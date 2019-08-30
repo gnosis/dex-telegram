@@ -6,6 +6,15 @@ require('dotenv').config()
 const token = process.env.TELEGRAM_TOKEN
 assert(token, "TELEGRAM_TOKEN env var is required")
 
+const MESSAGE_GO_TO_CHANNEL = `Hey, for now I prefer to talk in dFusion channel.
+
+Please, go to t.me/dFusionPoC to get notified when there's a new standing order.
+
+Also, here are some links you might find useful:
+- https://github.com/gnosis/dex-contracts: dFusion Smart Contracts
+- https://github.com/gnosis/dex-research: dFusion Research
+- https://github.com/gnosis/dex-services: dFusion services`
+
 const bot = new TelegramBot(token, {
   polling: true
 })
@@ -22,5 +31,5 @@ bot.onText(/\/echo (.+)/, (msg, match) => {
 bot.on('message', (msg) => {
   const chatId = msg.chat.id
 
-  bot.sendMessage(chatId, 'Received your message')
+  bot.sendMessage(chatId, MESSAGE_GO_TO_CHANNEL)
 })
