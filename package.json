@@ -5,12 +5,16 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "DEBUG=ERROR-*,WARN-*,INFO-* node src/bot"
+    "start": "DEBUG=ERROR-*,WARN-*,INFO-* node src/bot",
+    "dev": "DEBUG=ERROR-*,WARN-*,INFO-*,DEBUG-* nodemon src/bot"
   },
   "author": "Angel Rodriguez <anxolin@gmail.com> (https://github.com/anxolin)",
   "license": "ISC",
   "dependencies": {
     "dotenv": "^8.1.0",
     "node-telegram-bot-api": "^0.30.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.19.1"
   }
 }
