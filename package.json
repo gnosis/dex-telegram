@@ -11,6 +11,7 @@
   "author": "Angel Rodriguez <anxolin@gmail.com> (https://github.com/anxolin)",
   "license": "ISC",
   "dependencies": {
+    "debug": "^4.1.1",
     "dotenv": "^8.1.0",
     "node-telegram-bot-api": "^0.30.0"
   },
