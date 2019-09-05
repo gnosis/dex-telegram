@@ -31,12 +31,10 @@ bot.onText(/\/echo (.+)/, (msg, match) => {
   const resp = match[1] // the captured "whatever"
 
   debug("Received an echo message: %s, answering in 3s. %s, %o", resp, msg, match)
-  const msg = 'This is a new order: ' + resp
-  debug("Writtin into the channel", msg)
-  bot.sendMessage(channelId, msg)
+  const text = 'This is a new order: ' + resp
+  debug("Writing into the channel", text)
+  bot.sendMessage(channelId, text)
 })
-
-
 
 
 // Listen to any message
