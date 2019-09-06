@@ -8,7 +8,7 @@ install:
   - docker build -t dex-telegram .
 after_success:
 - |
-  # Create Docker image if branch master or develop and not on pull requests
+  # Create Docker image if branch master or develop or a tag
   if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
     echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin;
 
