@@ -7,7 +7,12 @@ WORKDIR /usr/src/app/
 COPY package*.json src yarn*.lock ./
 RUN yarn install --pure-lockfile --production=true && \
     yarn cache clean && \
-    apk add --no-cache tini tzdata
+    apk add --no-cache tini tzdata && \
+    groupadd -g 1000 telegram && \
+    useradd -m -u 1001 -g -o -s /bin/sh telegram
+
+# Use telegram user
+USER telegram
 
 # Copy files
 COPY . .
