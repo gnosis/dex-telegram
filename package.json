@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "DEBUG=ERROR-*,WARN-*,INFO-* node src/bot",
-    "dev": "DEBUG=ERROR-*,WARN-*,INFO-*,DEBUG-* nodemon src/bot"
+    "dev": "DEBUG=ERROR-*,WARN-*,INFO-*,DEBUG-* nodemon src/bot",
+    "test": "echo Testing... && echo OK"
   },
   "author": "Angel Rodriguez <anxolin@gmail.com> (https://github.com/anxolin)",
   "license": "ISC",
