@@ -8,8 +8,6 @@
     "dev": "DEBUG=ERROR-*,WARN-*,INFO-*,DEBUG-* nodemon src/bot",
     "test": "echo Testing... && echo OK"
   },
-  "author": "Angel Rodriguez <anxolin@gmail.com> (https://github.com/anxolin)",
-  "license": "ISC",
   "dependencies": {
     "debug": "^4.1.1",
     "dotenv": "^8.1.0",
