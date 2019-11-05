@@ -27,7 +27,9 @@ const bot = new TelegramBot(token, {
 
 // Matches "/echo [whatever]"
 bot.onText(/\/echo (.+)/, (msg, match) => {
+  // const chatId = msg.chat.id
   const resp = match[1]; // the captured "whatever"
+
   debug(
     "Received an echo message: %s, answering in 3s. %s, %o",
     resp,
