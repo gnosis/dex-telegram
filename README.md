@@ -1,3 +1,15 @@
+[![npm version](https://img.shields.io/npm/v/@gnosis.pm/dex-telegram.svg?style=flat)](https://npmjs.org/package/@gnosis.pm/dex-telegram 'View this project on npm')
+&nbsp;
+[![Build Status](https://travis-ci.org/gnosis/dex-telegram.svg?branch=develop)](https://travis-ci.org/gnosis/dex-telegram)
+&nbsp;
+[![Coverage Status](https://coveralls.io/repos/github/gnosis/dex-telegram/badge.svg?branch=master)](https://coveralls.io/github/gnosis/dex-telegram?branch=master)
+
+Develop:
+&nbsp;
+[![Build Status](https://travis-ci.org/gnosis/dex-telegram.svg?branch=develop)](https://travis-ci.org/gnosis/dex-telegram)
+&nbsp;
+[![Coverage Status](https://coveralls.io/repos/github/gnosis/dex-telegram/badge.svg?branch=develop)](https://coveralls.io/github/gnosis/dex-telegram?branch=develop)
+
 # dFusion Telegram Bots
 
 ## Setup environment variables
