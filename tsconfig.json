@@ -21,7 +21,7 @@
     "skipLibCheck": true,
     "strictNullChecks": true,
     "suppressImplicitAnyIndexErrors": true,
-    "types": ["node"],
+    "types": ["jest", "node"],
     "baseUrl": "./src/",
     "outDir": "./build"
   },

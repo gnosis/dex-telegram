@@ -19,7 +19,7 @@ module.exports = {
     //   }
     // ]
   },
-  plugins: [],
+  plugins: ['jest'],
   env: {
     browser: true,
     commonjs: true,
@@ -27,4 +27,12 @@ module.exports = {
   },
   extends: ['standard'],
   globals: {},
+  overrides: [
+    {
+      files: ['**/*.test.ts'],
+      env: {
+        jest: true,
+      },
+    },
+  ],
 }
