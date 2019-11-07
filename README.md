@@ -34,6 +34,17 @@ yarn dev
 
 > First setup the environment variables
 
+**Option 1: Run dockerhub image**
+See all available tagged images:
+
+- [https://hub.docker.com/r/gnosispm/dex-telegram/tags](https://hub.docker.com/r/gnosispm/dex-telegram/tags)
+
+```bash
+# For example, run the develop branch
+docker run --env-file .env gnosispm/dex-telegram:develop
+```
+
+**Option 2: Use docker compose**
 First setup the environment variables using [.env.example](.env.example) as a template.
 
 Then run docker compose:
