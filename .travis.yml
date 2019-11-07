@@ -1,7 +1,10 @@
 sudo: required
 language: node_js
 node_js:
-  - "lts/*"
+  - 'lts/*'
+script:
+  - yarn test-coverage
+  - yarn build
 services:
   - docker
 install:
