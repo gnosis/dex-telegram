@@ -6,6 +6,7 @@ WORKDIR /usr/src/app/
 # Install app dependencies
 COPY package*.json src yarn*.lock ./
 RUN yarn install --pure-lockfile --production=true && \
+  yarn build && \
   yarn cache clean && \
   apk add --no-cache tini tzdata && \
   addgroup -S --gid 1001 telegram && \
