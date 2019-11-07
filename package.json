@@ -7,7 +7,7 @@
     "start": "DEBUG=ERROR-*,WARN-*,INFO-* node build/bot",
     "dev": "DEBUG=ERROR-*,WARN-*,INFO-*,DEBUG-* nodemon src/bot.ts",
     "test": "jest",
-    "test-coverage": "jest --coverage && cat ./coverage/lcov.info | coveralls",
+    "test-coverage": "jest --coverage && ls -la ./coverage && cat ./coverage/lcov.info | coveralls",
     "build": "rimraf build && tsc"
   },
   "dependencies": {
