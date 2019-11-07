@@ -1,18 +1,16 @@
 # dFusion Telegram Bots
 
-## Setup the environment variables
+## Setup environment variables
 
 Create a `.env` file using [.env.example](.env.example) as a template.
 
-You'll need to setup the Telegram token and the channel in the `.env` file.
+You'll need to setup the Telegram token and the channel in the `.env` file or as environment variables when you run the process.
 
-## Run for develop
+## Run in develop
 
-Firs setup the environment variables.
+> First setup the environment variables
 
-Then install dependencies and run the bot:
-
-```
+```bash
 # Install dependencies
 yarn install
 
@@ -20,12 +18,31 @@ yarn install
 yarn dev
 ```
 
-# Run with docker
+## Run with docker
 
-Firs setup the environment variables.
+> First setup the environment variables
+
+First setup the environment variables using [.env.example](.env.example) as a template.
 
 Then run docker compose:
 
-```
+```bash
 docker-compose up
+```
+
+## Run in Production
+
+> First setup the environment variables
+
+First setup the environment variables using [.env.example](.env.example) as a template.
+
+```bash
+# Install dependencies
+yarn install
+
+# Build project
+yarn build
+
+# Run
+yarn start
 ```
