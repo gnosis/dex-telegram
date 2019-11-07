@@ -6,7 +6,7 @@
   "scripts": {
     "start": "DEBUG=ERROR-*,WARN-*,INFO-* node build/bot",
     "dev": "DEBUG=ERROR-*,WARN-*,INFO-*,DEBUG-* nodemon src/bot.ts",
-    "test": "echo Testing... && echo OK",
+    "test": "jest",
     "build": "rimraf build && tsc"
   },
   "dependencies": {
@@ -27,6 +27,7 @@
     "eslint-plugin-prettier": "^3.1.1",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
+    "jest": "^24.9.0",
     "nodemon": "^1.19.1",
     "prettier": "^1.18.2",
     "rimraf": "^3.0.0",
