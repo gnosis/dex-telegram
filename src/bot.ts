@@ -1,5 +1,5 @@
 import { strict as assert } from 'assert'
-import TelegramBot, { Message } from 'node-telegram-bot-api'
+import TelegramBot from 'node-telegram-bot-api'
 
 const debug = require('debug')('DEBUG-bot')
 const info = require('debug')('INFO-bot')
@@ -26,7 +26,7 @@ const bot = new TelegramBot(token, {
 })
 
 // Matches "/echo [whatever]"
-bot.onText(/\/echo (.+)/, (msg: Message, match: RegExpExecArray | null) => {
+bot.onText(/\/echo (.+)/, (msg: TelegramBot.Message, match: RegExpExecArray | null) => {
   const resp = match ? match[1] : 'N/A'
 
   debug('Received an echo message: %s, answering in 3s. %s, %o', resp, msg, match)
@@ -36,7 +36,7 @@ bot.onText(/\/echo (.+)/, (msg: Message, match: RegExpExecArray | null) => {
 })
 
 // Listen to any message
-bot.on('message', (msg: Message) => {
+bot.on('message', (msg: TelegramBot.Message) => {
   const chatId = msg.chat.id
   debug('Received msg: %o', msg)
 
