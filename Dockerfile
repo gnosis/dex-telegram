@@ -4,7 +4,7 @@ FROM node:8.16-alpine
 WORKDIR /usr/src/app/
 
 # Install app dependencies
-COPY package*.json src yarn*.lock ./
+COPY package*.json src yarn*.lock tsconfig.json ./
 RUN yarn install --pure-lockfile && \
   yarn build && \
   yarn cache clean && \
