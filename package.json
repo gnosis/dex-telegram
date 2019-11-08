@@ -1,12 +1,13 @@
 {
-  "name": "dfusion-bot",
+  "name": "@gnosis.pm/dex-telegram",
   "version": "0.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "DEBUG=ERROR-*,WARN-*,INFO-* node src/bot",
-    "dev": "DEBUG=ERROR-*,WARN-*,INFO-*,DEBUG-* nodemon src/bot",
-    "test": "echo Testing... && echo OK"
+    "start": "DEBUG=ERROR-*,WARN-*,INFO-* node build/bot",
+    "dev": "DEBUG=ERROR-*,WARN-*,INFO-*,DEBUG-* nodemon src/bot.ts",
+    "test": "echo Testing... && echo OK",
+    "build": "rimraf build && tsc"
   },
   "dependencies": {
     "debug": "^4.1.1",
@@ -14,12 +15,22 @@
     "node-telegram-bot-api": "^0.30.0"
   },
   "devDependencies": {
+    "@types/node": "^12.7.5",
+    "@types/node-telegram-bot-api": "^0.40.0",
+    "@typescript-eslint/eslint-plugin": "^2.6.1",
+    "@typescript-eslint/parser": "^2.6.1",
     "eslint": "^6.6.0",
+    "eslint-config-prettier": "^6.5.0",
     "eslint-config-standard": "^14.1.0",
     "eslint-plugin-import": "^2.18.2",
     "eslint-plugin-node": "^10.0.0",
+    "eslint-plugin-prettier": "^3.1.1",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
-    "nodemon": "^1.19.1"
+    "nodemon": "^1.19.1",
+    "prettier": "^1.18.2",
+    "rimraf": "^3.0.0",
+    "ts-node": "^8.4.1",
+    "typescript": "^3.6.3"
   }
 }
