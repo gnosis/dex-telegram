@@ -1,3 +1,15 @@
+[![npm version](https://img.shields.io/npm/v/@gnosis.pm/dex-telegram.svg?style=flat)](https://npmjs.org/package/@gnosis.pm/dex-telegram 'View this project on npm')
+&nbsp;
+[![Build Status](https://travis-ci.org/gnosis/dex-telegram.svg?branch=develop)](https://travis-ci.org/gnosis/dex-telegram)
+&nbsp;
+[![Coverage Status](https://coveralls.io/repos/github/gnosis/dex-telegram/badge.svg?branch=master)](https://coveralls.io/github/gnosis/dex-telegram?branch=master)
+
+Develop:
+&nbsp;
+[![Build Status](https://travis-ci.org/gnosis/dex-telegram.svg?branch=develop)](https://travis-ci.org/gnosis/dex-telegram)
+&nbsp;
+[![Coverage Status](https://coveralls.io/repos/github/gnosis/dex-telegram/badge.svg?branch=develop)](https://coveralls.io/github/gnosis/dex-telegram?branch=develop)
+
 # dFusion Telegram Bots
 
 ## Setup environment variables
@@ -22,6 +34,17 @@ yarn dev
 
 > First setup the environment variables
 
+**Option 1: Run dockerhub image**
+See all available tagged images:
+
+- [https://hub.docker.com/r/gnosispm/dex-telegram/tags](https://hub.docker.com/r/gnosispm/dex-telegram/tags)
+
+```bash
+# For example, run the develop branch
+docker run --env-file .env gnosispm/dex-telegram:develop
+```
+
+**Option 2: Use docker compose**
 First setup the environment variables using [.env.example](.env.example) as a template.
 
 Then run docker compose:

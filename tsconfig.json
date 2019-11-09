@@ -21,10 +21,9 @@
     "skipLibCheck": true,
     "strictNullChecks": true,
     "suppressImplicitAnyIndexErrors": true,
-    "types": ["node"],
-    "baseUrl": "./src/",
+    "types": ["jest", "node"],
+    "baseUrl": "src",
     "outDir": "./build"
   },
-  "include": ["./src/**/*"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "coverage", "build"]
 }
