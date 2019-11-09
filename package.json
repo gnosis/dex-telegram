@@ -21,7 +21,8 @@
   "dependencies": {
     "debug": "^4.1.1",
     "dotenv": "^8.1.0",
-    "node-telegram-bot-api": "^0.30.0"
+    "node-telegram-bot-api": "^0.30.0",
+    "web3": "^1.2.2"
   },
   "devDependencies": {
     "@types/debug": "^4.1.5",
