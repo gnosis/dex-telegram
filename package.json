@@ -2,18 +2,19 @@
   "name": "@gnosis.pm/dex-telegram",
   "version": "0.0.1",
   "description": "",
-  "main": "index.js",
   "scripts": {
     "start": "DEBUG=ERROR-*,WARN-*,INFO-* node build/bot",
     "dev": "DEBUG=ERROR-*,WARN-*,INFO-*,DEBUG-*,-DEBUG-helper*,-DEBUG-util* nodemon src/bot.ts",
     "dev:debug": "DEBUG=ERROR-*,WARN-*,INFO-*,DEBUG-* nodemon src/bot.ts",
     "dev:info": "DEBUG=ERROR-*,WARN-*,INFO-* nodemon src/bot.ts",
+    "sandbox": "DEBUG=ERROR-*,WARN-*,INFO-*,DEBUG-*,-DEBUG-helper*,-DEBUG-util* nodemon -r dotenv/config",
     "test": "jest",
     "test-coverage": "jest --coverage && cat ./coverage/lcov.info | coveralls",
     "lint": "eslint src --ext .ts,.js",
     "lint:fix": "eslint --fix . --ext .ts,.js",
     "verify": "npm run lint && npm run test",
-    "build": "rimraf build && tsc"
+    "build": "rimraf build && tsc",
+    "rpc": "ganache-cli -d --mnemonic 'candy maple cake sugar pudding cream honey rich smooth crumble sweet treat'"
   },
   "husky": {
     "hooks": {
@@ -24,7 +25,9 @@
     "debug": "^4.1.1",
     "dotenv": "^8.1.0",
     "node-telegram-bot-api": "^0.30.0",
-    "web3": "^1.2.2"
+    "truffle-hdwallet-provider": "^1.0.17",
+    "web3": "^1.2.2",
+    "web3-core": "^1.2.2"
   },
   "devDependencies": {
     "@types/debug": "^4.1.5",
@@ -32,6 +35,7 @@
     "@types/jest": "^24.0.22",
     "@types/node": "^12.7.5",
     "@types/node-telegram-bot-api": "^0.40.0",
+    "@types/web3": "^1.2.2",
     "@typescript-eslint/eslint-plugin": "^2.6.1",
     "@typescript-eslint/parser": "^2.6.1",
     "coveralls": "^3.0.7",
