@@ -1,6 +1,6 @@
 import { strict as assert } from 'assert'
 import TelegramBot, { Message } from 'node-telegram-bot-api'
-import Logger from './util/Logger'
+import Logger from './helpers/Logger'
 import { logUnhandledErrors, onShutdown } from './helpers'
 
 require('dotenv').config()

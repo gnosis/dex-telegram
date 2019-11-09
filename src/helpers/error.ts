@@ -1,4 +1,4 @@
-import Logger from '../util/Logger'
+import Logger from './Logger'
 const log = new Logger('error')
 
 /**
