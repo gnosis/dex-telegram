@@ -31,7 +31,6 @@ export class Logger {
   public _log (level: string, formatter: any, ...args: any[]) {
     const logger = this._getLogger(level, this._namespace)
     if (args.length > 0) {
-      console.log(args.length > 0, args)
       logger(formatter, ...args)
     } else {
       logger(formatter)
@@ -40,7 +39,7 @@ export class Logger {
 
   private _getLogger (logLevel: string, namespace: string) {
     const loggerName = logLevel + '-' + namespace
-    console.log(loggerName)
+
     let logger: Debugger = this._loggers[loggerName]
     if (!logger) {
       logger = debug(loggerName)
