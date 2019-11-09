@@ -1,11 +1,10 @@
 import { strict as assert } from 'assert'
 import TelegramBot, { Message } from 'node-telegram-bot-api'
-
-const debug = require('debug')('DEBUG-bot')
-const info = require('debug')('INFO-bot')
+import Logger from './util/Logger'
 
 require('dotenv').config()
 
+const log = new Logger('bot')
 const token = process.env.TELEGRAM_TOKEN as string
 const channelId = process.env.TELEGRAM_CHANNEL_ID as string
 
@@ -29,18 +28,18 @@ const bot = new TelegramBot(token, {
 bot.onText(/\/echo (.+)/, (msg: Message, match: RegExpExecArray | null) => {
   const resp = match ? match[1] : 'N/A'
 
-  debug('Received an echo message: %s, answering in 3s. %s, %o', resp, msg, match)
+  log.debug('Received an echo message: %s, answering in 3s. %s, %o', resp, msg, match)
   const text = 'This is a new order: ' + resp
-  debug('Writing into the channel', text)
+  log.debug('Writing into the channel', text)
   bot.sendMessage(channelId, text)
 })
 
 // Listen to any message
 bot.on('message', (msg: Message) => {
   const chatId = msg.chat.id
-  debug('Received msg: %o', msg)
+  log.debug('Received msg: %o', msg)
 
   bot.sendMessage(chatId, MESSAGE_GO_TO_CHANNEL)
 })
 
-info('The bot is up :)')
+log.info('The bot is up :)')
