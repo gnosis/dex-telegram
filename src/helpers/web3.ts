@@ -1,9 +1,7 @@
+import { strict as assert } from 'assert'
 import Web3 from 'web3'
-import { getProvider } from './provider'
 
-import Logger from './Logger'
+assert(process.env.NODE_URL, 'NODE_URL env var is required')
 
-const log = new Logger('web3')
-log.debug('Init')
-
-export const web3 = new Web3(getProvider())
+export const provider = new Web3.providers.HttpProvider(process.env.NODE_URL as string)
+export const web3 = new Web3(provider)
