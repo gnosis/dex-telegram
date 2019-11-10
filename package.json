@@ -26,7 +26,6 @@
     "debug": "^4.1.1",
     "dotenv": "^8.1.0",
     "node-telegram-bot-api": "^0.30.0",
-    "truffle-hdwallet-provider": "^1.0.17",
     "web3": "^1.2.2",
     "web3-core": "^1.2.2"
   },
