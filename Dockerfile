@@ -3,15 +3,20 @@ FROM node:8.16-alpine
 # Create app directory
 WORKDIR /usr/src/app/
 
-# Install app dependencies
-COPY package.json yarn.lock tsconfig.json ./
-RUN yarn --pure-lockfile && \ 
-  yarn cache clean && \
+# Install dependencies
+RUN apk add --no-cache --virtual build-dependencies bash git python make g++ ca-certificates python && \
   apk add --no-cache tini tzdata && \
   addgroup -S --gid 1001 telegram && \
   adduser -SDH -G telegram -u 1001 -s /bin/sh telegram
 
 # Copy files
+COPY package.json yarn.lock tsconfig.json ./
+
+# Install npm dependencies
+RUN yarn --pure-lockfile && \ 
+  yarn cache clean
+
+# Copy source files
 COPY src src
 
 # Compile files
