@@ -2,6 +2,8 @@ import { strict as assert } from 'assert'
 import TelegramBot, { Message, User } from 'node-telegram-bot-api'
 import Logger from './helpers/Logger'
 import { logUnhandledErrors, onShutdown } from './helpers'
+import packageJson from '../package.json'
+// import { dfusionRepo } from './repos'
 
 require('dotenv').config()
 logUnhandledErrors()
@@ -18,7 +20,7 @@ const bot = new TelegramBot(token, {
 })
 
 bot.onText(/\/(\w+) ?(.+)?/, (msg: Message, match: RegExpExecArray | null) => {
-  log.debug(msg)
+  log.debug('New command: %o', msg)
   const command = match ? match[1] : ''
   switch (command) {
     case 'start':
@@ -37,10 +39,9 @@ bot.onText(/\/(\w+) ?(.+)?/, (msg: Message, match: RegExpExecArray | null) => {
 
 // Listen to any message
 bot.on('message', (msg: Message) => {
-  log.debug('Received msg: %o', msg)
-
   const isCommand = msg.text && msg.text.startsWith('/')
   if (!isCommand) {
+    log.debug('Received msg: %o', msg)
     _helpCommand(msg)
   }
 })
@@ -71,7 +72,7 @@ If you want to know more about me, checkout my code in https://github.com/gnosis
 
 In that github you'll be able to fork me, open issues, or even better, give me some additional functionality (Pull Requests are really welcomed 😀).
 
-I'm running on version
+I'm running on version ${packageJson.version}
 
 Also, here are some links you might find useful:
 - https://github.com/gnosis/dex-contracts: dFusion Smart Contracts
