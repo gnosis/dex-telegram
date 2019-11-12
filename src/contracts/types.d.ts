@@ -32,6 +32,7 @@ export interface ContractEventLog<T> extends EventLog {
   returnValues: T
 }
 export interface ContractEventEmitter<T> extends EventEmitter {
+  on(event: 'connected', listener: (subscriptionId: string) => void): this
   on(event: 'data' | 'changed', listener: (event: ContractEventLog<T>) => void): this
   on(event: 'error', listener: (error: Error) => void): this
 }

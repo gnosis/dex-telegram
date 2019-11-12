@@ -2,8 +2,8 @@
 /* tslint:disable */
 
 import BN from 'bn.js'
-import Contract, { contractOptions } from 'web3/eth/contract'
-import { EventLog, Callback, EventEmitter } from 'web3/types'
+import { Contract, ContractOptions } from 'web3-eth-contract'
+import { EventLog, Callback, EventEmitter } from 'web3-core'
 import { TransactionObject, BlockType } from 'web3/eth/types'
 import { ContractEvent } from './types'
 
@@ -14,7 +14,7 @@ interface EventOptions {
 }
 
 export class StablecoinConverter extends Contract {
-  constructor(jsonInterface: any[], address?: string, options?: contractOptions)
+  constructor(jsonInterface: any[], address?: string, options?: ContractOptions)
   clone(): StablecoinConverter
   methods: {
     getSecondsRemainingInBatch(): TransactionObject<BN>
