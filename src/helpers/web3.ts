@@ -1,7 +1,11 @@
 import { strict as assert } from 'assert'
 import Web3 from 'web3'
 
-assert(process.env.NODE_URL, 'NODE_URL env var is required')
+import Logger from './Logger'
+const log = new Logger('helpers:web3')
+const nodeUrl = process.env.NODE_URL
 
-export const provider = new Web3.providers.HttpProvider(process.env.NODE_URL as string)
-export const web3 = new Web3(provider)
+log.info('Connecting to ethereum using web3: %s', nodeUrl)
+assert(nodeUrl, 'NODE_URL env var is required')
+export const provider = 'ws://localhost:8545'
+export const web3: Web3 = new Web3(provider)
