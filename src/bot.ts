@@ -1,5 +1,5 @@
 import { strict as assert } from 'assert'
-import TelegramBot, { Message } from 'node-telegram-bot-api'
+import TelegramBot, { Message, User } from 'node-telegram-bot-api'
 import Logger from './helpers/Logger'
 import { logUnhandledErrors, onShutdown } from './helpers'
 
@@ -13,39 +13,71 @@ const channelId = process.env.TELEGRAM_CHANNEL_ID as string
 assert(token, 'TELEGRAM_TOKEN env var is required')
 assert(channelId, 'TELEGRAM_CHANNEL_ID env var is required')
 
-const MESSAGE_GO_TO_CHANNEL = `Hey, for now I prefer to talk in dFusion channel.
-
-Please, go to t.me/dFusionPoC to get notified when there's a new standing order.
-
-Also, here are some links you might find useful:
-- https://github.com/gnosis/dex-contracts: dFusion Smart Contracts
-- https://github.com/gnosis/dex-research: dFusion Research
-- https://github.com/gnosis/dex-services: dFusion services`
-
 const bot = new TelegramBot(token, {
   polling: true
 })
 
-// Matches "/echo [whatever]"
-bot.onText(/\/echo (.+)/, (msg: Message, match: RegExpExecArray | null) => {
-  const resp = match ? match[1] : 'N/A'
+bot.onText(/\/(\w+) ?(.+)?/, (msg: Message, match: RegExpExecArray | null) => {
+  log.debug(msg)
+  const command = match ? match[1] : ''
+  switch (command) {
+    case 'start':
+    case 'help':
+      _helpCommand(msg)
+      break
 
-  log.debug('Received an echo message: %s, answering in 3s. %s, %o', resp, msg, match)
-  const text = 'This is a new order: ' + resp
-  log.debug('Writing into the channel', text)
-  bot.sendMessage(channelId, text)
+    case 'about':
+      _aboutCommand(msg)
+      break
+
+    default:
+      bot.sendMessage(msg.chat.id, "I don't recognize that command! You can use this other one instead: /help")
+  }
 })
 
 // Listen to any message
 bot.on('message', (msg: Message) => {
-  const chatId = msg.chat.id
   log.debug('Received msg: %o', msg)
 
-  bot.sendMessage(chatId, MESSAGE_GO_TO_CHANNEL)
+  const isCommand = msg.text && msg.text.startsWith('/')
+  if (!isCommand) {
+    _helpCommand(msg)
+  }
 })
 
 onShutdown(() => {
   log.info('Bye!')
 })
+
+function _helpCommand (msg: Message) {
+  const fromUser: User | undefined = msg.from
+  bot.sendMessage(
+    msg.chat.id,
+    `${fromUser ? 'Hi ' + fromUser.first_name : 'Hi there'}!
+    
+I don't talk much for now. I just notify every new order in dFusion channel.
+Please, go to t.me/dFusionPoC to get notified on every new order.
+
+Also, you can ask about me by using the command: /about`
+  )
+}
+
+function _aboutCommand (msg: Message) {
+  bot.sendMessage(
+    msg.chat.id,
+    `I'm just a bot watching dFusion smart contract.
+
+If you want to know more about me, checkout my code in https://github.com/gnosis/dex-telegram
+
+In that github you'll be able to fork me, open issues, or even better, give me some additional functionality (Pull Requests are really welcomed 😀).
+
+I'm running on version
+
+Also, here are some links you might find useful:
+- https://github.com/gnosis/dex-contracts: dFusion Smart Contracts
+- https://github.com/gnosis/dex-research: dFusion Research
+- https://github.com/gnosis/dex-services: dFusion services`
+  )
+}
 
 log.info('The bot is up :)')
