@@ -1,17 +1,17 @@
-import { web3 } from '../../src/helpers/web3'
-import Logger from '../../src/helpers/Logger'
+import { web3 } from '../../../src/helpers/web3'
+import Logger from '../../../src/helpers/Logger'
 import { AbiItem } from 'web3-utils'
 
 require('dotenv').config()
 
 /**
- *  SANDBOX: Get accounts from connected wallet
+ *  SANDBOX: Print the encoded version for the functions
  *  RUN:     yarn sandbox test/sandbox/printEncodedFunctions.ts
  */
 const log = new Logger('sandbox:printEncodedFunctions')
 
 async function exec (): Promise<void> {
-  const abi = require('../../src/contracts/StablecoinConverter.json')
+  const abi = require('../../../src/contracts/StablecoinConverter.json')
   const functions = abi.filter((def: AbiItem) => def.type === 'function')
 
   log.info('Found %d functions:', functions.length)
@@ -20,4 +20,4 @@ async function exec (): Promise<void> {
   })
 }
 
-exec().catch(log.error)
+exec().catch(log.errorHandler)

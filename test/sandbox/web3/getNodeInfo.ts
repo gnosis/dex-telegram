@@ -1,13 +1,13 @@
-import { web3 } from '../../src/helpers/web3'
-import Logger from '../../src/helpers/Logger'
+import { web3 } from '../../../src/helpers/web3'
+import Logger from '../../../src/helpers/Logger'
 
 require('dotenv').config()
 
 /**
  *  SANDBOX: Get ethereum node info
- *  RUN:     yarn sandbox test/sandbox/getNodeInfo.ts
+ *  RUN:     yarn sandbox test/sandbox/web3/getNodeInfo.ts
  */
-const log = new Logger('sandbox:getNodeInfo')
+const log = new Logger('sandbox:web3:getNodeInfo')
 
 async function exec (): Promise<void> {
   log.debug('web3 version: ', web3.version)
@@ -22,4 +22,4 @@ async function exec (): Promise<void> {
   log.debug('Get latest block: %o', await web3.eth.getBlock('latest'))
 }
 
-exec().catch(log.error)
+exec().catch(log.errorHandler)
