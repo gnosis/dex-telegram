@@ -73,12 +73,12 @@ async function _aboutCommand (msg: Message) {
   const [blockNumber, networkId, nodeInfo] = await Promise.all([
     dfusionRepo
       .getBlockNumber()
-      .then(_toString)
+      .then(String)
       .catch(_handleFetchDataError),
 
     dfusionRepo
       .getNetworkId()
-      .then(_toString)
+      .then(String)
       .catch(_handleFetchDataError),
 
     dfusionRepo.getNodeInfo().catch(_handleFetchDataError)
@@ -108,10 +108,6 @@ Also, here are some links you might find useful:
 function _handleFetchDataError (error: Error): string {
   log.error(error)
   return 'N/A'
-}
-
-function _toString (data: any): string {
-  return data.toString()
 }
 
 dfusionRepo.watchOrderPlacement({
