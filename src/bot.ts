@@ -114,4 +114,15 @@ function _toString (data: any): string {
   return data.toString()
 }
 
+dfusionRepo.watchOrderPlacement({
+  onNewOrder (order: any) {
+    // TODO: Fix when we use the right typescript object for the order
+    log.info('New order: %o', order)
+    bot.sendMessage(channelId, 'New order: ' + JSON.stringify(order))
+  },
+  onError (error: Error) {
+    log.error('Error watching order placements: ', error)
+  }
+})
+
 log.info('The bot is up :)')
