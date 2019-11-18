@@ -37,7 +37,7 @@ async function exec (): Promise<void> {
     topics
   }
   log.info('Get past events with:\n%O', options)
-  web3.eth.getPastLogs(options).then(logs => log.info('RESULT: Past logs: %O', logs))
+  await web3.eth.getPastLogs(options).then(logs => log.info('RESULT: Past logs: %O', logs))
 }
 
 exec().catch(log.errorHandler)

@@ -32,11 +32,7 @@ export class Logger {
 
   public _log (level: string, formatter: any, ...args: any[]) {
     const logger = this._getLogger(level, this._namespace)
-    if (args.length > 0) {
-      logger(formatter, ...args)
-    } else {
-      logger(formatter)
-    }
+    logger(formatter, ...args)
   }
 
   private _getLogger (logLevel: string, namespace: string) {
