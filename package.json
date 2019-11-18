@@ -14,7 +14,8 @@
     "lint:fix": "eslint --fix . --ext .ts,.js",
     "verify": "npm run lint && npm run test",
     "build": "rimraf build && tsc",
-    "rpc": "ganache-cli -d --mnemonic 'candy maple cake sugar pudding cream honey rich smooth crumble sweet treat'"
+    "rpc": "ganache-cli -d --mnemonic 'candy maple cake sugar pudding cream honey rich smooth crumble sweet treat'",
+    "contracts": "rimraf \"src/contracts/*.ts\" && npx typechain --target=web3-v1 --outDir src/contracts src/contracts/*.json && prettier --write src/contracts/*.ts"
   },
   "husky": {
     "hooks": {
@@ -25,7 +26,6 @@
     "debug": "^4.1.1",
     "dotenv": "^8.1.0",
     "node-telegram-bot-api": "^0.30.0",
-    "truffle-hdwallet-provider": "^1.0.17",
     "web3": "^1.2.2",
     "web3-core": "^1.2.2"
   },
@@ -55,6 +55,11 @@
     "rimraf": "^3.0.0",
     "ts-jest": "^24.1.0",
     "ts-node": "^8.4.1",
+    "typechain": "^1.0.3",
+    "typechain-target-web3-v1": "^1.0.0",
     "typescript": "^3.7.2"
-  }
+  },
+  "eslintIgnore": [
+    "src/contracts"
+  ]
 }

@@ -3,9 +3,11 @@ import { Debugger, debug } from 'debug'
 export class Logger {
   private _loggers: { [namespace: string]: Debugger } = {}
   private _namespace: string
+  public errorHandler: (formatter: any, ...args: any[]) => any
 
   constructor (namespace: string) {
     this._namespace = namespace
+    this.errorHandler = this.error.bind(this)
   }
 
   public info (formatter: any, ...args: any[]) {
