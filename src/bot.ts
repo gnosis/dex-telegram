@@ -111,9 +111,8 @@ function _handleFetchDataError (error: Error): string {
 }
 
 dfusionRepo.watchOrderPlacement({
-  onNewOrder (order: any) {
-    // TODO: Fix when we use the right typescript object for the order
-    log.info('New order: %o', order)
+  onNewOrder (order) {
+    log.info('New order: %o in block %d, transaction %s', order, order.blockNumber, order.transactionHash)
     bot.sendMessage(channelId, 'New order: ' + JSON.stringify(order))
   },
   onError (error: Error) {
