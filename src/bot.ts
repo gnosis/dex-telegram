@@ -121,4 +121,8 @@ dfusionRepo.watchOrderPlacement({
   }
 })
 
+onShutdown(() => {
+  log.info('Bye!')
+})
+
 log.info('The bot is up :)')
