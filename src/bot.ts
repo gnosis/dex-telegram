@@ -1,8 +1,10 @@
 import { strict as assert } from 'assert'
 import TelegramBot, { Message } from 'node-telegram-bot-api'
-import Logger from './util/Logger'
+import Logger from './helpers/Logger'
+import { logUnhandledErrors, onShutdown } from './helpers'
 
 require('dotenv').config()
+logUnhandledErrors()
 
 const log = new Logger('bot')
 const token = process.env.TELEGRAM_TOKEN as string
@@ -40,6 +42,10 @@ bot.on('message', (msg: Message) => {
   log.debug('Received msg: %o', msg)
 
   bot.sendMessage(chatId, MESSAGE_GO_TO_CHANNEL)
+})
+
+onShutdown(() => {
+  log.info('Bye!')
 })
 
 log.info('The bot is up :)')

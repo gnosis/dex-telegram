@@ -25,5 +25,6 @@
     "baseUrl": "src",
     "outDir": "./build"
   },
+  "include": ["src/**/*.ts", "node_modules/web3-*/types/*.d.ts"],
   "exclude": ["node_modules", "coverage", "build"]
 }
