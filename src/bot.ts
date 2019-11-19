@@ -4,6 +4,7 @@ import Logger from './helpers/Logger'
 import { logUnhandledErrors, onShutdown } from './helpers'
 import packageJson from '../package.json'
 import { dfusionRepo } from './repos'
+import { formatNewOrders } from './utils'
 
 logUnhandledErrors()
 
@@ -111,29 +112,8 @@ function _handleFetchDataError (error: Error): string {
 }
 
 dfusionRepo.watchOrderPlacement({
-  onNewOrder (order) {
-    const { owner, sellToken, buyToken, priceNumerator, priceDenominator, validFrom, validUntil } = order.returnValues
-    const price = 'N/A' // priceNumerator.div(priceDenominator)
-
-    log.info(`New order in tx ${order.blockHash}:
-    - Owner: ${owner}
-    - Sell token: ${sellToken}
-    - Buy token: ${buyToken}
-    - Price: ${priceNumerator}/${priceDenominator} = ${price}
-    - Valid from: ${validFrom}
-    - Valid until: ${validUntil}
-    - Block number: ${order.blockNumber}`)
-
-    // TODO: Format amounts in the message: https://github.com/gnosis/dex-telegram/issues/23
-    // TODO: Resolve names of known tokens: https://github.com/gnosis/dex-telegram/issues/24
-    // TODO: Format better the date for the end time of the order: https://github.com/gnosis/dex-telegram/issues/25
-    // TODO: Provide the link to the front end: https://github.com/gnosis/dex-telegram/issues/3
-    const message = `Sell ${priceDenominator} ${sellToken} for ${priceNumerator} ${buyToken}:
-    Price:  1 ${sellToken} = ${price} ${buyToken}
-    Valid from: ${validFrom}
-    Valid until: ${validUntil}`
-
-    bot.sendMessage(channelId, message)
+  onNewOrder (event) {
+    bot.sendMessage(channelId, formatNewOrders(event))
   },
   onError (error: Error) {
     log.error('Error watching order placements: ', error)

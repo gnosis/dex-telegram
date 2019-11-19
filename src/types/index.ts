@@ -3,7 +3,7 @@ import { OrderPlacement } from 'contracts/StablecoinConverter'
 
 export type Command = () => void
 export interface WatchOrderPlacementParams {
-  onNewOrder: (data: ContractEventLog<OrderPlacement>) => void
+  onNewOrder: (event: ContractEventLog<OrderPlacement>) => void
   onError: (error: Error) => void
 }
 

@@ -23,6 +23,7 @@
     }
   },
   "dependencies": {
+    "bignumber.js": "^9.0.0",
     "debug": "^4.1.1",
     "dotenv": "^8.1.0",
     "node-telegram-bot-api": "^0.30.0",

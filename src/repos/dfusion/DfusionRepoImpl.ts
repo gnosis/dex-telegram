@@ -26,12 +26,12 @@ export class DfusionRepoImpl implements DfusionRepo {
 
   public watchOrderPlacement (params: WatchOrderPlacementParams) {
     this._contract.events
-      .OrderPlacement({}, error => params.onError(error))
+      .OrderPlacement()
       .on('connected', subscriptionId => {
         log.debug('Starting to listen for new orders. SubscriptionId: %s', subscriptionId)
       })
       .on('data', data => {
-        log.info('New order: %o', data)
+        log.debug('New order: %o', data)
         params.onNewOrder(data)
       })
       .on('changed', data => {
