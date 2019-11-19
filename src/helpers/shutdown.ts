@@ -1,4 +1,4 @@
-import Logger from './Logger'
+import Logger from 'helpers/Logger'
 import { Command } from 'types'
 
 const log = new Logger('helpers:shutdown')

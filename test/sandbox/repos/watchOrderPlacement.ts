@@ -1,5 +1,5 @@
-import { dfusionRepo } from '../../../src/repos'
-import Logger from '../../../src/helpers/Logger'
+import { dfusionRepo } from 'repos'
+import Logger from 'helpers/Logger'
 
 require('dotenv').config()
 

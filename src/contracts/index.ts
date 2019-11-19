@@ -1,6 +1,6 @@
 import { strict as assert } from 'assert'
-import { web3 } from '../helpers/web3'
-import { StablecoinConverter } from './StablecoinConverter'
+import { web3 } from 'helpers/web3'
+import { StablecoinConverter } from './StablecoinConverter.d'
 
 function getStableConverterContract(): StablecoinConverter {
   const { STABLE_COIN_CONTRACT_ADDRESS } = process.env

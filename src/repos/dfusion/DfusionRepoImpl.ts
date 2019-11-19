@@ -1,8 +1,8 @@
 import Web3 from 'web3'
 
-import Logger from '../../helpers/Logger'
+import Logger from 'helpers/Logger'
 import { DfusionRepo, WatchOrderPlacementParams } from 'types'
-import { StablecoinConverter } from '../../contracts/StablecoinConverter'
+import { StablecoinConverter } from 'contracts/StablecoinConverter'
 
 const log = new Logger('repos:dfusion')
 

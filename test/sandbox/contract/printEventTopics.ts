@@ -1,5 +1,5 @@
-import { web3 } from '../../../src/helpers/web3'
-import Logger from '../../../src/helpers/Logger'
+import { web3 } from 'helpers/web3'
+import Logger from 'helpers/Logger'
 import { AbiItem } from 'web3-utils'
 
 require('dotenv').config()
@@ -10,8 +10,8 @@ require('dotenv').config()
  */
 const log = new Logger('sandbox:contract/printEventTopics')
 
-async function exec (): Promise<void> {
-  const abi = require('../../../src/contracts/StablecoinConverter.json')
+async function exec(): Promise<void> {
+  const abi = require('contracts/StablecoinConverter.json')
   const events = abi.filter((def: AbiItem) => def.type === 'event')
 
   log.info('Found %d events:', events.length)

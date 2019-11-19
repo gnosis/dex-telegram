@@ -1,9 +1,9 @@
 import { strict as assert } from 'assert'
 import TelegramBot, { Message, User } from 'node-telegram-bot-api'
-import Logger from './helpers/Logger'
-import { logUnhandledErrors, onShutdown } from './helpers'
+import Logger from 'helpers/Logger'
+import { logUnhandledErrors, onShutdown } from 'helpers'
 import packageJson from '../package.json'
-import { dfusionRepo } from './repos'
+import { dfusionRepo } from 'repos'
 
 logUnhandledErrors()
 
