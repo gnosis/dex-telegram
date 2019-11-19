@@ -1,59 +1,57 @@
-import BN from 'bn.js'
-
 import { Contract, EventOptions, ContractOptions } from 'web3-eth-contract'
 import { TransactionObject, ContractEvent, Callback } from './types'
 import { EventLog } from 'web3-core'
 
 export interface Order {
-  buyToken: BN
-  sellToken: BN
-  validFrom: BN
-  validUntil: BN
-  priceNumerator: BN
-  priceDenominator: BN
-  usedAmount: BN
+  buyToken: string
+  sellToken: string
+  validFrom: string
+  validUntil: string
+  priceNumerator: string
+  priceDenominator: string
+  usedAmount: string
 }
 
 export interface SolutionData {
-  batchId: BN
+  batchId: string
   solutionSubmitter: string
-  feeReward: BN
-  objectiveValue: BN
+  feeReward: string
+  objectiveValue: string
 }
 
 export interface OrderCancelation {
   owner: string
-  id: BN
+  id: string
 }
 
 export interface Deposit {
   user: string
   token: string
-  amount: BN
-  stateIndex: BN
+  amount: string
+  stateIndex: string
 }
 
 export interface WithdrawRequest {
   user: string
   token: string
-  amount: BN
-  stateIndex: BN
+  amount: string
+  stateIndex: string
 }
 
 export interface Withdraw {
   user: string
   token: string
-  amount: BN
+  amount: string
 }
 
 export interface OrderPlacement {
   owner: string
-  buyToken: BN
-  sellToken: BN
-  validFrom: BN
-  validUntil: BN
-  priceNumerator: BN
-  priceDenominator: BN
+  buyToken: string
+  sellToken: string
+  validFrom: string
+  validUntil: string
+  priceNumerator: string
+  priceDenominator: string
 }
 
 export class StablecoinConverter extends Contract {
@@ -63,51 +61,51 @@ export class StablecoinConverter extends Contract {
   clone(): StablecoinConverter
 
   methods: {
-    getSecondsRemainingInBatch(): TransactionObject<BN>
+    getSecondsRemainingInBatch(): TransactionObject<string>
 
-    feeDenominator(): TransactionObject<BN>
+    feeDenominator(): TransactionObject<string>
 
-    getPendingWithdrawAmount(user: string, token: string): TransactionObject<BN>
+    getPendingWithdrawAmount(user: string, token: string): TransactionObject<string>
 
     requestWithdraw(token: string, amount: number | string): TransactionObject<void>
 
-    getPendingDepositAmount(user: string, token: string): TransactionObject<BN>
+    getPendingDepositAmount(user: string, token: string): TransactionObject<string>
 
     deposit(token: string, amount: number | string): TransactionObject<void>
 
-    getPendingWithdrawBatchNumber(user: string, token: string): TransactionObject<BN>
+    getPendingWithdrawBatchNumber(user: string, token: string): TransactionObject<string>
 
-    TOKEN_ADDITION_FEE_IN_OWL(): TransactionObject<BN>
+    TOKEN_ADDITION_FEE_IN_OWL(): TransactionObject<string>
 
     feeToken(): TransactionObject<string>
 
-    currentPrices(arg0: number | string): TransactionObject<BN>
+    currentPrices(arg0: number | string): TransactionObject<string>
 
     orders(arg0: string, arg1: number | string): TransactionObject<Order>
 
-    numTokens(): TransactionObject<BN>
+    numTokens(): TransactionObject<string>
 
-    lastCreditBatchId(arg0: string, arg1: string): TransactionObject<BN>
+    lastCreditBatchId(arg0: string, arg1: string): TransactionObject<string>
 
     latestSolution(): TransactionObject<SolutionData>
 
-    getBalance(user: string, token: string): TransactionObject<BN>
+    getBalance(user: string, token: string): TransactionObject<string>
 
-    BATCH_TIME(): TransactionObject<BN>
+    BATCH_TIME(): TransactionObject<string>
 
-    getCurrentBatchId(): TransactionObject<BN>
+    getCurrentBatchId(): TransactionObject<string>
 
     requestFutureWithdraw(token: string, amount: number | string, batchId: number | string): TransactionObject<void>
 
     hasValidWithdrawRequest(user: string, token: string): TransactionObject<boolean>
 
-    MAX_TOKENS(): TransactionObject<BN>
+    MAX_TOKENS(): TransactionObject<string>
 
-    getPendingDepositBatchNumber(user: string, token: string): TransactionObject<BN>
+    getPendingDepositBatchNumber(user: string, token: string): TransactionObject<string>
 
     withdraw(user: string, token: string): TransactionObject<void>
 
-    MAX_TOUCHED_ORDERS(): TransactionObject<BN>
+    MAX_TOUCHED_ORDERS(): TransactionObject<string>
 
     addToken(token: string): TransactionObject<void>
 
@@ -118,7 +116,7 @@ export class StablecoinConverter extends Contract {
       validUntil: number | string,
       buyAmount: number | string,
       sellAmount: number | string,
-    ): TransactionObject<BN>
+    ): TransactionObject<string>
 
     placeOrder(
       buyToken: number | string,
@@ -126,7 +124,7 @@ export class StablecoinConverter extends Contract {
       validUntil: number | string,
       buyAmount: number | string,
       sellAmount: number | string,
-    ): TransactionObject<BN>
+    ): TransactionObject<string>
 
     cancelOrder(id: number | string): TransactionObject<void>
 
@@ -141,7 +139,7 @@ export class StablecoinConverter extends Contract {
       tokenIdsForPrice: (number | string)[],
     ): TransactionObject<void>
 
-    tokenAddressToIdMap(addr: string): TransactionObject<BN>
+    tokenAddressToIdMap(addr: string): TransactionObject<string>
 
     tokenIdToAddressMap(id: number | string): TransactionObject<string>
 
@@ -149,7 +147,7 @@ export class StablecoinConverter extends Contract {
 
     acceptingSolutions(batchIndex: number | string): TransactionObject<boolean>
 
-    getCurrentObjectiveValue(): TransactionObject<BN>
+    getCurrentObjectiveValue(): TransactionObject<string>
   }
   events: {
     OrderPlacement: ContractEvent<OrderPlacement>

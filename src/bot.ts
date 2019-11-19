@@ -113,17 +113,16 @@ function _handleFetchDataError (error: Error): string {
 dfusionRepo.watchOrderPlacement({
   onNewOrder (order) {
     const { owner, sellToken, buyToken, priceNumerator, priceDenominator, validFrom, validUntil } = order.returnValues
-    const price = priceNumerator.div(priceDenominator)
+    const price = 'N/A' // priceNumerator.div(priceDenominator)
 
-    log.info(`New order: %o in block %d, tx %s. Details:
-    - Transaction hash: ${order.blockHash}
-    - Block number: ${order.blockNumber}
+    log.info(`New order in tx ${order.blockHash}:
     - Owner: ${owner}
     - Sell token: ${sellToken}
     - Buy token: ${buyToken}
     - Price: ${priceNumerator}/${priceDenominator} = ${price}
     - Valid from: ${validFrom}
-    - Valid until: ${validUntil}`)
+    - Valid until: ${validUntil}
+    - Block number: ${order.blockNumber}`)
 
     // TODO: Format amounts in the message: https://github.com/gnosis/dex-telegram/issues/23
     // TODO: Resolve names of known tokens: https://github.com/gnosis/dex-telegram/issues/24

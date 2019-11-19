@@ -3,6 +3,7 @@ import Web3 from 'web3'
 import Logger from '../../helpers/Logger'
 import { DfusionRepo, WatchOrderPlacementParams } from 'types'
 import { StablecoinConverter } from '../../contracts/StablecoinConverter'
+// import BN = require('bn.js')
 
 const log = new Logger('repos:dfusion')
 
