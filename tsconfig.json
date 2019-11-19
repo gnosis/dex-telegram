@@ -23,9 +23,9 @@
     "strictNullChecks": true,
     "suppressImplicitAnyIndexErrors": true,
     "types": ["jest", "node"],
-    "baseUrl": "src",
+    "baseUrl": "./src/",
     "outDir": "./build"
   },
-  "include": ["src/**/*.ts", "node_modules/web3-*/types/*.d.ts"],
+  "include": ["src/**/*.ts", "test/**/*.ts", "node_modules/web3-*/types/*.d.ts"],
   "exclude": ["node_modules", "coverage", "build"]
 }
