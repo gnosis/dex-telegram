@@ -1,11 +1,7 @@
-import { DfusionRepo } from '../../../src/types'
-import { dfusionRepo as dfusionRepoAny } from '../../../src/repos'
-import Logger from '../../../src/helpers/Logger'
+import { dfusionRepo } from 'repos'
+import Logger from 'helpers/Logger'
 
 require('dotenv').config()
-
-// FIXME: It's not gessing the right type of dfusionRepo
-const dfusionRepo = dfusionRepoAny as DfusionRepo
 
 /**
  *  SANDBOX: Watch the placement of orders

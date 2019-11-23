@@ -128,7 +128,7 @@ module.exports = {
   // snapshotSerializers: [],
 
   // The test environment that will be used for testing
-  testEnvironment: 'node'
+  testEnvironment: 'node',
 
   // Options that will be passed to the testEnvironment
   // testEnvironmentOptions: {},
@@ -137,18 +137,15 @@ module.exports = {
   // testLocationInResults: false,
 
   // The glob patterns Jest uses to detect test files
-  // testMatch: [
-  //   "**/__tests__/**/*.[jt]s?(x)",
-  //   "**/?(*.)+(spec|test).[tj]s?(x)"
-  // ],
+  testMatch: ['**/?(*.)+(spec|test).[tj]s?(x)'],
 
   // An array of regexp pattern strings that are matched against all test paths, matched tests are skipped
-  // testPathIgnorePatterns: [
-  //   "/node_modules/"
-  // ],
+  // testPathIgnorePatterns: ['/node_modules/', '/build/', '.*'],
+  testPathIgnorePatterns: ['/node_modules/', '/build/'],
 
   // The regexp pattern or array of patterns that Jest uses to detect test files
   // testRegex: [],
+  // testRegex: ['test/.*\\.test\\.(js|ts)$'],
 
   // This option allows the use of a custom results processor
   // testResultsProcessor: null,
@@ -163,7 +160,9 @@ module.exports = {
   // timers: "real",
 
   // A map from regular expressions to paths to transformers
-  // transform: null,
+  transform: {
+    '^.+\\.(ts|tsx)?$': 'ts-jest'
+  }
 
   // An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation
   // transformIgnorePatterns: [
