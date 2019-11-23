@@ -98,7 +98,9 @@ dfusionService.watchOrderPlacement({
     const {
       // owner,
       buyToken,
+      buyTokenAddress,
       sellToken,
+      sellTokenAddress,
       validFrom,
       validUntil,
       // validFromBatchId,
@@ -108,14 +110,16 @@ dfusionService.watchOrderPlacement({
       // event
     } = order
     const price = priceNumerator.div(priceDenominator)
+    const sellTokenLabel = sellToken ? sellToken.symbol : sellTokenAddress
+    const buyTokenLabel = buyToken ? buyToken.symbol : buyTokenAddress
 
     // TODO: Format amounts in the message: https://github.com/gnosis/dex-telegram/issues/23
     // TODO: Resolve names of known tokens: https://github.com/gnosis/dex-telegram/issues/24
     // TODO: Format better the date for the end time of the order: https://github.com/gnosis/dex-telegram/issues/25
     // TODO: Provide the link to the front end: https://github.com/gnosis/dex-telegram/issues/3
     // TODO: Add some style to the bot message: https://github.com/gnosis/dex-telegram/issues/27
-    const message = `Sell ${priceDenominator} ${sellToken} for ${priceNumerator} ${buyToken}:
-    Price:  1 ${sellToken} = ${price} ${buyToken}
+    const message = `Sell ${priceDenominator} ${sellTokenLabel} for ${priceNumerator} ${buyTokenLabel}:
+    Price:  1 ${sellTokenLabel} = ${price} ${buyTokenLabel}
     Valid from: ${validFrom}
     Valid until: ${validUntil}`
 

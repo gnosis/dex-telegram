@@ -6,6 +6,9 @@ import { OrderPlacement, StablecoinConverter } from 'contracts/StablecoinConvert
 import packageJson from '../../package.json'
 import BN = require('bn.js')
 
+// TODO: Create common lib with the API/repo
+import tokenList = require('@gnosis.pm/dex-react/src/api/tokenList/tokenList.json')
+
 const log = new Logger('service:dfusion')
 
 export interface Params {
@@ -26,6 +29,13 @@ export interface WatchOrderPlacementParams {
   onError: (error: Error) => void
 }
 
+interface TokenDto {
+  name: string
+  symbol: string
+  decimals: number
+  address: string
+}
+
 interface AboutDto {
   blockNumber: number
   networkId: number
@@ -36,8 +46,10 @@ interface AboutDto {
 
 export interface OrderDto {
   owner: string
-  buyToken: string
-  sellToken: string
+  sellTokenAddress: string
+  buyTokenAddress: string
+  buyToken: TokenDto | null
+  sellToken: TokenDto | null
   validFrom: Date
   validUntil: Date
   validFromBatchId: BN
@@ -50,6 +62,7 @@ export interface OrderDto {
 export class DfusionRepoImpl implements DfusionService {
   private _web3: Web3
   private _contract: StablecoinConverter
+  private _networkId: number
 
   constructor (params: Params) {
     const { web3, stableCoinConverterContract } = params
@@ -77,10 +90,15 @@ export class DfusionRepoImpl implements DfusionService {
           validUntil: validUntilBatchIdString
         } = event.returnValues
 
-        const [sellToken, buyToken] = await Promise.all([
+        const [sellTokenAddress, buyTokenAddress] = await Promise.all([
           this._getTokenAddress(sellTokenId),
           this._getTokenAddress(buyTokenId)
         ])
+        const [sellToken, buyToken] = await Promise.all([
+          this._getToken(sellTokenAddress),
+          this._getToken(buyTokenAddress)
+        ])
+
         const priceNumerator = new BN(priceNumeratorString)
         const priceDenominator = new BN(priceDenominatorString)
         const validFromBatchId = new BN(validFromBatchIdString)
@@ -99,6 +117,8 @@ export class DfusionRepoImpl implements DfusionService {
 
         params.onNewOrder({
           owner,
+          sellTokenAddress,
+          buyTokenAddress,
           sellToken,
           buyToken,
           priceNumerator,
@@ -121,7 +141,7 @@ export class DfusionRepoImpl implements DfusionService {
   public async getAbout (): Promise<AboutDto> {
     const [blockNumber, networkId, nodeInfo] = await Promise.all([
       this._web3.eth.getBlockNumber(),
-      this._web3.eth.getChainId(),
+      this._getNetworkId(),
       this._web3.eth.getNodeInfo()
     ])
 
@@ -134,8 +154,30 @@ export class DfusionRepoImpl implements DfusionService {
     }
   }
 
+  private async _getNetworkId (): Promise<number> {
+    if (!this._networkId) {
+      this._networkId = await this._web3.eth.getChainId()
+    }
+
+    return this._networkId
+  }
+
   private _getTokenAddress (id: string | number): Promise<string> {
     return this._contract.methods.tokenIdToAddressMap(id).call()
+  }
+
+  private async _getToken (tokenAddress: string): Promise<TokenDto | null> {
+    const networkId = await this._getNetworkId()
+
+    const tokenJson = tokenList.find(token => token.addressByNetwork[networkId] === tokenAddress)
+    if (!tokenJson) {
+      return null
+    }
+
+    return {
+      ...tokenJson,
+      address: tokenJson.addressByNetwork[networkId]
+    }
   }
 }
 
