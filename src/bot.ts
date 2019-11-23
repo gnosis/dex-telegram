@@ -3,8 +3,7 @@ import TelegramBot, { Message, User } from 'node-telegram-bot-api'
 import Logger from 'helpers/Logger'
 import { logUnhandledErrors, onShutdown } from 'helpers'
 import packageJson from '../package.json'
-import { dfusionRepo } from 'repos'
-import { formatNewOrders } from 'utils'
+import { dfusionService } from 'services'
 
 logUnhandledErrors()
 
@@ -72,17 +71,17 @@ Also, you can ask about me by using the command: /about`
 
 async function _aboutCommand (msg: Message) {
   const [blockNumber, networkId, nodeInfo] = await Promise.all([
-    dfusionRepo
+    dfusionService
       .getBlockNumber()
       .then(String)
       .catch(_handleFetchDataError),
 
-    dfusionRepo
+    dfusionService
       .getNetworkId()
       .then(String)
       .catch(_handleFetchDataError),
 
-    dfusionRepo.getNodeInfo().catch(_handleFetchDataError)
+    dfusionService.getNodeInfo().catch(_handleFetchDataError)
   ])
 
   bot.sendMessage(
@@ -111,9 +110,33 @@ function _handleFetchDataError (error: Error): string {
   return 'N/A'
 }
 
-dfusionRepo.watchOrderPlacement({
-  onNewOrder (event) {
-    bot.sendMessage(channelId, formatNewOrders(event))
+dfusionService.watchOrderPlacement({
+  onNewOrder (order) {
+    const {
+      // owner,
+      buyToken,
+      sellToken,
+      validFrom,
+      validUntil,
+      // validFromBatchId,
+      // validUntilBatchId,
+      priceNumerator,
+      priceDenominator
+      // event
+    } = order
+    const price = priceNumerator.div(priceDenominator)
+
+    // TODO: Format amounts in the message: https://github.com/gnosis/dex-telegram/issues/23
+    // TODO: Resolve names of known tokens: https://github.com/gnosis/dex-telegram/issues/24
+    // TODO: Format better the date for the end time of the order: https://github.com/gnosis/dex-telegram/issues/25
+    // TODO: Provide the link to the front end: https://github.com/gnosis/dex-telegram/issues/3
+    // TODO: Add some style to the bot message: https://github.com/gnosis/dex-telegram/issues/27
+    const message = `Sell ${priceDenominator} ${sellToken} for ${priceNumerator} ${buyToken}:
+    Price:  1 ${sellToken} = ${price} ${buyToken}
+    Valid from: ${validFrom}
+    Valid until: ${validUntil}`
+
+    bot.sendMessage(channelId, message)
   },
   onError (error: Error) {
     log.error('Error watching order placements: ', error)

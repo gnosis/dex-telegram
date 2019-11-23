@@ -1,4 +1,4 @@
-import { dfusionRepo } from 'repos'
+import { dfusionService } from 'services'
 import Logger from 'helpers/Logger'
 
 require('dotenv').config()
@@ -10,9 +10,9 @@ require('dotenv').config()
 const log = new Logger('sandbox:repos:watchOrderPlacement')
 
 async function exec (): Promise<void> {
-  dfusionRepo.watchOrderPlacement({
-    onNewOrder (event) {
-      log.info('New order: %o in block %d, transaction %s', event, event.blockNumber, event.transactionHash)
+  dfusionService.watchOrderPlacement({
+    onNewOrder (order) {
+      log.info('New order: %O', order)
     },
     onError (error: Error) {
       log.error('Error watching order placements: ', error)
