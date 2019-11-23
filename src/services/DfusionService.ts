@@ -3,11 +3,12 @@ import Web3 from 'web3'
 import Logger from 'helpers/Logger'
 import { ContractEventLog } from 'contracts/types'
 import { OrderPlacement, StablecoinConverter } from 'contracts/StablecoinConverter'
+import packageJson from '../../package.json'
 import BN = require('bn.js')
 
 const log = new Logger('service:dfusion')
 
-interface Params {
+export interface Params {
   stableCoinConverterContract: StablecoinConverter
   web3: Web3
 }
@@ -17,14 +18,19 @@ export interface DfusionService {
   watchOrderPlacement(params: WatchOrderPlacementParams): void
 
   // Basic info
-  getNetworkId(): Promise<number>
-  getNodeInfo(): Promise<String>
-  getBlockNumber(): Promise<number>
+  getAbout(): Promise<AboutDto>
 }
 
 export interface WatchOrderPlacementParams {
   onNewOrder: (order: OrderDto) => void
   onError: (error: Error) => void
+}
+
+interface AboutDto {
+  blockNumber: number
+  networkId: number
+  nodeInfo: string
+  version: string
 }
 
 export interface OrderDto {
@@ -111,20 +117,23 @@ export class DfusionRepoImpl implements DfusionService {
       })
   }
 
+  public async getAbout (): Promise<AboutDto> {
+    const [blockNumber, networkId, nodeInfo] = await Promise.all([
+      this._web3.eth.getBlockNumber(),
+      this._web3.eth.getChainId(),
+      this._web3.eth.getNodeInfo()
+    ])
+
+    return {
+      blockNumber,
+      networkId,
+      nodeInfo,
+      version: packageJson.version
+    }
+  }
+
   private _getTokenAddress (id: string | number): Promise<string> {
     return this._contract.methods.tokenIdToAddressMap(id).call()
-  }
-
-  public getNetworkId (): Promise<number> {
-    return this._web3.eth.getChainId()
-  }
-
-  public getNodeInfo (): Promise<String> {
-    return this._web3.eth.getNodeInfo()
-  }
-
-  public getBlockNumber (): Promise<number> {
-    return this._web3.eth.getBlockNumber()
   }
 }
 

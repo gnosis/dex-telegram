@@ -2,7 +2,6 @@ import { strict as assert } from 'assert'
 import TelegramBot, { Message, User } from 'node-telegram-bot-api'
 import Logger from 'helpers/Logger'
 import { logUnhandledErrors, onShutdown } from 'helpers'
-import packageJson from '../package.json'
 import { dfusionService } from 'services'
 
 logUnhandledErrors()
@@ -70,19 +69,7 @@ Also, you can ask about me by using the command: /about`
 }
 
 async function _aboutCommand (msg: Message) {
-  const [blockNumber, networkId, nodeInfo] = await Promise.all([
-    dfusionService
-      .getBlockNumber()
-      .then(String)
-      .catch(_handleFetchDataError),
-
-    dfusionService
-      .getNetworkId()
-      .then(String)
-      .catch(_handleFetchDataError),
-
-    dfusionService.getNodeInfo().catch(_handleFetchDataError)
-  ])
+  const { blockNumber, networkId, nodeInfo, version } = await dfusionService.getAbout()
 
   bot.sendMessage(
     msg.chat.id,
@@ -93,7 +80,7 @@ If you want to know more about me, checkout my code in https://github.com/gnosis
 In that github you'll be able to fork me, open issues, or even better, give me some additional functionality (Pull Requests are really welcomed 😀).
 
 Some interesting facts are:
-- Bot version: ${packageJson.version}
+- Bot version: ${version}
 - Ethereum Network: ${networkId}
 - Ethereum Node: ${nodeInfo}
 - Last minded block: ${blockNumber}
@@ -103,11 +90,6 @@ Also, here are some links you might find useful:
 - https://github.com/gnosis/dex-research: dFusion Research
 - https://github.com/gnosis/dex-services: dFusion services`
   )
-}
-
-function _handleFetchDataError (error: Error): string {
-  log.error(error)
-  return 'N/A'
 }
 
 dfusionService.watchOrderPlacement({
