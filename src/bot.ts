@@ -1,5 +1,7 @@
 import { strict as assert } from 'assert'
+import moment from 'moment'
 import TelegramBot, { Message, User } from 'node-telegram-bot-api'
+
 import Logger from 'helpers/Logger'
 import { logUnhandledErrors, onShutdown } from 'helpers'
 import { dfusionService } from 'services'
@@ -120,8 +122,8 @@ dfusionService.watchOrderPlacement({
     // TODO: Add some style to the bot message: https://github.com/gnosis/dex-telegram/issues/27
     const message = `Sell ${priceDenominator} ${sellTokenLabel} for ${priceNumerator} ${buyTokenLabel}:
     Price:  1 ${sellTokenLabel} = ${price} ${buyTokenLabel}
-    Valid from: ${validFrom}
-    Valid until: ${validUntil}`
+    Valid from: ${moment(validFrom).fromNow()}
+    Expires: ${moment(validUntil).fromNow()}`
 
     bot.sendMessage(channelId, message)
   },

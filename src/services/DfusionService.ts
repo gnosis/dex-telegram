@@ -48,10 +48,10 @@ export interface OrderDto {
   owner: string
   sellTokenAddress: string
   buyTokenAddress: string
-  buyToken: TokenDto | null
-  sellToken: TokenDto | null
-  validFrom: Date
-  validUntil: Date
+  buyToken?: TokenDto
+  sellToken?: TokenDto
+  validFrom?: Date
+  validUntil?: Date
   validFromBatchId: BN
   validUntilBatchId: BN
   priceNumerator: BN
@@ -166,12 +166,12 @@ export class DfusionRepoImpl implements DfusionService {
     return this._contract.methods.tokenIdToAddressMap(id).call()
   }
 
-  private async _getToken (tokenAddress: string): Promise<TokenDto | null> {
+  private async _getToken (tokenAddress: string): Promise<TokenDto | undefined> {
     const networkId = await this._getNetworkId()
 
     const tokenJson = tokenList.find(token => token.addressByNetwork[networkId] === tokenAddress)
     if (!tokenJson) {
-      return null
+      return undefined
     }
 
     return {
