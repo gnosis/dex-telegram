@@ -63,6 +63,7 @@ export class DfusionRepoImpl implements DfusionService {
   private _web3: Web3
   private _contract: StablecoinConverter
   private _networkId: number
+  private _batchTime: BN
 
   constructor (params: Params) {
     const { web3, stableCoinConverterContract } = params
@@ -89,22 +90,21 @@ export class DfusionRepoImpl implements DfusionService {
           validFrom: validFromBatchIdString,
           validUntil: validUntilBatchIdString
         } = event.returnValues
+        const priceNumerator = new BN(priceNumeratorString)
+        const priceDenominator = new BN(priceDenominatorString)
+        const validFromBatchId = new BN(validFromBatchIdString)
+        const validUntilBatchId = new BN(validUntilBatchIdString)
 
         const [sellTokenAddress, buyTokenAddress] = await Promise.all([
           this._getTokenAddress(sellTokenId),
           this._getTokenAddress(buyTokenId)
         ])
-        const [sellToken, buyToken] = await Promise.all([
+        const [sellToken, buyToken, validFrom, validUntil] = await Promise.all([
           this._getToken(sellTokenAddress),
-          this._getToken(buyTokenAddress)
+          this._getToken(buyTokenAddress),
+          this._batchIdToDate(validFromBatchId),
+          this._batchIdToDate(validUntilBatchId)
         ])
-
-        const priceNumerator = new BN(priceNumeratorString)
-        const priceDenominator = new BN(priceDenominatorString)
-        const validFromBatchId = new BN(validFromBatchIdString)
-        const validUntilBatchId = new BN(validUntilBatchIdString)
-        const validFrom = new Date()
-        const validUntil = new Date()
 
         log.info(`New order in tx ${event.blockHash}:
     - Owner: ${owner}
@@ -178,6 +178,25 @@ export class DfusionRepoImpl implements DfusionService {
       ...tokenJson,
       address: tokenJson.addressByNetwork[networkId]
     }
+  }
+
+  private async _getBatchTime (): Promise<BN> {
+    if (!this._batchTime) {
+      this._batchTime = new BN(await this._contract.methods.BATCH_TIME().call())
+    }
+    return this._batchTime
+  }
+
+  // TODO: Move to utils project
+  private async _batchIdToDate (batchId: BN): Promise<Date> {
+    const batchTime = await this._getBatchTime()
+
+    return new Date(
+      batchId
+        .mul(batchTime)
+        .mul(new BN(1000))
+        .toNumber()
+    )
   }
 }
 
