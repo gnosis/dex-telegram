@@ -31,6 +31,7 @@ interface AboutDto {
   networkId: number
   nodeInfo: string
   version: string
+  stablecoinConverterAddress: string
 }
 
 export interface OrderDto {
@@ -128,7 +129,8 @@ export class DfusionRepoImpl implements DfusionService {
       blockNumber,
       networkId,
       nodeInfo,
-      version: packageJson.version
+      version: packageJson.version,
+      stablecoinConverterAddress: this._contract.options.address
     }
   }
 

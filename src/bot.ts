@@ -69,7 +69,7 @@ Also, you can ask about me by using the command: /about`
 }
 
 async function _aboutCommand (msg: Message) {
-  const { blockNumber, networkId, nodeInfo, version } = await dfusionService.getAbout()
+  const { blockNumber, networkId, nodeInfo, version, stablecoinConverterAddress } = await dfusionService.getAbout()
 
   bot.sendMessage(
     msg.chat.id,
@@ -81,6 +81,7 @@ In that github you'll be able to fork me, open issues, or even better, give me s
 
 Some interesting facts are:
 - Bot version: ${version}
+- Contract Address: ${stablecoinConverterAddress}
 - Ethereum Network: ${networkId}
 - Ethereum Node: ${nodeInfo}
 - Last minded block: ${blockNumber}
