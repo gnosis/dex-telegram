@@ -4,7 +4,7 @@ import Logger from 'helpers/Logger'
 import { ContractEventLog } from 'contracts/types'
 import { OrderPlacement, StablecoinConverter } from 'contracts/StablecoinConverter'
 import packageJson from '../../package.json'
-import BN = require('bn.js')
+import { BigNumber } from 'bignumber.js/bignumber.js'
 
 // TODO: Create common lib with the API/repo
 import tokenList = require('@gnosis.pm/dex-react/src/api/tokenList/tokenList.json')
@@ -50,12 +50,12 @@ export interface OrderDto {
   buyTokenAddress: string
   buyToken?: TokenDto
   sellToken?: TokenDto
-  validFrom?: Date
-  validUntil?: Date
-  validFromBatchId: BN
-  validUntilBatchId: BN
-  priceNumerator: BN
-  priceDenominator: BN
+  validFrom: Date
+  validUntil: Date
+  validFromBatchId: BigNumber
+  validUntilBatchId: BigNumber
+  priceNumerator: BigNumber
+  priceDenominator: BigNumber
   event: ContractEventLog<OrderPlacement>
 }
 
@@ -63,7 +63,8 @@ export class DfusionRepoImpl implements DfusionService {
   private _web3: Web3
   private _contract: StablecoinConverter
   private _networkId: number
-  private _batchTime: BN
+  private _batchTime: BigNumber
+  private _tokenCache: { [tokenAddress: string]: TokenDto | null } = {}
 
   constructor (params: Params) {
     const { web3, stableCoinConverterContract } = params
@@ -90,10 +91,10 @@ export class DfusionRepoImpl implements DfusionService {
           validFrom: validFromBatchIdString,
           validUntil: validUntilBatchIdString
         } = event.returnValues
-        const priceNumerator = new BN(priceNumeratorString)
-        const priceDenominator = new BN(priceDenominatorString)
-        const validFromBatchId = new BN(validFromBatchIdString)
-        const validUntilBatchId = new BN(validUntilBatchIdString)
+        const priceNumerator = new BigNumber(priceNumeratorString)
+        const priceDenominator = new BigNumber(priceDenominatorString)
+        const validFromBatchId = new BigNumber(validFromBatchIdString)
+        const validUntilBatchId = new BigNumber(validUntilBatchIdString)
 
         const [sellTokenAddress, buyTokenAddress] = await Promise.all([
           this._getTokenAddress(sellTokenId),
@@ -110,7 +111,7 @@ export class DfusionRepoImpl implements DfusionService {
     - Owner: ${owner}
     - Sell token: ${sellToken}
     - Buy token: ${buyToken}
-    - Price: ${priceNumerator}/${priceDenominator} = ${priceNumerator.div(priceDenominator).toNumber()}
+    - Price: ${priceNumerator}/${priceDenominator} = ${priceNumerator.dividedBy(priceDenominator).toNumber()}
     - Valid from: ${validFromBatchId}
     - Valid until: ${validUntilBatchId}
     - Block number: ${event.blockNumber}`)
@@ -125,8 +126,8 @@ export class DfusionRepoImpl implements DfusionService {
           priceDenominator,
           validFromBatchId,
           validUntilBatchId,
-          validFrom,
-          validUntil,
+          validFrom: validFrom as Date,
+          validUntil: validUntil as Date,
           event
         })
       })
@@ -167,34 +168,47 @@ export class DfusionRepoImpl implements DfusionService {
   }
 
   private async _getToken (tokenAddress: string): Promise<TokenDto | undefined> {
-    const networkId = await this._getNetworkId()
+    let token = this._tokenCache[tokenAddress]
 
-    const tokenJson = tokenList.find(token => token.addressByNetwork[networkId] === tokenAddress)
-    if (!tokenJson) {
-      return undefined
+    if (token) {
+      const networkId = await this._getNetworkId()
+      const tokenJson = tokenList.find(token => token.addressByNetwork[networkId] === tokenAddress)
+      if (tokenJson) {
+        token = {
+          ...tokenJson,
+          address: tokenJson.addressByNetwork[networkId]
+        }
+      } else {
+        token = null
+      }
+      // Cache token if it's found, or null if is not
+      this._tokenCache[tokenAddress] = token
     }
 
-    return {
-      ...tokenJson,
-      address: tokenJson.addressByNetwork[networkId]
+    if (token === null) {
+      // Token not found
+      return undefined
+    } else {
+      // Return token details
+      return token
     }
   }
 
-  private async _getBatchTime (): Promise<BN> {
+  private async _getBatchTime (): Promise<BigNumber> {
     if (!this._batchTime) {
-      this._batchTime = new BN(await this._contract.methods.BATCH_TIME().call())
+      this._batchTime = new BigNumber(await this._contract.methods.BATCH_TIME().call())
     }
     return this._batchTime
   }
 
   // TODO: Move to utils project
-  private async _batchIdToDate (batchId: BN): Promise<Date> {
+  private async _batchIdToDate (batchId: BigNumber): Promise<Date> {
     const batchTime = await this._getBatchTime()
 
     return new Date(
       batchId
-        .mul(batchTime)
-        .mul(new BN(1000))
+        .multipliedBy(batchTime)
+        .multipliedBy(new BigNumber(1000))
         .toNumber()
     )
   }

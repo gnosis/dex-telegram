@@ -111,21 +111,30 @@ dfusionService.watchOrderPlacement({
       priceDenominator
       // event
     } = order
-    const price = priceNumerator.div(priceDenominator)
+    const price = priceNumerator.dividedBy(priceDenominator)
     const sellTokenLabel = sellToken ? sellToken.symbol : sellTokenAddress
     const buyTokenLabel = buyToken ? buyToken.symbol : buyTokenAddress
 
+    // Only display the valid from if the period hasn't started
+    const now = new Date()
+    let validDescription
+    if (validFrom > now) {
+      // The order is not active yet
+      validDescription = `*Tradable* \`${moment(validFrom).calendar()}\`, *until* \`${moment(validUntil).calendar()}\``
+    } else {
+      validDescription = `*Expires*: \`${moment(validUntil).calendar()}\``
+    }
+
     // TODO: Format amounts in the message: https://github.com/gnosis/dex-telegram/issues/23
     // TODO: Resolve names of known tokens: https://github.com/gnosis/dex-telegram/issues/24
-    // TODO: Format better the date for the end time of the order: https://github.com/gnosis/dex-telegram/issues/25
     // TODO: Provide the link to the front end: https://github.com/gnosis/dex-telegram/issues/3
     // TODO: Add some style to the bot message: https://github.com/gnosis/dex-telegram/issues/27
-    const message = `Sell ${priceDenominator} ${sellTokenLabel} for ${priceNumerator} ${buyTokenLabel}:
-    Price:  1 ${sellTokenLabel} = ${price} ${buyTokenLabel}
-    Valid from: ${moment(validFrom).fromNow()}
-    Expires: ${moment(validUntil).fromNow()}`
+    const message = `Sell *${priceDenominator}* \`${sellTokenLabel}\` for *${priceNumerator}* \`${buyTokenLabel}\`
 
-    bot.sendMessage(channelId, message)
+  - *Price*:  1 \`${sellTokenLabel}\` = ${price} \`${buyTokenLabel}\`
+  - ${validDescription}`
+
+    bot.sendMessage(channelId, message, { parse_mode: 'Markdown' })
   },
   onError (error: Error) {
     log.error('Error watching order placements: ', error)
