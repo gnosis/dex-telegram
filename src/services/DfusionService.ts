@@ -5,6 +5,7 @@ import { ContractEventLog } from 'contracts/types'
 import { OrderPlacement, StablecoinConverter } from 'contracts/StablecoinConverter'
 import packageJson from '../../package.json'
 import { BigNumber } from 'bignumber.js/bignumber.js'
+import { Erc20Contract } from 'contracts/Erc20Contract'
 
 // TODO: Create common lib with the API/repo
 import tokenList = require('@gnosis.pm/dex-react/src/api/tokenList/tokenList.json')
@@ -13,6 +14,7 @@ const log = new Logger('service:dfusion')
 
 export interface Params {
   stableCoinConverterContract: StablecoinConverter
+  erc20Contract: Erc20Contract
   web3: Web3
 }
 
@@ -30,8 +32,8 @@ export interface WatchOrderPlacementParams {
 }
 
 interface TokenDto {
-  name: string
-  symbol: string
+  name?: string
+  symbol?: string
   decimals: number
   address: string
 }
@@ -46,10 +48,8 @@ interface AboutDto {
 
 export interface OrderDto {
   owner: string
-  sellTokenAddress: string
-  buyTokenAddress: string
-  buyToken?: TokenDto
-  sellToken?: TokenDto
+  buyToken: TokenDto
+  sellToken: TokenDto
   validFrom: Date
   validUntil: Date
   validFromBatchId: BigNumber
@@ -62,15 +62,17 @@ export interface OrderDto {
 export class DfusionRepoImpl implements DfusionService {
   private _web3: Web3
   private _contract: StablecoinConverter
+  private _erc20Contract: Erc20Contract
   private _networkId: number
   private _batchTime: BigNumber
-  private _tokenCache: { [tokenAddress: string]: TokenDto | null } = {}
+  private _tokenCache: { [tokenAddress: string]: TokenDto } = {}
 
   constructor (params: Params) {
-    const { web3, stableCoinConverterContract } = params
+    const { web3, stableCoinConverterContract, erc20Contract } = params
     log.debug('Setup dfusionRepo with contract address %s', stableCoinConverterContract.options.address)
 
     this._contract = stableCoinConverterContract
+    this._erc20Contract = erc20Contract
     this._web3 = web3
   }
 
@@ -118,8 +120,6 @@ export class DfusionRepoImpl implements DfusionService {
 
         params.onNewOrder({
           owner,
-          sellTokenAddress,
-          buyTokenAddress,
           sellToken,
           buyToken,
           priceNumerator,
@@ -167,31 +167,57 @@ export class DfusionRepoImpl implements DfusionService {
     return this._contract.methods.tokenIdToAddressMap(id).call()
   }
 
-  private async _getToken (tokenAddress: string): Promise<TokenDto | undefined> {
+  private async _getToken (tokenAddress: string): Promise<TokenDto> {
     let token = this._tokenCache[tokenAddress]
 
-    if (token) {
+    if (!token) {
       const networkId = await this._getNetworkId()
+
+      const tokenContract = this._erc20Contract.clone()
+      tokenContract.options.address = tokenAddress
+
+      // Get basic data from the contract
+      const [symbol, decimals, name] = await Promise.all([
+        tokenContract.methods
+          .symbol()
+          .call()
+          .then(symbol => 'Maybe ' + symbol)
+          .catch(() => undefined),
+        tokenContract.methods
+          .decimals()
+          .call()
+          .then(parseInt)
+          .catch(() => 18),
+        tokenContract.methods
+          .name()
+          .call()
+          .then(name => 'Maybe ' + name)
+          .catch(() => undefined)
+      ])
+
       const tokenJson = tokenList.find(token => token.addressByNetwork[networkId] === tokenAddress)
       if (tokenJson) {
         token = {
+          symbol,
+          name,
           ...tokenJson,
-          address: tokenJson.addressByNetwork[networkId]
+          decimals: decimals as number,
+          address: tokenAddress
         }
       } else {
-        token = null
+        token = {
+          symbol,
+          decimals: decimals as number,
+          name,
+          address: tokenAddress
+        }
       }
+
       // Cache token if it's found, or null if is not
       this._tokenCache[tokenAddress] = token
     }
 
-    if (token === null) {
-      // Token not found
-      return undefined
-    } else {
-      // Return token details
-      return token
-    }
+    return token
   }
 
   private async _getBatchTime (): Promise<BigNumber> {
