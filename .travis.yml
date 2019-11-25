@@ -2,12 +2,13 @@ sudo: required
 language: node_js
 node_js:
   - "lts/*"
-script:
-  - yarn test-coverage
+# script:
+#   - yarn test-coverage
 services:
   - docker
 install:
   - yarn install
+  - yarn test-coverage
   - docker build -t dex-telegram .
 after_success:
   - |
