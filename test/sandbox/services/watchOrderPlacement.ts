@@ -5,7 +5,7 @@ require('dotenv').config()
 
 /**
  *  SANDBOX: Watch the placement of orders
- *  RUN:     yarn sandbox test/sandbox/repos/watchOrderPlacement.ts
+ *  RUN:     yarn sandbox test/sandbox/services/watchOrderPlacement.ts
  */
 const log = new Logger('sandbox:repos:watchOrderPlacement')
 
