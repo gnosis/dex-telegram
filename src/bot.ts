@@ -1,10 +1,15 @@
 import { strict as assert } from 'assert'
-import moment from 'moment'
+// import moment from 'moment'
+import moment from 'moment-timezone'
 import TelegramBot, { Message, User } from 'node-telegram-bot-api'
 
 import Logger from 'helpers/Logger'
 import { logUnhandledErrors, onShutdown } from 'helpers'
 import { dfusionService } from 'services'
+import { formatAmount } from 'utils/format'
+import BN from 'bn.js'
+
+moment.tz.setDefault('Etc/GMT')
 
 logUnhandledErrors()
 
@@ -100,9 +105,7 @@ dfusionService.watchOrderPlacement({
     const {
       // owner,
       buyToken,
-      buyTokenAddress,
       sellToken,
-      sellTokenAddress,
       validFrom,
       validUntil,
       // validFromBatchId,
@@ -111,29 +114,45 @@ dfusionService.watchOrderPlacement({
       priceDenominator
       // event
     } = order
-    const price = priceNumerator.dividedBy(priceDenominator)
-    const sellTokenLabel = sellToken ? sellToken.symbol : sellTokenAddress
-    const buyTokenLabel = buyToken ? buyToken.symbol : buyTokenAddress
+
+    // Calculate the price
+    let price
+    if (buyToken.decimals >= sellToken.decimals) {
+      const precisionFactor = 10 ** (buyToken.decimals - sellToken.decimals)
+      price = priceNumerator.dividedBy(priceDenominator.multipliedBy(precisionFactor))
+    } else {
+      const precisionFactor = 10 ** (sellToken.decimals - buyToken.decimals)
+      price = priceNumerator.multipliedBy(precisionFactor).dividedBy(priceDenominator)
+    }
+
+    // Label for token
+    const sellTokenLabel = sellToken.symbol || sellToken.name || sellToken.address
+    const buyTokenLabel = buyToken.symbol || buyToken.name || buyToken.address
 
     // Only display the valid from if the period hasn't started
     const now = new Date()
-    let validDescription
+    let datesDescription = ''
     if (validFrom > now) {
       // The order is not active yet
-      validDescription = `*Tradable* \`${moment(validFrom).calendar()}\`, *until* \`${moment(validUntil).calendar()}\``
-    } else {
-      validDescription = `*Expires*: \`${moment(validUntil).calendar()}\``
+      datesDescription = `  - *Tradable*: \`${moment(validFrom).calendar()} GMT\`, \`${moment(validFrom).fromNow()}\`\n`
     }
+    datesDescription += `  - *Expires*: \`${moment(validUntil).calendar()} GMT\`, \`${moment(validUntil).fromNow()}\``
 
-    // TODO: Format amounts in the message: https://github.com/gnosis/dex-telegram/issues/23
-    // TODO: Resolve names of known tokens: https://github.com/gnosis/dex-telegram/issues/24
+    // Format the amounts
+    const sellAmountFmt = sellToken
+      ? formatAmount(new BN(priceDenominator.toString()), sellToken.decimals)
+      : priceDenominator
+    const buyAmountFmt = buyToken ? formatAmount(new BN(priceNumerator.toString()), buyToken.decimals) : priceNumerator
+
+    // Compose message using markdown
     // TODO: Provide the link to the front end: https://github.com/gnosis/dex-telegram/issues/3
-    // TODO: Add some style to the bot message: https://github.com/gnosis/dex-telegram/issues/27
-    const message = `Sell *${priceDenominator}* \`${sellTokenLabel}\` for *${priceNumerator}* \`${buyTokenLabel}\`
+    // TODO: Should we publish even if the user doesn't have balance. Should we include the balance of the user? he can change it...
+    const message = `Sell *${sellAmountFmt}* \`${sellTokenLabel}\` for *${buyAmountFmt}* \`${buyTokenLabel}\`
 
   - *Price*:  1 \`${sellTokenLabel}\` = ${price} \`${buyTokenLabel}\`
-  - ${validDescription}`
+${datesDescription}`
 
+    // Send message
     bot.sendMessage(channelId, message, { parse_mode: 'Markdown' })
   },
   onError (error: Error) {
