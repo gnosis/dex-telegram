@@ -196,21 +196,12 @@ export class DfusionRepoImpl implements DfusionService {
       ])
 
       const tokenJson = tokenList.find(token => token.addressByNetwork[networkId] === tokenAddress)
-      if (tokenJson) {
-        token = {
-          symbol,
-          name,
-          ...tokenJson,
-          decimals: decimals as number,
-          address: tokenAddress
-        }
-      } else {
-        token = {
-          symbol,
-          decimals: decimals as number,
-          name,
-          address: tokenAddress
-        }
+      token = {
+        symbol,
+        name,
+        ...tokenJson,
+        decimals: decimals as number,
+        address: tokenAddress
       }
 
       // Cache token if it's found, or null if is not
