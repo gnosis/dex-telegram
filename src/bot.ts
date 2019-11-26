@@ -1,5 +1,4 @@
 import { strict as assert } from 'assert'
-// import moment from 'moment'
 import moment from 'moment-timezone'
 import TelegramBot, { Message, User } from 'node-telegram-bot-api'
 
@@ -126,6 +125,7 @@ dfusionService.watchOrderPlacement({
     }
 
     // Label for token
+    // TODO: to use the shared utils function when available safeTokenName
     const sellTokenLabel = sellToken.symbol || sellToken.name || sellToken.address
     const buyTokenLabel = buyToken.symbol || buyToken.name || buyToken.address
 
