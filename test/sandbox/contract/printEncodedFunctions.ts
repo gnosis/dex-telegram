@@ -6,7 +6,7 @@ require('dotenv').config()
 
 /**
  *  SANDBOX: Print the encoded version for the functions
- *  RUN:     yarn sandbox test/sandbox/printEncodedFunctions.ts
+ *  RUN:     yarn sandbox test/sandbox/contract/printEncodedFunctions.ts
  */
 const log = new Logger('sandbox:printEncodedFunctions')
 

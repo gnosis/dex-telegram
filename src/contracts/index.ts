@@ -9,7 +9,10 @@ function getStableConverterContract(): StablecoinConverter {
   const stableCoinContractAddress = STABLE_COIN_CONTRACT_ADDRESS as string
 
   const abi = require('./StablecoinConverter.json')
-  return new web3.eth.Contract(abi, stableCoinContractAddress) as StablecoinConverter
+
+  // FIXME: There's an issue with this conversion
+  const unknownContract = new web3.eth.Contract(abi, stableCoinContractAddress) as unknown
+  return unknownContract as StablecoinConverter
 }
 
 // Create contracts

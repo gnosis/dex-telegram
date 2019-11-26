@@ -4,6 +4,7 @@ import Logger from 'helpers/Logger'
 import { logUnhandledErrors, onShutdown } from 'helpers'
 import packageJson from '../package.json'
 import { dfusionRepo } from 'repos'
+import { formatNewOrders } from 'utils'
 
 logUnhandledErrors()
 
@@ -111,10 +112,8 @@ function _handleFetchDataError (error: Error): string {
 }
 
 dfusionRepo.watchOrderPlacement({
-  onNewOrder (order: any) {
-    // TODO: Fix when we use the right typescript object for the order
-    log.info('New order: %o', order)
-    bot.sendMessage(channelId, 'New order: ' + JSON.stringify(order))
+  onNewOrder (event) {
+    bot.sendMessage(channelId, formatNewOrders(event))
   },
   onError (error: Error) {
     log.error('Error watching order placements: ', error)

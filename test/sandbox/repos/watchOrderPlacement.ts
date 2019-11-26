@@ -11,8 +11,8 @@ const log = new Logger('sandbox:repos:watchOrderPlacement')
 
 async function exec (): Promise<void> {
   dfusionRepo.watchOrderPlacement({
-    onNewOrder (order: any) {
-      log.info('New order: %o', order)
+    onNewOrder (event) {
+      log.info('New order: %o in block %d, transaction %s', event, event.blockNumber, event.transactionHash)
     },
     onError (error: Error) {
       log.error('Error watching order placements: ', error)

@@ -11,4 +11,4 @@ function createDfusionRepo (): DfusionRepo {
 }
 
 // Build Repos
-export const dfusionRepo = createDfusionRepo()
+export const dfusionRepo: DfusionRepo = createDfusionRepo()
