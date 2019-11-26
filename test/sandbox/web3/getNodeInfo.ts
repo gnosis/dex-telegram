@@ -1,5 +1,5 @@
-import { web3 } from '../../../src/helpers/web3'
-import Logger from '../../../src/helpers/Logger'
+import { web3 } from 'helpers/web3'
+import Logger from 'helpers/Logger'
 
 require('dotenv').config()
 
@@ -9,7 +9,7 @@ require('dotenv').config()
  */
 const log = new Logger('sandbox:web3:getNodeInfo')
 
-async function exec (): Promise<void> {
+async function exec(): Promise<void> {
   log.debug('web3 version: ', web3.version)
   log.debug('Chain id: ', await web3.eth.getChainId())
   log.debug('Node info: ', await web3.eth.getNodeInfo())
