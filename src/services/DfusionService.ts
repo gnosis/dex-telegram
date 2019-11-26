@@ -4,7 +4,7 @@ import Logger from 'helpers/Logger'
 import { ContractEventLog } from 'contracts/types'
 import { OrderPlacement, StablecoinConverter } from 'contracts/StablecoinConverter'
 import packageJson from '../../package.json'
-import { BigNumber } from 'bignumber.js/bignumber.js'
+import { BigNumber } from 'bignumber.js'
 import { Erc20Contract } from 'contracts/Erc20Contract'
 
 // TODO: Create common lib with the API/repo
