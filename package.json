@@ -9,7 +9,7 @@
     "dev:info": "DEBUG=ERROR-*,WARN-*,INFO-* nodemon src/bot.ts",
     "sandbox": "DEBUG=ERROR-*,WARN-*,INFO-*,DEBUG-*,-DEBUG-helper*,-DEBUG-util* nodemon -r dotenv/config",
     "test": "jest",
-    "test-coverage": "jest --coverage && cat ./coverage/lcov.info | coveralls",
+    "test-coverage": "jest --debug --verbose --coverage && cat ./coverage/lcov.info | coveralls",
     "lint": "eslint src --ext .ts,.js",
     "lint:fix": "eslint --fix . --ext .ts,.js",
     "verify": "npm run lint && npm run test",
