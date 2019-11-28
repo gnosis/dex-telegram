@@ -1,12 +1,19 @@
-import { strict as assert } from 'assert'
+import assert from 'assert'
 import moment from 'moment-timezone'
 import TelegramBot, { Message, User } from 'node-telegram-bot-api'
 
 import Logger from 'helpers/Logger'
 import { logUnhandledErrors, onShutdown } from 'helpers'
 import { dfusionService } from 'services'
-import { formatAmount } from 'utils/format'
+import { formatAmount, formatAmountFull } from 'utils/format'
 import BN from 'bn.js'
+import { FEE_DENOMINATOR } from 'const'
+
+const WEB_BASE_URL = process.env.WEB_BASE_URL
+assert(WEB_BASE_URL, 'WEB_BASE_URL is required')
+
+// To fill an order, no solver will match the trades if there's not 2*FEE spread between the trades
+const FACTOR_TO_FILL_ORDER = 1 + 2 / FEE_DENOMINATOR
 
 moment.tz.setDefault('Etc/GMT')
 
@@ -139,10 +146,14 @@ dfusionService.watchOrderPlacement({
     datesDescription += `  - *Expires*: \`${moment(validUntil).calendar()} GMT\`, \`${moment(validUntil).fromNow()}\``
 
     // Format the amounts
-    const sellAmountFmt = sellToken
-      ? formatAmount(new BN(priceDenominator.toString()), sellToken.decimals)
-      : priceDenominator
-    const buyAmountFmt = buyToken ? formatAmount(new BN(priceNumerator.toString()), buyToken.decimals) : priceNumerator
+    // TODO: Allow to use BN, string or BigNumber or all three in the format. Review in dex-js
+    const sellAmountFmt = formatAmount(new BN(priceDenominator.toString()), sellToken.decimals)
+    const buyAmountFmt = formatAmount(new BN(priceNumerator.toString()), buyToken.decimals)
+    const fillSellAmountFmt = formatAmountFull(
+      new BN(priceNumerator.multipliedBy(FACTOR_TO_FILL_ORDER).toString()),
+      buyToken.decimals
+    )
+    const buyAmountFullFmt = formatAmountFull(new BN(priceDenominator.toString()), sellToken.decimals)
 
     // Compose message using markdown
     // TODO: Provide the link to the front end: https://github.com/gnosis/dex-telegram/issues/3
@@ -150,7 +161,9 @@ dfusionService.watchOrderPlacement({
     const message = `Sell *${sellAmountFmt}* \`${sellTokenLabel}\` for *${buyAmountFmt}* \`${buyTokenLabel}\`
 
   - *Price*:  1 \`${sellTokenLabel}\` = ${price} \`${buyTokenLabel}\`
-${datesDescription}`
+${datesDescription}
+
+Fill the order here: ${WEB_BASE_URL}/trade/${buyTokenLabel}-${sellTokenLabel}?sell=${fillSellAmountFmt}&buy=${buyAmountFullFmt}` // TODO:
 
     // Send message
     bot.sendMessage(channelId, message, { parse_mode: 'Markdown' })

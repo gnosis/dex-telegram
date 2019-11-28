@@ -1,4 +1,4 @@
-import { strict as assert } from 'assert'
+import assert from 'assert'
 import Web3 from 'web3'
 
 import Logger from 'helpers/Logger'
