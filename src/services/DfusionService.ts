@@ -177,23 +177,7 @@ export class DfusionRepoImpl implements DfusionService {
       tokenContract.options.address = tokenAddress
 
       // Get basic data from the contract
-      const [symbol, decimals, name] = await Promise.all([
-        tokenContract.methods
-          .symbol()
-          .call()
-          .then(symbol => 'Maybe ' + symbol)
-          .catch(() => undefined),
-        tokenContract.methods
-          .decimals()
-          .call()
-          .then(parseInt)
-          .catch(() => 18),
-        tokenContract.methods
-          .name()
-          .call()
-          .then(name => 'Maybe ' + name)
-          .catch(() => undefined)
-      ])
+      const { symbol, decimals, name } = await _getDataFromErc20(tokenContract)
 
       const tokenJson = tokenList.find(token => token.addressByNetwork[networkId] === tokenAddress)
       token = {
@@ -229,6 +213,30 @@ export class DfusionRepoImpl implements DfusionService {
         .toNumber()
     )
   }
+}
+
+async function _getDataFromErc20 (tokenContract: Erc20Contract) {
+  const symbolPromise = tokenContract.methods
+    .symbol()
+    .call()
+    .then(symbol => 'Maybe ' + symbol)
+    .catch(() => undefined)
+
+  const decimalsPromise = tokenContract.methods
+    .decimals()
+    .call()
+    .then(parseInt)
+    .catch(() => 18)
+
+  const namePromise = tokenContract.methods
+    .name()
+    .call()
+    .then(name => 'Maybe ' + name)
+    .catch(() => undefined)
+
+  // Get basic data from the contract
+  const [symbol, decimals, name] = await Promise.all([symbolPromise, decimalsPromise, namePromise])
+  return { symbol, decimals, name }
 }
 
 export default DfusionRepoImpl
