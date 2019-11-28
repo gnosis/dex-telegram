@@ -1,10 +1,14 @@
 import { strict as assert } from 'assert'
+import moment from 'moment-timezone'
 import TelegramBot, { Message, User } from 'node-telegram-bot-api'
+
 import Logger from 'helpers/Logger'
 import { logUnhandledErrors, onShutdown } from 'helpers'
-import packageJson from '../package.json'
-import { dfusionRepo } from 'repos'
-import { formatNewOrders } from 'utils'
+import { dfusionService } from 'services'
+import { formatAmount } from 'utils/format'
+import BN from 'bn.js'
+
+moment.tz.setDefault('Etc/GMT')
 
 logUnhandledErrors()
 
@@ -71,19 +75,7 @@ Also, you can ask about me by using the command: /about`
 }
 
 async function _aboutCommand (msg: Message) {
-  const [blockNumber, networkId, nodeInfo] = await Promise.all([
-    dfusionRepo
-      .getBlockNumber()
-      .then(String)
-      .catch(_handleFetchDataError),
-
-    dfusionRepo
-      .getNetworkId()
-      .then(String)
-      .catch(_handleFetchDataError),
-
-    dfusionRepo.getNodeInfo().catch(_handleFetchDataError)
-  ])
+  const { blockNumber, networkId, nodeInfo, version, stablecoinConverterAddress } = await dfusionService.getAbout()
 
   bot.sendMessage(
     msg.chat.id,
@@ -94,7 +86,8 @@ If you want to know more about me, checkout my code in https://github.com/gnosis
 In that github you'll be able to fork me, open issues, or even better, give me some additional functionality (Pull Requests are really welcomed 😀).
 
 Some interesting facts are:
-- Bot version: ${packageJson.version}
+- Bot version: ${version}
+- Contract Address: ${stablecoinConverterAddress}
 - Ethereum Network: ${networkId}
 - Ethereum Node: ${nodeInfo}
 - Last minded block: ${blockNumber}
@@ -106,14 +99,61 @@ Also, here are some links you might find useful:
   )
 }
 
-function _handleFetchDataError (error: Error): string {
-  log.error(error)
-  return 'N/A'
-}
+dfusionService.watchOrderPlacement({
+  onNewOrder (order) {
+    const {
+      // owner,
+      buyToken,
+      sellToken,
+      validFrom,
+      validUntil,
+      // validFromBatchId,
+      // validUntilBatchId,
+      priceNumerator,
+      priceDenominator
+      // event
+    } = order
 
-dfusionRepo.watchOrderPlacement({
-  onNewOrder (event) {
-    bot.sendMessage(channelId, formatNewOrders(event))
+    // Calculate the price
+    let price
+    if (buyToken.decimals >= sellToken.decimals) {
+      const precisionFactor = 10 ** (buyToken.decimals - sellToken.decimals)
+      price = priceNumerator.dividedBy(priceDenominator.multipliedBy(precisionFactor))
+    } else {
+      const precisionFactor = 10 ** (sellToken.decimals - buyToken.decimals)
+      price = priceNumerator.multipliedBy(precisionFactor).dividedBy(priceDenominator)
+    }
+
+    // Label for token
+    // TODO: to use the shared utils function when available safeTokenName
+    const sellTokenLabel = sellToken.symbol || sellToken.name || sellToken.address
+    const buyTokenLabel = buyToken.symbol || buyToken.name || buyToken.address
+
+    // Only display the valid from if the period hasn't started
+    const now = new Date()
+    let datesDescription = ''
+    if (validFrom > now) {
+      // The order is not active yet
+      datesDescription = `  - *Tradable*: \`${moment(validFrom).calendar()} GMT\`, \`${moment(validFrom).fromNow()}\`\n`
+    }
+    datesDescription += `  - *Expires*: \`${moment(validUntil).calendar()} GMT\`, \`${moment(validUntil).fromNow()}\``
+
+    // Format the amounts
+    const sellAmountFmt = sellToken
+      ? formatAmount(new BN(priceDenominator.toString()), sellToken.decimals)
+      : priceDenominator
+    const buyAmountFmt = buyToken ? formatAmount(new BN(priceNumerator.toString()), buyToken.decimals) : priceNumerator
+
+    // Compose message using markdown
+    // TODO: Provide the link to the front end: https://github.com/gnosis/dex-telegram/issues/3
+    // TODO: Should we publish even if the user doesn't have balance. Should we include the balance of the user? he can change it...
+    const message = `Sell *${sellAmountFmt}* \`${sellTokenLabel}\` for *${buyAmountFmt}* \`${buyTokenLabel}\`
+
+  - *Price*:  1 \`${sellTokenLabel}\` = ${price} \`${buyTokenLabel}\`
+${datesDescription}`
+
+    // Send message
+    bot.sendMessage(channelId, message, { parse_mode: 'Markdown' })
   },
   onError (error: Error) {
     log.error('Error watching order placements: ', error)

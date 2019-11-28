@@ -1,6 +1,8 @@
 import { strict as assert } from 'assert'
 import { web3 } from 'helpers/web3'
 import { StablecoinConverter } from './StablecoinConverter.d'
+import { Erc20Contract } from './Erc20Contract'
+import Erc20ABI from './Erc20ABI'
 
 function getStableConverterContract(): StablecoinConverter {
   const { STABLE_COIN_CONTRACT_ADDRESS } = process.env
@@ -15,5 +17,12 @@ function getStableConverterContract(): StablecoinConverter {
   return unknownContract as StablecoinConverter
 }
 
+function getErc20Contract(): Erc20Contract {
+  // FIXME: There's an issue with this conversion
+  const unknownContract = new web3.eth.Contract(Erc20ABI) as any
+  return unknownContract as Erc20Contract
+}
+
 // Create contracts
-export const stableCoinConverterContract = getStableConverterContract()
+export const stableCoinConverterContract: StablecoinConverter = getStableConverterContract()
+export const erc20Contract: Erc20Contract = getErc20Contract()
