@@ -1,4 +1,4 @@
-import { strict as assert } from 'assert'
+import assert from 'assert'
 import moment from 'moment-timezone'
 import TelegramBot, { Message, User } from 'node-telegram-bot-api'
 
