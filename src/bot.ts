@@ -174,7 +174,15 @@ Fill the order here: ${WEB_BASE_URL}/trade/${buyTokenLabel}-${sellTokenLabel}?se
 })
 
 onShutdown(() => {
-  log.info('Bye!')
+  log.info('Stopping bot v%s. Bye!', dfusionService.getVersion())
 })
 
-log.info('The bot is up :)')
+log.info('The bot v%s is up :)', dfusionService.getVersion())
+dfusionService
+  .getAbout()
+  .then(({ stablecoinConverterAddress, nodeInfo, networkId, blockNumber }) => {
+    log.info(
+      `'Using contract ${stablecoinConverterAddress} in network ${networkId} (${nodeInfo}). Last block: ${blockNumber}'`
+    )
+  })
+  .catch(log.errorHandler)
