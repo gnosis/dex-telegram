@@ -3,8 +3,8 @@
   "version": "0.0.3",
   "description": "",
   "scripts": {
-    "start": "DEBUG=ERROR-*,WARN-*,INFO-* NODE_PATH=build/src node build/src/bot",
-    "start:env": "DEBUG=ERROR-*,WARN-*,INFO-* NODE_PATH=build/src node -r dotenv/config build/src/bot",
+    "start": "DEBUG=ERROR-*,WARN-*,INFO-* node build/src/bot",
+    "start:env": "DEBUG=ERROR-*,WARN-*,INFO-* node -r dotenv/config build/src/bot",
     "dev": "DEBUG=ERROR-*,WARN-*,INFO-*,DEBUG-*,-DEBUG-helper*,-DEBUG-util* nodemon -r dotenv/config  -r tsconfig-paths/register src/bot.ts",
     "dev:debug": "DEBUG=ERROR-*,WARN-*,INFO-*,DEBUG-* -r dotenv/config -r tsconfig-paths/register src/bot.ts",
     "dev:info": "DEBUG=ERROR-*,WARN-*,INFO-* nodemon -r tsconfig-paths/register -r dotenv/config src/bot.ts",
@@ -14,7 +14,7 @@
     "lint": "eslint src --ext .ts,.js",
     "lint:fix": "eslint --fix . --ext .ts,.js",
     "verify": "npm run lint && npm run test",
-    "build": "rimraf build && tsc",
+    "build": "rimraf build && ttsc",
     "rpc": "ganache-cli -d --mnemonic 'candy maple cake sugar pudding cream honey rich smooth crumble sweet treat'",
     "contracts": "rimraf \"src/contracts/*.ts\" && npx typechain --target=web3-v1 --outDir src/contracts src/contracts/*.json && prettier --write src/contracts/*.ts"
   },
@@ -62,9 +62,11 @@
     "ts-jest": "^24.1.0",
     "ts-node": "^8.4.1",
     "tsconfig-paths": "^3.9.0",
+    "ttypescript": "^1.5.8",
     "typechain": "^1.0.3",
     "typechain-target-web3-v1": "^1.0.0",
-    "typescript": "^3.7.2"
+    "typescript": "^3.7.2",
+    "typescript-transform-paths": "^1.1.13"
   },
   "eslintIgnore": [
     "src/contracts"

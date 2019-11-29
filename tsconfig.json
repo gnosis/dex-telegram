@@ -24,7 +24,8 @@
     "suppressImplicitAnyIndexErrors": true,
     "types": ["jest", "node"],
     "baseUrl": "./src/",
-    "outDir": "./build"
+    "outDir": "./build",
+    "plugins": [{ "transform": "typescript-transform-paths" }]
   },
   "include": [
     "src/**/*.ts",
