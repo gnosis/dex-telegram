@@ -24,6 +24,7 @@ export interface DfusionService {
 
   // Basic info
   getAbout(): Promise<AboutDto>
+  getVersion(): String
 }
 
 export interface WatchOrderPlacementParams {
@@ -153,6 +154,10 @@ export class DfusionRepoImpl implements DfusionService {
       version: packageJson.version,
       stablecoinConverterAddress: this._contract.options.address
     }
+  }
+
+  public getVersion (): String {
+    return packageJson.version
   }
 
   private async _getNetworkId (): Promise<number> {
