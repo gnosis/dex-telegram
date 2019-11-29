@@ -10,11 +10,16 @@ env:
   global:
     DOCKER_TAG: dex-telegram
     DOCKER_IMAGE: gnosispm/dex-telegram
-
+cache:
+  directories:
+    - docker_images
+before_install:
+  - docker load -i docker_images/images.tar || true
+before_cache:
+  - docker save -o docker_images/images.tar $(docker images -a -q)
 install:
   - yarn install
   - docker build --cache-from $CACHE_IMAGE:develop -t $DOCKER_TAG .
-
 after_success:
   - |
     # Create Docker image if branch master or develop or a tag
