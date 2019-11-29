@@ -14,7 +14,7 @@
     "lint": "eslint src --ext .ts,.js",
     "lint:fix": "eslint --fix . --ext .ts,.js",
     "verify": "npm run lint && npm run test",
-    "build": "rimraf build && tsc",
+    "build": "rimraf build && ttsc",
     "rpc": "ganache-cli -d --mnemonic 'candy maple cake sugar pudding cream honey rich smooth crumble sweet treat'",
     "contracts": "rimraf \"src/contracts/*.ts\" && npx typechain --target=web3-v1 --outDir src/contracts src/contracts/*.json && prettier --write src/contracts/*.ts"
   },
