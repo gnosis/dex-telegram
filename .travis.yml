@@ -12,7 +12,7 @@ env:
     DOCKER_IMAGE: gnosispm/dex-telegram
 install:
   - yarn install
-  - docker build -t $DOCKER_TAG .
+  - docker build --cache-from $CACHE_IMAGE:develop -t $DOCKER_TAG .
 after_success:
   - |
     # Create Docker image if branch master or develop or a tag
