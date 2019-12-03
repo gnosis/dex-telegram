@@ -28,7 +28,7 @@ assert(channelId, 'TELEGRAM_CHANNEL_ID env var is required')
 
 // Private channels are identified by numbers
 const isPublicChannel = isNaN(channelId as any)
-const channelHandle = isPublicChannel ? '@' + channelId : '**private chat**'
+const channelHandle = isPublicChannel ? channelId : '**private chat**'
 
 const bot = new TelegramBot(token, {
   polling: true
