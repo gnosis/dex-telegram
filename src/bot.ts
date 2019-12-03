@@ -26,6 +26,10 @@ const channelId = process.env.TELEGRAM_CHANNEL_ID as string
 assert(token, 'TELEGRAM_TOKEN env var is required')
 assert(channelId, 'TELEGRAM_CHANNEL_ID env var is required')
 
+// Private channels are identified by numbers
+const isPublicChannel = isNaN(channelId as any)
+const channelHandle = isPublicChannel ? '@' + channelId : '**private chat**'
+
 const bot = new TelegramBot(token, {
   polling: true
 })
@@ -75,7 +79,7 @@ async function _helpCommand (msg: Message) {
     `${fromUser ? 'Hi ' + fromUser.first_name : 'Hi there'}!
     
 I don't talk much for now. I just notify every new order in dFusion channel.
-Please, go to t.me/dFusionPoC to get notified on every new order.
+Please, go to ${channelHandle} to get notified on every new order.
 
 Also, you can ask about me by using the command: /about`
   )
