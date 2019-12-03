@@ -165,15 +165,6 @@ dfusionService.watchOrderPlacement({
       buyToken
     )
 
-    // Only display the valid from if the period hasn't started
-    const now = new Date()
-    let datesDescription = ''
-    if (validFrom > now) {
-      // The order is not active yet
-      datesDescription = `  - *Tradable*: \`${moment(validFrom).calendar()} GMT\`, \`${moment(validFrom).fromNow()}\`\n`
-    }
-    datesDescription += `  - *Expires*: \`${moment(validUntil).calendar()} GMT\`, \`${moment(validUntil).fromNow()}\``
-
     // Format the amounts
     // TODO: Allow to use BN, string or BigNumber or all three in the format. Review in dex-js
     const fillSellAmountFmt = formatAmountFull(
@@ -184,12 +175,23 @@ dfusionService.watchOrderPlacement({
 
     // TODO: Should we publish even if the user doesn't have balance. Should we include the balance of the user? he can change it...
     //  https://github.com/gnosis/dex-telegram/issues/45
-    const message = `Sell *${sellAmountFmt}* \`${sellTokenLabel}\` for *${buyAmountFmt}* \`${buyTokenLabel}\`
+    let message = `Sell *${sellAmountFmt}* \`${sellTokenLabel}\` for *${buyAmountFmt}* \`${buyTokenLabel}\`\n`
+    message += `\n  - *Price*:  1 \`${sellTokenLabel}\` = ${price} \`${buyTokenLabel}\``
 
-  - *Price*:  1 \`${sellTokenLabel}\` = ${price} \`${buyTokenLabel}\`
-${datesDescription}
-
-Fill the order here: ${WEB_BASE_URL}/trade/${sellTokenParam}-${buyTokenParam}?sell=${fillSellAmountFmt}&buy=${buyAmountFullFmt}`
+    // Only display the valid from if the period hasn't started
+    const now = new Date()
+    if (validFrom > now) {
+      // The order is not active yet
+      message += `\n  - *Tradable*: \`${moment(validFrom).calendar()} GMT\`, \`${moment(validFrom).fromNow()}\``
+    }
+    message += `\n  - *Expires*: \`${moment(validUntil).calendar()} GMT\`, \`${moment(validUntil).fromNow()}\``
+    if (!sellToken.known || !buyToken.known) {
+      message +=
+        '\n  - "Maybe <token-symbol>" means the token is not recognizable as a token in the following [web](' +
+        WEB_BASE_URL +
+        ')'
+    }
+    message += `\n\nFill the order here: ${WEB_BASE_URL}/trade/${sellTokenParam}-${buyTokenParam}?sell=${fillSellAmountFmt}&buy=${buyAmountFullFmt}`
 
     // Send message
     bot.sendMessage(channelId, message, { parse_mode: 'Markdown' })
