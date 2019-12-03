@@ -32,14 +32,15 @@ export interface WatchOrderPlacementParams {
   onError: (error: Error) => void
 }
 
-interface TokenDto {
+export interface TokenDto {
   name?: string
   symbol?: string
   decimals: number
   address: string
+  known: boolean
 }
 
-interface AboutDto {
+export interface AboutDto {
   blockNumber: number
   networkId: number
   nodeInfo: string
@@ -190,7 +191,8 @@ export class DfusionRepoImpl implements DfusionService {
         name,
         ...tokenJson,
         decimals: decimals as number,
-        address: tokenAddress
+        address: tokenAddress,
+        known: !!tokenJson
       }
 
       // Cache token if it's found, or null if is not
@@ -224,7 +226,6 @@ async function _getDataFromErc20 (tokenContract: Erc20Contract) {
   const symbolPromise = tokenContract.methods
     .symbol()
     .call()
-    .then(symbol => 'Maybe ' + symbol)
     .catch(() => undefined)
 
   const decimalsPromise = tokenContract.methods
@@ -236,7 +237,6 @@ async function _getDataFromErc20 (tokenContract: Erc20Contract) {
   const namePromise = tokenContract.methods
     .name()
     .call()
-    .then(name => 'Maybe ' + name)
     .catch(() => undefined)
 
   // Get basic data from the contract
