@@ -10,7 +10,7 @@ require('dotenv').config()
  */
 const log = new Logger('sandbox:printEncodedFunctions')
 
-async function exec(): Promise<void> {
+async function exec (): Promise<void> {
   const abi = require('contracts/StablecoinConverter.json')
   const functions = abi.filter((def: AbiItem) => def.type === 'function')
 
