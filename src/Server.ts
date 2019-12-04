@@ -50,10 +50,8 @@ export class Server {
   }
 
   private _registerEndpoint (app: Express) {
-    app.get('/v1/health/ping', (_req, _res) => {
-      throw new Error('ping pong')
-    })
-    app.get('/v1/health/alive', (req, res) => res.send('Alive ' + req.url))
+    app.get('/v1/health/ping', (_req, res) => res.status(204).send())
+    app.get('/v1/health/healthy', (_req, res) => res.status(204).send())
   }
 
   private _registerMiddleware (app: Express) {
