@@ -39,7 +39,7 @@ export class Server {
       server.listen(this._port, () => {
         log.debug(`Listening on port ${this._port}!`)
         log.debug(`Ping URL: http://localhost:${this._port}/v1/health/ping`)
-        log.debug(`Alive URL: http://localhost:${this._port}/v1/health/alive`)
+        log.debug(`Healthy URL: http://localhost:${this._port}/v1/health/healthy`)
         resolve()
       })
     })
@@ -47,7 +47,7 @@ export class Server {
 
   private _registerEndpoint (app: Express) {
     app.get('/v1/health/ping', (_req, res) => res.status(204).send())
-    app.get('/v1/health/alive', (_req, res) => res.status(204).send())
+    app.get('/v1/health/healthy', (_req, res) => res.status(204).send())
   }
 
   private _registerMiddleware (app: Express) {
