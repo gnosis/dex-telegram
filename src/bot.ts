@@ -212,7 +212,7 @@ dfusionService
   .catch(log.errorHandler)
 
 // Run server
-const server = new Server({ port })
+const server = new Server({ port, dfusionService })
 server
   .start()
   .then(() => log.info('Server is ready on port %d', port))

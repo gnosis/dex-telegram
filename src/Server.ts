@@ -5,19 +5,23 @@ import * as http from 'http'
 import Logger from 'helpers/Logger'
 import { Request, ParamsDictionary, Response, NextFunction } from 'express-serve-static-core'
 import { addCache, noCache } from 'helpers'
+import { DfusionService } from 'services/DfusionService'
 
 const log = new Logger('server')
 export interface Params {
   port: number
+  dfusionService: DfusionService
 }
 
 export class Server {
   private _port: number
   private _server: http.Server | null = null
+  private _dfusionService: DfusionService
 
   constructor (params: Params) {
-    const { port } = params
+    const { port, dfusionService } = params
     this._port = port
+    this._dfusionService = dfusionService
   }
 
   public start (): Promise<void> {
@@ -53,16 +57,26 @@ export class Server {
   private _registerEndpoint (app: Express) {
     app.get('/v1/version', (_req, res) => {
       addCache(res, 120)
-      res.status(200).send('0.0.1') // TODO: next PR
+      res.status(200).send(this._dfusionService.getVersion())
     })
 
     app.get('/v1/health/ping', (_req, res) => {
       noCache(res)
       res.status(204).send()
     })
-    app.get('/v1/health/healthy', (_req, res) => {
+
+    app.get('/v1/health/healthy', (_req, res, next) => {
       noCache(res)
-      res.status(204).send()
+      this._dfusionService
+        .isHealthy()
+        .then(isHealthy => {
+          if (isHealthy) {
+            res.status(204).send()
+          } else {
+            res.status(500).send({ error: true, message: 'Not healthy' })
+          }
+        })
+        .catch(err => next(err))
     })
   }
 

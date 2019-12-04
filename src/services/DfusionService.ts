@@ -25,6 +25,7 @@ export interface DfusionService {
   // Basic info
   getAbout(): Promise<AboutDto>
   getVersion(): String
+  isHealthy(): Promise<boolean>
 }
 
 export interface WatchOrderPlacementParams {
@@ -76,6 +77,10 @@ export class DfusionRepoImpl implements DfusionService {
     this._contract = stableCoinConverterContract
     this._erc20Contract = erc20Contract
     this._web3 = web3
+  }
+
+  public async isHealthy (): Promise<boolean> {
+    return true
   }
 
   public watchOrderPlacement (params: WatchOrderPlacementParams) {
