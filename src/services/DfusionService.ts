@@ -10,6 +10,9 @@ import { Erc20Contract } from 'contracts/Erc20Contract'
 // TODO: Create common lib with the API/repo
 import tokenList = require('@gnosis.pm/dex-react/src/api/tokenList/tokenList.json')
 
+const PEER_COUNT_WARN_THRESHOLD = 3 // Warning if the node has less than X peers
+const BLOCK_TIME_ERR_THRESHOLD_MINUTES = 2 // Error if there's no a new block in X min
+
 const log = new Logger('service:dfusion')
 
 export interface Params {
@@ -80,7 +83,40 @@ export class DfusionRepoImpl implements DfusionService {
   }
 
   public async isHealthy (): Promise<boolean> {
-    return true
+    try {
+      // Try to get info from the node, and the peer count, and the last mined block
+      await this._web3.eth.getNodeInfo()
+      const peerCount = await this._web3.eth.net.getPeerCount()
+      const block = await this._web3.eth.getBlock('latest')
+      const lastMinedBlockDate = new Date(+block.timestamp * 1000)
+      const someTimeAgo = new Date(Date.now() - BLOCK_TIME_ERR_THRESHOLD_MINUTES * 60 * 1000)
+      log.debug('Peer count=%d, Block: %d, Last mined block: %s', peerCount, block.number, lastMinedBlockDate)
+
+      if (peerCount === 0) {
+        log.error(
+          "Health check error. There aren't any Ethereum peer nodes. Last mined block is %d at %s",
+          block.number,
+          lastMinedBlockDate
+        )
+        return false
+      } else if (lastMinedBlockDate < someTimeAgo) {
+        log.error(
+          'Health check error. No block has been mined in the last %d minutes. Last mined block is %d at %s',
+          BLOCK_TIME_ERR_THRESHOLD_MINUTES,
+          block.number,
+          lastMinedBlockDate
+        )
+        return false
+      } else if (peerCount < PEER_COUNT_WARN_THRESHOLD) {
+        log.warn("There're too little Ethereum peers nodes: " + peerCount)
+      }
+
+      // All good
+      return true
+    } catch (error) {
+      log.error('Health check error', error)
+      return false
+    }
   }
 
   public watchOrderPlacement (params: WatchOrderPlacementParams) {
