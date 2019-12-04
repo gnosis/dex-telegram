@@ -43,7 +43,7 @@ export class Server {
       server.listen(this._port, () => {
         log.debug(`Server started on port ${this._port}!`)
         log.debug(`Ping URL: http://localhost:${this._port}/v1/health/ping`)
-        log.debug(`Alive URL: http://localhost:${this._port}/v1/health/alive`)
+        log.debug(`Alive URL: http://localhost:${this._port}/v1/health/healthy`)
         resolve()
       })
     })
