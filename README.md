@@ -79,4 +79,4 @@ By default, the API is exposed in port `3000`, but it can be changed using `API_
 The endpoints using the default port would be available at:
 
 - http://localhost:3000/v1/health/ping
-- http://localhost:3000/v1/health/ping
+- http://localhost:3000/v1/health/healthy
