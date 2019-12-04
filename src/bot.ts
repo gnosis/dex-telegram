@@ -115,7 +115,7 @@ function _getTokenFmt (amount: BigNumber, token: TokenDto) {
   let tokenLabel, tokenParam
   if (token.known) {
     tokenLabel = token.symbol || token.name || token.address
-    tokenParam = tokenLabel
+    tokenParam = token.symbol || token.address
   } else {
     // The token is unknown, so it can't be trusted.
     // We use it's address and we add the "Maybe " prefix ot it's symbol/name
