@@ -10,7 +10,7 @@ require('dotenv').config()
  */
 const log = new Logger('sandbox:contract/printEventTopics')
 
-async function exec(): Promise<void> {
+async function exec (): Promise<void> {
   const abi = require('contracts/StablecoinConverter.json')
   const events = abi.filter((def: AbiItem) => def.type === 'event')
 

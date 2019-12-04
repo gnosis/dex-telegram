@@ -9,7 +9,7 @@ require('dotenv').config()
  */
 const log = new Logger('sandbox:getNodeInfo')
 
-async function exec(): Promise<void> {
+async function exec (): Promise<void> {
   log.debug('web3 version: ', web3.version)
   log.debug('Chain id: ', await web3.eth.getChainId())
   log.debug('Node info: ', await web3.eth.getNodeInfo())

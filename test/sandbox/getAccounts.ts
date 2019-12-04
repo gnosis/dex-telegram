@@ -9,7 +9,7 @@ require('dotenv').config()
  */
 const log = new Logger('sandbox:getAccounts')
 
-async function exec(): Promise<void> {
+async function exec (): Promise<void> {
   log.debug('Default account: ', web3.eth.defaultAccount)
   log.debug('All accounts: %o', await web3.eth.getAccounts())
 }
