@@ -187,9 +187,7 @@ dfusionService.watchOrderPlacement({
     message += `\n  - *Expires*: \`${moment(validUntil).calendar()} GMT\`, \`${moment(validUntil).fromNow()}\``
     if (!sellToken.known || !buyToken.known) {
       message +=
-        '\n  - "Maybe <token-symbol>" means the token is not recognizable as a token in the following [web](' +
-        WEB_BASE_URL +
-        ')'
+        '\n  - "Maybe" means one or more tokens claim to be called as shown, but it\'s not currently part of the list of [known tokens](https://github.com/gnosis/dex-react/blob/master/src/api/tokenList/tokenList.json). Make sure you verify the address yourself before trading against it.'
     }
     message += `\n\nFill the order here: ${WEB_BASE_URL}/trade/${sellTokenParam}-${buyTokenParam}?sell=${fillSellAmountFmt}&buy=${buyAmountFullFmt}`
 
