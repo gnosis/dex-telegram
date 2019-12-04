@@ -1,6 +1,7 @@
 import assert from 'assert'
 import moment from 'moment-timezone'
 import TelegramBot, { Message, User } from 'node-telegram-bot-api'
+import Server from 'Server'
 
 import Logger from 'helpers/Logger'
 import { logUnhandledErrors, onShutdown } from 'helpers'
@@ -11,6 +12,7 @@ import { FEE_DENOMINATOR } from 'const'
 
 const WEB_BASE_URL = process.env.WEB_BASE_URL
 assert(WEB_BASE_URL, 'WEB_BASE_URL is required')
+const port = parseInt(process.env.API_PORT || '3000')
 
 // To fill an order, no solver will match the trades if there's not 2*FEE spread between the trades
 const FACTOR_TO_FILL_ORDER = 1 + 2 / FEE_DENOMINATOR
@@ -189,4 +191,11 @@ dfusionService
       `'Using contract ${stablecoinConverterAddress} in network ${networkId} (${nodeInfo}). Last block: ${blockNumber}'`
     )
   })
+  .catch(log.errorHandler)
+
+// Run server
+const server = new Server({ port })
+server
+  .start()
+  .then(() => log.info('Server is running on port %d', port))
   .catch(log.errorHandler)
