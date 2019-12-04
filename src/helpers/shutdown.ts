@@ -1,5 +1,5 @@
 import Logger from 'helpers/Logger'
-import { Command } from 'types'
+import { Command, AsyncCommand } from 'types'
 
 const log = new Logger('helpers:shutdown')
 type QuitSignal = 'SIGINT' | 'SIGTERM' | 'SIGQUIT'
@@ -13,7 +13,7 @@ POSIX_SIGNALS.forEach(signal => {
   })
 })
 
-export function onShutdown (listener: Command) {
+export function onShutdown (listener: Command | AsyncCommand) {
   log.debug('Registering a new listener')
   listeners.push(listener)
 }

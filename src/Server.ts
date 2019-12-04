@@ -20,6 +20,7 @@ export class Server {
   }
 
   public start (): Promise<void> {
+    log.debug(`Starting server on port ${this._port}...`)
     assert(this._server === null, 'Server was already started')
     const app = express()
 
@@ -33,32 +34,53 @@ export class Server {
     this._server = http.createServer(app)
     const server = this._server as http.Server
 
+    // Error handling
+    server.on('error', log.errorHandler)
+
     // Start to listen on port
     return new Promise((resolve, reject) => {
       server.once('error', reject)
       server.listen(this._port, () => {
-        log.debug(`Listening on port ${this._port}!`)
+        log.debug(`Server started on port ${this._port}!`)
         log.debug(`Ping URL: http://localhost:${this._port}/v1/health/ping`)
-        log.debug(`Healthy URL: http://localhost:${this._port}/v1/health/healthy`)
+        log.debug(`Alive URL: http://localhost:${this._port}/v1/health/alive`)
         resolve()
       })
     })
   }
 
   private _registerEndpoint (app: Express) {
-    app.get('/v1/health/ping', (_req, res) => res.status(204).send())
-    app.get('/v1/health/healthy', (_req, res) => res.status(204).send())
+    app.get('/v1/health/ping', (_req, _res) => {
+      throw new Error('ping pong')
+    })
+    app.get('/v1/health/alive', (req, res) => res.send('Alive ' + req.url))
   }
 
   private _registerMiddleware (app: Express) {
-    app.use((err: Error, req: Request<ParamsDictionary, any, any>, res: Response<any>, _next: NextFunction) => {
-      log.error(`Error ${req.method} ${req.url}`, err)
-      res.status(500).send({ error: true, message: err.message, stack: err.stack })
+    app.use((error: Error, req: Request<ParamsDictionary, any, any>, res: Response<any>, _next: NextFunction) => {
+      log.error(`Error ${req.method} ${req.url}`, error)
+      res.status(500).send({ error: true, message: error.message, stack: error.stack })
     })
   }
 
-  public stop () {
-    this._server = null
+  public async stop (): Promise<void> {
+    if (this._server !== null) {
+      const server = this._server
+      log.debug(`Stopping server on port ${this._port}...`)
+      return new Promise((resolve, reject) => {
+        server.close(error => {
+          if (error) {
+            reject(error)
+          } else {
+            log.debug('Server has been stopped')
+            resolve()
+          }
+        })
+        this._server = null
+      })
+    } else {
+      log.warn('Server was already stopped')
+    }
   }
 }
 

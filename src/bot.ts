@@ -54,10 +54,6 @@ bot.on('message', (msg: Message) => {
   }
 })
 
-onShutdown(() => {
-  log.info('Bye!')
-})
-
 async function _runCommand (msg: Message, match: RegExpExecArray | null) {
   const command = match ? match[1] : ''
   switch (command) {
@@ -197,5 +193,14 @@ dfusionService
 const server = new Server({ port })
 server
   .start()
-  .then(() => log.info('Server is running on port %d', port))
+  .then(() => log.info('Server is ready on port %d', port))
   .catch(log.errorHandler)
+
+onShutdown(async () => {
+  // Stop server
+  await server
+    .stop()
+    .then(() => log.info('Server has been stopped'))
+    .catch(log.errorHandler)
+    .finally(() => log.info('Bye!'))
+})
