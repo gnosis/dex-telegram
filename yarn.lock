@@ -448,6 +448,13 @@
   dependencies:
     web3connect "^1.0.0-beta.23"
 
+"@gnosis.pm/dex-js@^0.0.7":
+  version "0.0.7"
+  resolved "https://registry.yarnpkg.com/@gnosis.pm/dex-js/-/dex-js-0.0.7.tgz#634dfd6541a29ca81788f2215a848a419f15d714"
+  integrity sha512-42EXjtaFGAR2jm0SOrE8EI2tqqiLjV4zf1h6+M3aojsBIv/Z1kKevQPA+qVbBJIod29bROGXWuLv7N09Vel/5A==
+  dependencies:
+    web3 "^1.2.4"
+
 "@gnosis.pm/dex-react@^0.0.4":
   version "0.0.4"
   resolved "https://registry.yarnpkg.com/@gnosis.pm/dex-react/-/dex-react-0.0.4.tgz#0bcaf14274250d8dbd32c95021ba43bb23c6b8dd"
