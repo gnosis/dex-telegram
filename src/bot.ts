@@ -100,7 +100,7 @@ Some interesting facts are:
 - Contract Address: ${stablecoinConverterAddress}
 - Ethereum Network: ${networkId}
 - Ethereum Node: ${nodeInfo}
-- Last minded block: ${blockNumber}
+- Last minted block: ${blockNumber}
 
 Also, here are some links you might find useful:
 - https://github.com/gnosis/dex-contracts: dFusion Smart Contracts
