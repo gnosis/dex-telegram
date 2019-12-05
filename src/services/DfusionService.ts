@@ -84,14 +84,16 @@ export class DfusionRepoImpl implements DfusionService {
 
   public async isHealthy (): Promise<boolean> {
     try {
-      // Try to get info from the node, and the peer count, and the last mined block
+      // Perform some health checks
       await this._web3.eth.getNodeInfo()
       const peerCount = await this._web3.eth.net.getPeerCount()
       const block = await this._web3.eth.getBlock('latest')
+      const isListening = await this._web3.eth.net.isListening()
       const lastMinedBlockDate = new Date(+block.timestamp * 1000)
+
+      // Verify the peer count, last mined block, amd that we are still listening the node
       const someTimeAgo = new Date(Date.now() - BLOCK_TIME_ERR_THRESHOLD_MINUTES * 60 * 1000)
       log.debug('Peer count=%d, Block: %d, Last mined block: %s', peerCount, block.number, lastMinedBlockDate)
-
       if (peerCount === 0) {
         log.error(
           "Health check error. There aren't any Ethereum peer nodes. Last mined block is %d at %s",
@@ -102,6 +104,14 @@ export class DfusionRepoImpl implements DfusionService {
       } else if (lastMinedBlockDate < someTimeAgo) {
         log.error(
           'Health check error. No block has been mined in the last %d minutes. Last mined block is %d at %s',
+          BLOCK_TIME_ERR_THRESHOLD_MINUTES,
+          block.number,
+          lastMinedBlockDate
+        )
+        return false
+      } else if (!isListening) {
+        log.error(
+          'Health check error. It is not listening. Last mined block is %d at %s',
           BLOCK_TIME_ERR_THRESHOLD_MINUTES,
           block.number,
           lastMinedBlockDate
