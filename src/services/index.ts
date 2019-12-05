@@ -12,3 +12,6 @@ function createDfusionService (): DfusionService {
 
 // Build Repos
 export const dfusionService: DfusionService = createDfusionService()
+
+// Reexport all definitions
+export * from './DfusionService'
