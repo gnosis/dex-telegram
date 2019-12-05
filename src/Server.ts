@@ -4,6 +4,7 @@ import * as http from 'http'
 
 import Logger from 'helpers/Logger'
 import { Request, ParamsDictionary, Response, NextFunction } from 'express-serve-static-core'
+import { addCache, noCache } from 'helpers'
 
 const log = new Logger('server')
 export interface Params {
@@ -50,11 +51,23 @@ export class Server {
   }
 
   private _registerEndpoint (app: Express) {
-    app.get('/v1/health/ping', (_req, res) => res.status(204).send())
-    app.get('/v1/health/healthy', (_req, res) => res.status(204).send())
+    app.get('/v1/version', (_req, res) => {
+      addCache(res, 120)
+      res.status(200).send('0.0.1') // TODO: next PR
+    })
+
+    app.get('/v1/health/ping', (_req, res) => {
+      noCache(res)
+      res.status(204).send()
+    })
+    app.get('/v1/health/healthy', (_req, res) => {
+      noCache(res)
+      res.status(204).send()
+    })
   }
 
   private _registerMiddleware (app: Express) {
+    // Handle errors
     app.use((error: Error, req: Request<ParamsDictionary, any, any>, res: Response<any>, _next: NextFunction) => {
       log.error(`Error ${req.method} ${req.url}`, error)
       res.status(500).send({ error: true, message: error.message, stack: error.stack })
