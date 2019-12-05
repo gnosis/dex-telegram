@@ -10,6 +10,9 @@ import { Erc20Contract } from 'contracts/Erc20Contract'
 // TODO: Create common lib with the API/repo
 import tokenList = require('@gnosis.pm/dex-react/src/api/tokenList/tokenList.json')
 
+const PEER_COUNT_WARN_THRESHOLD = 3 // Warning if the node has less than X peers
+const BLOCK_TIME_ERR_THRESHOLD_MINUTES = 2 // Error if there's no a new block in X min
+
 const log = new Logger('service:dfusion')
 
 export interface Params {
@@ -25,6 +28,7 @@ export interface DfusionService {
   // Basic info
   getAbout(): Promise<AboutDto>
   getVersion(): String
+  isHealthy(): Promise<boolean>
 }
 
 export interface WatchOrderPlacementParams {
@@ -76,6 +80,53 @@ export class DfusionRepoImpl implements DfusionService {
     this._contract = stableCoinConverterContract
     this._erc20Contract = erc20Contract
     this._web3 = web3
+  }
+
+  public async isHealthy (): Promise<boolean> {
+    try {
+      // Perform some health checks
+      await this._web3.eth.getNodeInfo()
+      const peerCount = await this._web3.eth.net.getPeerCount()
+      const block = await this._web3.eth.getBlock('latest')
+      const isListening = await this._web3.eth.net.isListening()
+      const lastMinedBlockDate = new Date(+block.timestamp * 1000)
+
+      // Verify the peer count, last mined block, amd that we are still listening the node
+      const someTimeAgo = new Date(Date.now() - BLOCK_TIME_ERR_THRESHOLD_MINUTES * 60 * 1000)
+      log.debug('Peer count=%d, Block: %d, Last mined block: %s', peerCount, block.number, lastMinedBlockDate)
+      if (peerCount === 0) {
+        log.error(
+          "Health check error. There aren't any Ethereum peer nodes. Last mined block is %d at %s",
+          block.number,
+          lastMinedBlockDate
+        )
+        return false
+      } else if (lastMinedBlockDate < someTimeAgo) {
+        log.error(
+          'Health check error. No block has been mined in the last %d minutes. Last mined block is %d at %s',
+          BLOCK_TIME_ERR_THRESHOLD_MINUTES,
+          block.number,
+          lastMinedBlockDate
+        )
+        return false
+      } else if (!isListening) {
+        log.error(
+          'Health check error. It is not listening. Last mined block is %d at %s',
+          BLOCK_TIME_ERR_THRESHOLD_MINUTES,
+          block.number,
+          lastMinedBlockDate
+        )
+        return false
+      } else if (peerCount < PEER_COUNT_WARN_THRESHOLD) {
+        log.warn("There're too little Ethereum peers nodes: " + peerCount)
+      }
+
+      // All good
+      return true
+    } catch (error) {
+      log.error('Health check error', error)
+      return false
+    }
   }
 
   public watchOrderPlacement (params: WatchOrderPlacementParams) {
