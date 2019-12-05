@@ -25,6 +25,9 @@ RUN yarn build
 # Use telegram user
 USER telegram
 
+# Expose container port
+EXPOSE 3000
+
 # Run Node app as child of tini
 # Signal handling for PID1 https://github.com/krallin/tini
 ENTRYPOINT ["/sbin/tini", "--"]

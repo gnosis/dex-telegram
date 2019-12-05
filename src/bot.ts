@@ -4,6 +4,7 @@ import TelegramBot, { Message, User } from 'node-telegram-bot-api'
 import BigNumber from 'bignumber.js'
 import BN from 'bn.js'
 
+import Server from 'Server'
 import Logger from 'helpers/Logger'
 import { logUnhandledErrors, onShutdown } from 'helpers'
 import { dfusionService, TokenDto } from 'services'
@@ -12,6 +13,7 @@ import { FEE_DENOMINATOR } from 'const'
 
 const WEB_BASE_URL = process.env.WEB_BASE_URL
 assert(WEB_BASE_URL, 'WEB_BASE_URL is required')
+const port = parseInt(process.env.API_PORT || '3000')
 
 // To fill an order, no solver will match the trades if there's not 2*FEE spread between the trades
 const FACTOR_TO_FILL_ORDER = 1 + 2 / FEE_DENOMINATOR
@@ -51,10 +53,6 @@ bot.on('message', (msg: Message) => {
     log.debug('Received msg: %o', msg)
     _helpCommand(msg)
   }
-})
-
-onShutdown(() => {
-  log.info('Bye!')
 })
 
 async function _runCommand (msg: Message, match: RegExpExecArray | null) {
@@ -212,3 +210,19 @@ dfusionService
     )
   })
   .catch(log.errorHandler)
+
+// Run server
+const server = new Server({ port })
+server
+  .start()
+  .then(() => log.info('Server is ready on port %d', port))
+  .catch(log.errorHandler)
+
+onShutdown(async () => {
+  // Stop server
+  await server
+    .stop()
+    .then(() => log.info('Server has been stopped'))
+    .catch(log.errorHandler)
+    .finally(() => log.info('Bye!'))
+})

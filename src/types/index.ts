@@ -1,4 +1,5 @@
 export type Command = () => void
+export type AsyncCommand = () => Promise<void>
 
 export interface TokenDetails {
   name?: string
