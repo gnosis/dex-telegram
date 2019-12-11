@@ -76,7 +76,7 @@ export class Server {
             res.status(500).send({ error: true, message: 'Not healthy' })
           }
         })
-        .catch(err => next(err))
+        .catch(next)
     })
   }
 
