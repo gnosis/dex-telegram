@@ -24,7 +24,7 @@
     }
   },
   "dependencies": {
-    "@gnosis.pm/dex-js": "^0.0.7",
+    "@gnosis.pm/dex-js": "^0.0.8",
     "@gnosis.pm/dex-react": "^0.0.4",
     "bignumber.js": "^9.0.0",
     "debug": "^4.1.1",
