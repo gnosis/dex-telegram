@@ -1,10 +1,10 @@
 import DfusionServiceImpl, { DfusionService } from 'services/DfusionService'
-import { stableCoinConverterContract, erc20Contract } from 'contracts'
-import { web3 } from 'helpers/web3'
+import { batchExchangeContract, erc20Contract } from '@gnosis.pm/dex-js/build/src/contracts/index'
+import { web3 } from '@gnosis.pm/dex-js/build/src/helpers/web3'
 
 function createDfusionService (): DfusionService {
   return new DfusionServiceImpl({
-    stableCoinConverterContract,
+    batchExchangeContract,
     erc20Contract,
     web3
   })

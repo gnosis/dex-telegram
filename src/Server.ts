@@ -2,7 +2,7 @@ import assert from 'assert'
 import express, { Express } from 'express'
 import * as http from 'http'
 
-import Logger from 'helpers/Logger'
+import { Logger } from '@gnosis.pm/dex-js'
 import { Request, ParamsDictionary, Response, NextFunction } from 'express-serve-static-core'
 import { addCache, noCache } from 'helpers'
 import { DfusionService } from 'services/DfusionService'

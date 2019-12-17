@@ -1,3 +1,2 @@
-export * from './shutdown'
-export * from './error'
+// export * from '@gnosis.pm/dex-js'
 export * from './http'

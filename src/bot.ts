@@ -5,11 +5,16 @@ import BigNumber from 'bignumber.js'
 import BN from 'bn.js'
 
 import Server from 'Server'
-import Logger from 'helpers/Logger'
-import { logUnhandledErrors, onShutdown } from 'helpers'
+import {
+  Logger,
+  logUnhandledErrors,
+  onShutdown,
+  formatAmount,
+  formatAmountFull,
+  FEE_DENOMINATOR
+} from '@gnosis.pm/dex-js'
+
 import { dfusionService, TokenDto } from 'services'
-import { formatAmount, formatAmountFull } from 'utils/format'
-import { FEE_DENOMINATOR } from 'const'
 
 const WEB_BASE_URL = process.env.WEB_BASE_URL
 assert(WEB_BASE_URL, 'WEB_BASE_URL is required')
@@ -85,7 +90,7 @@ Also, you can ask about me by using the command: /about`
 }
 
 async function _aboutCommand (msg: Message) {
-  const { blockNumber, networkId, nodeInfo, version, stablecoinConverterAddress } = await dfusionService.getAbout()
+  const { blockNumber, networkId, nodeInfo, version, batchExchangeAddress } = await dfusionService.getAbout()
 
   bot.sendMessage(
     msg.chat.id,
@@ -97,7 +102,7 @@ In that github you'll be able to fork me, open issues, or even better, give me s
 
 Some interesting facts are:
 - Bot version: ${version}
-- Contract Address: ${stablecoinConverterAddress}
+- Contract Address: ${batchExchangeAddress}
 - Ethereum Network: ${networkId}
 - Ethereum Node: ${nodeInfo}
 - Last minted block: ${blockNumber}
@@ -204,9 +209,9 @@ onShutdown(() => {
 log.info('The bot v%s is up :)', dfusionService.getVersion())
 dfusionService
   .getAbout()
-  .then(({ stablecoinConverterAddress, nodeInfo, networkId, blockNumber }) => {
+  .then(({ batchExchangeAddress, nodeInfo, networkId, blockNumber }) => {
     log.info(
-      `'Using contract ${stablecoinConverterAddress} in network ${networkId} (${nodeInfo}). Last block: ${blockNumber}'`
+      `'Using contract ${batchExchangeAddress} in network ${networkId} (${nodeInfo}). Last block: ${blockNumber}'`
     )
   })
   .catch(log.errorHandler)
