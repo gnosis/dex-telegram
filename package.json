@@ -15,8 +15,7 @@
     "lint:fix": "eslint --fix src test --ext .ts,.js",
     "verify": "npm run lint && npm run test",
     "build": "rimraf build && ttsc",
-    "rpc": "ganache-cli -d --mnemonic 'candy maple cake sugar pudding cream honey rich smooth crumble sweet treat'",
-    "contracts": "rimraf \"src/contracts/*.ts\" && npx typechain --target=web3-v1 --outDir src/contracts src/contracts/*.json && prettier --write src/contracts/*.ts"
+    "rpc": "ganache-cli -d --mnemonic 'candy maple cake sugar pudding cream honey rich smooth crumble sweet treat'"
   },
   "husky": {
     "hooks": {
@@ -65,8 +64,6 @@
     "ts-node": "^8.4.1",
     "tsconfig-paths": "^3.9.0",
     "ttypescript": "^1.5.8",
-    "typechain": "^1.0.3",
-    "typechain-target-web3-v1": "^1.0.0",
     "typescript": "^3.7.2",
     "typescript-transform-paths": "^1.1.13"
   },
