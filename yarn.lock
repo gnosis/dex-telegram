@@ -145,10 +145,10 @@
   dependencies:
     bn.js "^5.0.0"
 
-"@gnosis.pm/dex-js@0.1.0-RC11":
-  version "0.1.0-RC11"
-  resolved "https://registry.yarnpkg.com/@gnosis.pm/dex-js/-/dex-js-0.1.0-RC11.tgz#9b4a5ee881c93752158a34af948f4dc6bfceb4c3"
-  integrity sha512-LxBUWl7PFcHpAstcV87bQ9JdVG5Ppr/ituLZia9l5fxQiHKNVjf6wqVvdfj+Ir4cDGwJDVl3McwBkHw2M3n1tw==
+"@gnosis.pm/dex-js@0.1.0-RC14":
+  version "0.1.0-RC14"
+  resolved "https://registry.yarnpkg.com/@gnosis.pm/dex-js/-/dex-js-0.1.0-RC14.tgz#e22b0efbae81053866e1c6fef830711e31b28e62"
+  integrity sha512-hTLian2KKrbc6iaGNZnlk95xJJsA2o4vmQq0PMDxDGW+psjmXuu+DwtJHRA4pTDIQ2y+Mt3BMb6xTjKIo/QS4w==
   dependencies:
     "@gnosis.pm/dex-contracts" "^0.1.2"
     web3 "^1.2.4"
