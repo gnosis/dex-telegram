@@ -67,7 +67,8 @@
     "ttypescript": "^1.5.8",
     "typechain": "^1.0.3",
     "typechain-target-web3-v1": "^1.0.0",
-    "typescript": "^3.7.2"
+    "typescript": "^3.7.2",
+    "typescript-transform-paths": "^1.1.13"
   },
   "eslintIgnore": [
     "src/contracts"
