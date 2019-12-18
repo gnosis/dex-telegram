@@ -6656,6 +6656,13 @@ typedarray-to-buffer@^3.1.5:
   dependencies:
     is-typedarray "^1.0.0"
 
+typescript-transform-paths@^1.1.13:
+  version "1.1.13"
+  resolved "https://registry.yarnpkg.com/typescript-transform-paths/-/typescript-transform-paths-1.1.13.tgz#3d4f7d0c9b7dacfb957514fd156774f064b4699b"
+  integrity sha512-4E4mtRXw04YgqCPBdiVg5ZNVf8hv3R/1mGpCJjI970+pWuNjdkhivG2kVlpxiH7yScXTaAJDBp6CC/6AZgoz4g==
+  dependencies:
+    slash "^3.0.0"
+
 typescript@^3.7.2:
   version "3.7.3"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.7.3.tgz#b36840668a16458a7025b9eabfad11b66ab85c69"
