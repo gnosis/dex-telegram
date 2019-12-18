@@ -1,14 +1,16 @@
 import Web3 from 'web3'
 
-import Logger from 'helpers/Logger'
-import { ContractEventLog } from 'contracts/types'
-import { OrderPlacement, StablecoinConverter } from 'contracts/StablecoinConverter'
+import {
+  Logger,
+  ContractEventLog,
+  OrderPlacement,
+  BatchExchangeContract,
+  Erc20Contract,
+  tokenList
+} from '@gnosis.pm/dex-js'
+
 import packageJson from '../../package.json'
 import { BigNumber } from 'bignumber.js'
-import { Erc20Contract } from 'contracts/Erc20Contract'
-
-// TODO: Create common lib with the API/repo
-import tokenList = require('@gnosis.pm/dex-react/src/api/tokenList/tokenList.json')
 
 const PEER_COUNT_WARN_THRESHOLD = 3 // Warning if the node has less than X peers
 const BLOCK_TIME_ERR_THRESHOLD_MINUTES = 2 // Error if there's no a new block in X min
@@ -16,7 +18,7 @@ const BLOCK_TIME_ERR_THRESHOLD_MINUTES = 2 // Error if there's no a new block in
 const log = new Logger('service:dfusion')
 
 export interface Params {
-  stableCoinConverterContract: StablecoinConverter
+  batchExchangeContract: BatchExchangeContract
   erc20Contract: Erc20Contract
   web3: Web3
 }
@@ -49,7 +51,7 @@ export interface AboutDto {
   networkId: number
   nodeInfo: string
   version: string
-  stablecoinConverterAddress: string
+  batchExchangeAddress: string
 }
 
 export interface OrderDto {
@@ -67,17 +69,17 @@ export interface OrderDto {
 
 export class DfusionRepoImpl implements DfusionService {
   private _web3: Web3
-  private _contract: StablecoinConverter
+  private _contract: BatchExchangeContract
   private _erc20Contract: Erc20Contract
   private _networkId: number
   private _batchTime: BigNumber
   private _tokenCache: { [tokenAddress: string]: TokenDto } = {}
 
   constructor (params: Params) {
-    const { web3, stableCoinConverterContract, erc20Contract } = params
-    log.debug('Setup dfusionRepo with contract address %s', stableCoinConverterContract.options.address)
+    const { web3, batchExchangeContract, erc20Contract } = params
+    log.debug('Setup dfusionRepo with contract address %s', batchExchangeContract.options.address)
 
-    this._contract = stableCoinConverterContract
+    this._contract = batchExchangeContract
     this._erc20Contract = erc20Contract
     this._web3 = web3
   }
@@ -204,7 +206,7 @@ export class DfusionRepoImpl implements DfusionService {
       networkId,
       nodeInfo,
       version: packageJson.version,
-      stablecoinConverterAddress: this._contract.options.address
+      batchExchangeAddress: this._contract.options.address
     }
   }
 
