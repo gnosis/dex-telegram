@@ -1,5 +1,5 @@
 import { dfusionService } from 'services'
-import Logger from 'helpers/Logger'
+import { Logger } from '@gnosis.pm/dex-js'
 
 require('dotenv').config()
 
