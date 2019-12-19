@@ -1,13 +1,6 @@
 import Web3 from 'web3'
 
-import {
-  Logger,
-  ContractEventLog,
-  OrderPlacement,
-  BatchExchangeContract,
-  Erc20Contract,
-  tokenList
-} from '@gnosis.pm/dex-js'
+import { Logger, ContractEventLog, tokenList, Erc20Contract, BatchExchangeContract, OrderPlacement } from '@gnosis.pm/dex-js'
 
 import packageJson from '../../package.json'
 import { BigNumber } from 'bignumber.js'
