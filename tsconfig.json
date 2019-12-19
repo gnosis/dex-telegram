@@ -27,12 +27,6 @@
     "outDir": "./build",
     "plugins": [{ "transform": "typescript-transform-paths" }]
   },
-  "include": [
-    "src/**/*.ts",
-    "test/**/*.ts",
-    "node_modules/web3-*/types/*.d.ts",
-    "node_modules/moment/moment.d.ts",
-    "src/**/*.json"
-  ],
-  "exclude": ["node_modules", "coverage", "build"]
+  "include": ["src/**/*.ts", "test/**/*.ts", "src/**/*.json"],
+  "exclude": ["coverage", "build"]
 }
