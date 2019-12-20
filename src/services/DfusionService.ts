@@ -4,7 +4,7 @@ import { Logger, ContractEventLog, tokenList, Erc20Contract, BatchExchangeContra
 
 import packageJson from '../../package.json'
 import { BigNumber } from 'bignumber.js'
-import { version as jsVersion } from '@gnosis.pm/dex-js/package.json'
+import { version as dexJsVersion } from '@gnosis.pm/dex-js/package.json'
 import { version as contractsVersion } from '@gnosis.pm/dex-contracts/package.json'
 
 const PEER_COUNT_WARN_THRESHOLD = 3 // Warning if the node has less than X peers
@@ -47,7 +47,7 @@ export interface AboutDto {
   nodeInfo: string
   version: string
   contractsVersion: string
-  jsVersion: string
+  dexJsVersion: string
   batchExchangeAddress: string
 }
 
@@ -203,7 +203,7 @@ export class DfusionRepoImpl implements DfusionService {
       networkId,
       nodeInfo,
       contractsVersion,
-      jsVersion,
+      dexJsVersion,
       version: packageJson.version,
       batchExchangeAddress: this._contract.options.address
     }

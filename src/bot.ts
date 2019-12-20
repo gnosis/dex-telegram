@@ -90,7 +90,7 @@ Also, you can ask about me by using the command: /about`
 }
 
 async function _aboutCommand (msg: Message) {
-  const { blockNumber, networkId, nodeInfo, version, jsVersion, contractsVersion, batchExchangeAddress } = await dfusionService.getAbout()
+  const { blockNumber, networkId, nodeInfo, version, dexJsVersion, contractsVersion, batchExchangeAddress } = await dfusionService.getAbout()
 
   bot.sendMessage(
     msg.chat.id,
@@ -107,7 +107,7 @@ Some interesting facts are:
 - Last minted block: ${blockNumber}
 - Bot version: ${version}
 - Contract version: ${contractsVersion}
-- dex-js version: ${jsVersion}
+- dex-js version: ${dexJsVersion}
 
 Also, here are some links you might find useful:
 - https://github.com/gnosis/dex-contracts: dFusion Smart Contracts
