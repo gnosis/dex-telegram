@@ -15,7 +15,6 @@
     "lint:fix": "eslint --fix src test --ext .ts,.js",
     "verify": "npm run lint && npm run test",
     "build": "rimraf build && ttsc",
-    "prepublish": "npm run build",
     "rpc": "ganache-cli -d --mnemonic 'candy maple cake sugar pudding cream honey rich smooth crumble sweet treat'"
   },
   "husky": {
