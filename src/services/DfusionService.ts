@@ -1,6 +1,6 @@
 import Web3 from 'web3'
 
-import { Logger, ContractEventLog, tokenList, Erc20Contract, BatchExchangeContract, OrderPlacement } from '@gnosis.pm/dex-js'
+import { Logger, ContractEventLog, tokenList, Erc20Contract, BatchExchangeContract } from '@gnosis.pm/dex-js'
 
 import packageJson from '../../package.json'
 import { BigNumber } from 'bignumber.js'
@@ -16,6 +16,17 @@ export interface Params {
   batchExchangeContract: BatchExchangeContract
   erc20Contract: Erc20Contract
   web3: Web3
+}
+
+export interface OrderPlacement {
+  owner: string
+  index: string
+  buyToken: string
+  sellToken: string
+  validFrom: string
+  validUntil: string
+  priceNumerator: string
+  priceDenominator: string
 }
 
 export interface DfusionService {

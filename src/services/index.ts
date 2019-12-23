@@ -1,5 +1,5 @@
-import { web3 } from '@gnosis.pm/dex-js/build/src/helpers/web3'
-import { batchExchangeContract, erc20Contract } from '@gnosis.pm/dex-js/build/src/contracts'
+import { web3 } from '@gnosis.pm/dex-js/build/helpers/web3'
+import { batchExchangeContract, erc20Contract } from '@gnosis.pm/dex-js/build/contracts'
 
 import DfusionServiceImpl, { DfusionService } from 'services/DfusionService'
 
