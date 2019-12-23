@@ -2,6 +2,7 @@
   "name": "@gnosis.pm/dex-telegram",
   "version": "0.2.0",
   "description": "",
+  "license": "MIT",
   "scripts": {
     "start": "DEBUG=ERROR-*,WARN-*,INFO-* NTBA_FIX_319=yes node build/src/bot",
     "start:env": "DEBUG=ERROR-*,WARN-*,INFO-* NTBA_FIX_319=yes node -r dotenv/config build/src/bot",
