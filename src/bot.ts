@@ -194,7 +194,7 @@ dfusionService.watchOrderPlacement({
       message +=
         '\n  - "Maybe" means one or more tokens claim to be called as shown, but it\'s not currently part of the list of [known tokens](https://github.com/gnosis/dex-js/blob/master/src/tokenList.json). Make sure you verify the address yourself before trading against it.'
     }
-    message += `\n\nFill the order here: ${WEB_BASE_URL}/trade/${sellTokenParam}-${buyTokenParam}?sell=${fillSellAmountFmt}&buy=${buyAmountFullFmt}`
+    message += `\n\nFill the order here: ${WEB_BASE_URL}/trade/${buyTokenParam}-${sellTokenParam}?sell=${fillSellAmountFmt}&buy=${buyAmountFullFmt}`
 
     // Send message
     bot.sendMessage(channelId, message, { parse_mode: 'Markdown' })
