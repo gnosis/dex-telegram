@@ -13,9 +13,9 @@ Develop:
 # dFusion Telegram Bots
 <img align="right" width="350" src="./docs/screenshot.png">
 
-Telegram bot watching the smart contracts in of [dFusion protocol](https://github.com/gnosis/dex-contracts)
+Telegram bot watching the smart contracts of [dFusion protocol](https://github.com/gnosis/dex-contracts)
 
-The bots will watch the contracts and it could potentially:
+The bots will watch the contracts. They could potentially:
 * Report on a public channel about new orders
 * Report when a solution for a batch was submitted
 * Allow an user to register any address, so it's notified every time one of the orders is executed partially or totally
