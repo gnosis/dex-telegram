@@ -65,15 +65,13 @@ async function _runCommand (msg: Message, match: RegExpExecArray | null) {
   switch (command) {
     case 'start':
     case 'help':
-      await _helpCommand(msg)
-      break
+      return _helpCommand(msg)
 
     case 'about':
-      await _aboutCommand(msg)
-      break
+      return _aboutCommand(msg)
 
     default:
-      await bot.sendMessage(msg.chat.id, "I don't recognize that command! You can use this other one instead: /help")
+      return bot.sendMessage(msg.chat.id, "I don't recognize that command! You can use this other one instead: /help")
   }
 }
 async function _helpCommand (msg: Message) {
