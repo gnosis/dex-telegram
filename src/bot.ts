@@ -39,7 +39,7 @@ const isPublicChannel = isNaN(channelId as any)
 const channelHandle = isPublicChannel ? channelId : '**private chat**'
 
 const bot = new TelegramBot(token, {
-  polling: true
+  polling: true,
 })
 
 bot.onText(/\/(\w+) ?(.+)?/, (msg: Message, match: RegExpExecArray | null) => {
@@ -60,7 +60,7 @@ bot.on('message', (msg: Message) => {
   }
 })
 
-async function _runCommand (msg: Message, match: RegExpExecArray | null) {
+async function _runCommand(msg: Message, match: RegExpExecArray | null) {
   const command = match ? match[1] : ''
   switch (command) {
     case 'start':
@@ -74,7 +74,7 @@ async function _runCommand (msg: Message, match: RegExpExecArray | null) {
       return bot.sendMessage(msg.chat.id, "I don't recognize that command! You can use this other one instead: /help")
   }
 }
-async function _helpCommand (msg: Message) {
+async function _helpCommand(msg: Message) {
   const fromUser: User | undefined = msg.from
   return bot.sendMessage(
     msg.chat.id,
@@ -83,12 +83,20 @@ async function _helpCommand (msg: Message) {
 I don't talk much for now. I just notify every new order in dFusion channel.
 Please, go to ${channelHandle} to get notified on every new order.
 
-Also, you can ask about me by using the command: /about`
+Also, you can ask about me by using the command: /about`,
   )
 }
 
-async function _aboutCommand (msg: Message) {
-  const { blockNumber, networkId, nodeInfo, version, dexJsVersion, contractsVersion, batchExchangeAddress } = await dfusionService.getAbout()
+async function _aboutCommand(msg: Message) {
+  const {
+    blockNumber,
+    networkId,
+    nodeInfo,
+    version,
+    dexJsVersion,
+    contractsVersion,
+    batchExchangeAddress,
+  } = await dfusionService.getAbout()
 
   return bot.sendMessage(
     msg.chat.id,
@@ -110,7 +118,7 @@ Some interesting facts are:
 Also, here are some links you might find useful:
 - https://github.com/gnosis/dex-contracts: dFusion Smart Contracts
 - https://github.com/gnosis/dex-research: dFusion Research
-- https://github.com/gnosis/dex-services: dFusion services`
+- https://github.com/gnosis/dex-services: dFusion services`,
   )
 }
 
@@ -197,9 +205,9 @@ dfusionService.watchOrderPlacement({
     // Send message
     bot.sendMessage(channelId, message, { parse_mode: 'Markdown' })
   },
-  onError (error: Error) {
+  onError(error: Error) {
     log.error('Error watching order placements: ', error)
-  }
+  },
 })
 
 onShutdown(() => {
@@ -211,7 +219,7 @@ dfusionService
   .getAbout()
   .then(({ batchExchangeAddress, nodeInfo, networkId, blockNumber }) => {
     log.info(
-      `'Using contract ${batchExchangeAddress} in network ${networkId} (${nodeInfo}). Last block: ${blockNumber}'`
+      `'Using contract ${batchExchangeAddress} in network ${networkId} (${nodeInfo}). Last block: ${blockNumber}'`,
     )
   })
   .catch(log.errorHandler)
@@ -223,7 +231,7 @@ server
   .then(() => log.info('Server is ready on port %d', port))
   .catch(log.errorHandler)
 
-onShutdown(async () => {
+onShutdown(async() => {
   // Stop server
   await server
     .stop()

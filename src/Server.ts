@@ -18,13 +18,13 @@ export class Server {
   private _server: http.Server | null = null
   private _dfusionService: DfusionService
 
-  constructor (params: Params) {
+  constructor(params: Params) {
     const { port, dfusionService } = params
     this._port = port
     this._dfusionService = dfusionService
   }
 
-  public start (): Promise<void> {
+  public start(): Promise<void> {
     log.debug(`Starting server on port ${this._port}...`)
     assert(this._server === null, 'Server was already started')
     const app = express()
@@ -54,7 +54,7 @@ export class Server {
     })
   }
 
-  private _registerEndpoint (app: Express) {
+  private _registerEndpoint(app: Express) {
     app.get('/v1/version', (_req, res) => {
       addCache(res, 120)
       res.status(200).send(this._dfusionService.getVersion())
@@ -80,7 +80,7 @@ export class Server {
     })
   }
 
-  private _registerMiddleware (app: Express) {
+  private _registerMiddleware(app: Express) {
     // Handle errors
     app.use((error: Error, req: Request<ParamsDictionary, any, any>, res: Response<any>, _next: NextFunction) => {
       log.error(`Error ${req.method} ${req.url}`, error)
@@ -88,7 +88,7 @@ export class Server {
     })
   }
 
-  public async stop (): Promise<void> {
+  public async stop(): Promise<void> {
     if (this._server !== null) {
       const server = this._server
       log.debug(`Stopping server on port ${this._port}...`)

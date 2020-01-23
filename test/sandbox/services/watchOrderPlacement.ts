@@ -9,14 +9,14 @@ require('dotenv').config()
  */
 const log = new Logger('sandbox:repos:watchOrderPlacement')
 
-async function exec (): Promise<void> {
+async function exec(): Promise<void> {
   dfusionService.watchOrderPlacement({
-    onNewOrder (order) {
+    onNewOrder(order) {
       log.info('New order: %O', order)
     },
-    onError (error: Error) {
+    onError(error: Error) {
       log.error('Error watching order placements: ', error)
-    }
+    },
   })
 }
 
