@@ -65,20 +65,18 @@ async function _runCommand (msg: Message, match: RegExpExecArray | null) {
   switch (command) {
     case 'start':
     case 'help':
-      await _helpCommand(msg)
-      break
+      return _helpCommand(msg)
 
     case 'about':
-      await _aboutCommand(msg)
-      break
+      return _aboutCommand(msg)
 
     default:
-      await bot.sendMessage(msg.chat.id, "I don't recognize that command! You can use this other one instead: /help")
+      return bot.sendMessage(msg.chat.id, "I don't recognize that command! You can use this other one instead: /help")
   }
 }
 async function _helpCommand (msg: Message) {
   const fromUser: User | undefined = msg.from
-  bot.sendMessage(
+  return bot.sendMessage(
     msg.chat.id,
     `${fromUser ? 'Hi ' + fromUser.first_name : 'Hi there'}!
     
@@ -92,7 +90,7 @@ Also, you can ask about me by using the command: /about`
 async function _aboutCommand (msg: Message) {
   const { blockNumber, networkId, nodeInfo, version, dexJsVersion, contractsVersion, batchExchangeAddress } = await dfusionService.getAbout()
 
-  bot.sendMessage(
+  return bot.sendMessage(
     msg.chat.id,
     `I'm just a bot watching dFusion smart contract.
 
