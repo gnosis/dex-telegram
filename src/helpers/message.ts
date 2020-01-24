@@ -119,8 +119,8 @@ export function newOrderMessage(order: any, baseUrl: string): string {
   let fillAmountBuy: string
   let fillAmountSell: string
   if (isUnlimited) {
-    fillAmountBuy = price
-    fillAmountSell = '1'
+    fillAmountBuy = '10'
+    fillAmountSell = price.multipliedBy(10)
   } else {
     fillAmountBuy = buyAmountFullFmt as string
     fillAmountSell = fillSellAmountFmt as string
