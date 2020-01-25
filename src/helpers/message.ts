@@ -120,7 +120,7 @@ export function newOrderMessage(order: any, baseUrl: string): string {
   let fillAmountSell: string
   if (isUnlimited) {
     fillAmountBuy = '10'
-    fillAmountSell = price.multipliedBy(10)
+    fillAmountSell = price.multipliedBy(10).multipliedBy(FACTOR_TO_FILL_ORDER)
   } else {
     fillAmountBuy = buyAmountFullFmt as string
     fillAmountSell = fillSellAmountFmt as string
