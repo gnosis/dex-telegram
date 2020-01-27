@@ -24,12 +24,15 @@ module.exports = {
 
     // Disabled the 'no-unused-vars' error (typescript/no-unused-vars is used instead)
     'no-unused-vars': 'off',
+    'space-before-function-paren': ['error', 'never'],
+    'comma-dangle': ['error', 'always-multiline'],
   },
   plugins: [],
   env: {
     browser: true,
     commonjs: true,
     es6: true,
+    node: true,
   },
   extends: ['standard'],
   globals: {},

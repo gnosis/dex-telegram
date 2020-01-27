@@ -83,7 +83,7 @@ export class DfusionRepoImpl implements DfusionService {
   private _batchTime: BigNumber
   private _tokenCache: { [tokenAddress: string]: TokenDto } = {}
 
-  constructor (params: Params) {
+  constructor(params: Params) {
     const { web3, batchExchangeContract, erc20Contract } = params
     log.debug('Setup dfusionRepo with contract address %s', batchExchangeContract.options.address)
 
@@ -92,7 +92,7 @@ export class DfusionRepoImpl implements DfusionService {
     this._web3 = web3
   }
 
-  public async isHealthy (): Promise<boolean> {
+  public async isHealthy(): Promise<boolean> {
     try {
       // Perform some health checks
       await this._web3.eth.getNodeInfo()
@@ -108,7 +108,7 @@ export class DfusionRepoImpl implements DfusionService {
         log.error(
           "Health check error. There aren't any Ethereum peer nodes. Last mined block is %d at %s",
           block.number,
-          lastMinedBlockDate
+          lastMinedBlockDate,
         )
         return false
       } else if (lastMinedBlockDate < someTimeAgo) {
@@ -116,7 +116,7 @@ export class DfusionRepoImpl implements DfusionService {
           'Health check error. No block has been mined in the last %d minutes. Last mined block is %d at %s',
           BLOCK_TIME_ERR_THRESHOLD_MINUTES,
           block.number,
-          lastMinedBlockDate
+          lastMinedBlockDate,
         )
         return false
       } else if (!isListening) {
@@ -124,7 +124,7 @@ export class DfusionRepoImpl implements DfusionService {
           'Health check error. It is not listening. Last mined block is %d at %s',
           BLOCK_TIME_ERR_THRESHOLD_MINUTES,
           block.number,
-          lastMinedBlockDate
+          lastMinedBlockDate,
         )
         return false
       } else if (peerCount < PEER_COUNT_WARN_THRESHOLD) {
@@ -139,7 +139,7 @@ export class DfusionRepoImpl implements DfusionService {
     }
   }
 
-  public watchOrderPlacement (params: WatchOrderPlacementParams) {
+  public watchOrderPlacement(params: WatchOrderPlacementParams) {
     this._contract.events
       .OrderPlacement()
       .on('connected', subscriptionId => {
@@ -154,7 +154,7 @@ export class DfusionRepoImpl implements DfusionService {
           priceNumerator: priceNumeratorString,
           priceDenominator: priceDenominatorString,
           validFrom: validFromBatchIdString,
-          validUntil: validUntilBatchIdString
+          validUntil: validUntilBatchIdString,
         } = event.returnValues
         const priceNumerator = new BigNumber(priceNumeratorString)
         const priceDenominator = new BigNumber(priceDenominatorString)
@@ -163,13 +163,13 @@ export class DfusionRepoImpl implements DfusionService {
 
         const [sellTokenAddress, buyTokenAddress] = await Promise.all([
           this._getTokenAddress(sellTokenId),
-          this._getTokenAddress(buyTokenId)
+          this._getTokenAddress(buyTokenId),
         ])
         const [sellToken, buyToken, validFrom, validUntil] = await Promise.all([
           this._getToken(sellTokenAddress),
           this._getToken(buyTokenAddress),
           this._batchIdToDate(validFromBatchId),
-          this._batchIdToDate(validUntilBatchId)
+          this._batchIdToDate(validUntilBatchId),
         ])
 
         log.info(`New order in tx ${event.blockHash}:
@@ -191,7 +191,7 @@ export class DfusionRepoImpl implements DfusionService {
           validUntilBatchId,
           validFrom: validFrom as Date,
           validUntil: validUntil as Date,
-          event
+          event,
         })
       })
       .on('changed', data => {
@@ -202,11 +202,11 @@ export class DfusionRepoImpl implements DfusionService {
       })
   }
 
-  public async getAbout (): Promise<AboutDto> {
+  public async getAbout(): Promise<AboutDto> {
     const [blockNumber, networkId, nodeInfo] = await Promise.all([
       this._web3.eth.getBlockNumber(),
       this._getNetworkId(),
-      this._web3.eth.getNodeInfo()
+      this._web3.eth.getNodeInfo(),
     ])
 
     return {
@@ -216,15 +216,15 @@ export class DfusionRepoImpl implements DfusionService {
       contractsVersion,
       dexJsVersion,
       version: packageJson.version,
-      batchExchangeAddress: this._contract.options.address
+      batchExchangeAddress: this._contract.options.address,
     }
   }
 
-  public getVersion (): String {
+  public getVersion(): String {
     return packageJson.version
   }
 
-  private async _getNetworkId (): Promise<number> {
+  private async _getNetworkId(): Promise<number> {
     if (!this._networkId) {
       this._networkId = await this._web3.eth.getChainId()
     }
@@ -232,11 +232,11 @@ export class DfusionRepoImpl implements DfusionService {
     return this._networkId
   }
 
-  private _getTokenAddress (id: string | number): Promise<string> {
+  private _getTokenAddress(id: string | number): Promise<string> {
     return this._contract.methods.tokenIdToAddressMap(id).call()
   }
 
-  private async _getToken (tokenAddress: string): Promise<TokenDto> {
+  private async _getToken(tokenAddress: string): Promise<TokenDto> {
     let token = this._tokenCache[tokenAddress]
 
     if (!token) {
@@ -255,7 +255,7 @@ export class DfusionRepoImpl implements DfusionService {
         ...tokenJson,
         decimals: decimals as number,
         address: tokenAddress,
-        known: !!tokenJson
+        known: !!tokenJson,
       }
 
       // Cache token if it's found, or null if is not
@@ -265,7 +265,7 @@ export class DfusionRepoImpl implements DfusionService {
     return token
   }
 
-  private async _getBatchTime (): Promise<BigNumber> {
+  private async _getBatchTime(): Promise<BigNumber> {
     if (!this._batchTime) {
       this._batchTime = new BigNumber(await this._contract.methods.BATCH_TIME().call())
     }
@@ -273,19 +273,19 @@ export class DfusionRepoImpl implements DfusionService {
   }
 
   // TODO: Move to utils project
-  private async _batchIdToDate (batchId: BigNumber): Promise<Date> {
+  private async _batchIdToDate(batchId: BigNumber): Promise<Date> {
     const batchTime = await this._getBatchTime()
 
     return new Date(
       batchId
         .multipliedBy(batchTime)
         .multipliedBy(new BigNumber(1000))
-        .toNumber()
+        .toNumber(),
     )
   }
 }
 
-async function _getDataFromErc20 (tokenContract: Erc20Contract) {
+async function _getDataFromErc20(tokenContract: Erc20Contract) {
   const symbolPromise = tokenContract.methods
     .symbol()
     .call()
