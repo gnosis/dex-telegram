@@ -95,6 +95,29 @@ export function buildSellMsg(
   }
 }
 
+const ONE = new BigNumber(1)
+
+export function calculateUnlimitedBuyTokenFillAmount(price: BigNumber, sellToken: TokenDto): string {
+  // 1/fee denominator == fee %
+  // fee % * 2 == minimum amount to have a match (both orders paying the fee)
+  const feeToDeduce = ONE.dividedBy(FEE_DENOMINATOR).multipliedBy(2)
+
+  // Since we are inverting the sell/buy to create the 'counter' offer,
+  // we need to invert the price, thus 1/price
+  return (
+    ONE.dividedBy(price)
+      // deduct from the value the fee by multiplying by 1 - FEE
+      .multipliedBy(ONE.minus(feeToDeduce))
+      // scale up the order to have a baseline of selling 10 units of sellToken
+      .multipliedBy(10)
+      // Base 10 to force BigNumber NOT returning value in exponential notation
+      .toString(10)
+      // `rounding` down if needed because the token might not have enough precision.
+      // E.g.: GUSD has only 2 decimal places, thus it makes no sense to send an amount of 9.009
+      .replace(new RegExp(`\\.(\\d{1,${sellToken.decimals}})\\d*`), '.$1')
+  )
+}
+
 export function buildFillOrderMsg(
   isUnlimited: boolean,
   order: OrderDto,
@@ -110,11 +133,8 @@ export function buildFillOrderMsg(
   if (isUnlimited) {
     // This is tricky. how much should we offer to fill for a unlimited order?
     // Going for 10 units
-    fillAmountBuy = '10'
-    fillAmountSell = price
-      .multipliedBy(10)
-      .multipliedBy(FACTOR_TO_FILL_ORDER)
-      .toString(10)
+    fillAmountBuy = calculateUnlimitedBuyTokenFillAmount(price, sellToken)
+    fillAmountSell = '10'
   } else {
     // Format the amounts
     // TODO: Allow to use BN, string or BigNumber or all three in the format. Review in dex-js

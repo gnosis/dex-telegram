@@ -8,6 +8,7 @@ import {
   buildNotYetActiveOrderMsg,
   buildSellMsg,
   buildFillOrderMsg,
+  calculateUnlimitedBuyTokenFillAmount,
 } from 'helpers'
 import { MAX_BATCH_ID } from '@gnosis.pm/dex-js'
 
@@ -115,6 +116,30 @@ describe('buildSellMsg', () => {
   })
 })
 
+describe('calculateUnlimitedBuyTokenFillAmount', () => {
+  const price = new BigNumber('1.001')
+
+  test('high precision token', () => {
+    const actual = calculateUnlimitedBuyTokenFillAmount(price, baseSellToken)
+
+    expect(actual).toBe('9.970029970029970029')
+  })
+
+  test('lower precision token', () => {
+    const actual = calculateUnlimitedBuyTokenFillAmount(price, { ...baseSellToken, decimals: 2 })
+
+    expect(actual).toBe('9.97')
+  })
+
+  test('price is an integer', () => {
+    const price = new BigNumber(2)
+
+    const actual = calculateUnlimitedBuyTokenFillAmount(price, baseSellToken)
+
+    expect(actual).toBe('4.99')
+  })
+})
+
 describe('buildFillOrderMsg', () => {
   const price = new BigNumber(1.1)
   const baseUrl = 'http://dex.gnosis.io/'
@@ -125,7 +150,9 @@ describe('buildFillOrderMsg', () => {
     const actual = buildFillOrderMsg(true, baseOrder, price, baseUrl, buyTokenParam, sellTokenParam)
 
     expect(actual).toMatch(
-      new RegExp(`Fill the order here: ${baseUrl}/trade/${buyTokenParam}-${sellTokenParam}\\?sell=11\\.022\\&buy=10`),
+      new RegExp(
+        `Fill the order here: ${baseUrl}/trade/${buyTokenParam}-${sellTokenParam}\\?sell=10\\&buy=9.0727272727272727`,
+      ),
     )
   })
 
