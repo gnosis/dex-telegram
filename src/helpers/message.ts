@@ -27,7 +27,7 @@ function _getTokenFmt(amount: BigNumber, token: TokenDto) {
     tokenParam = token.address
   }
 
-  const amountFmt = formatAmount(new BN(amount.toString()), token.decimals) as string
+  const amountFmt = formatAmount(new BN(amount.toFixed()), token.decimals) as string
 
   return { tokenLabel, tokenParam, amountFmt }
 }
@@ -138,9 +138,9 @@ export function buildFillOrderMsg(
   } else {
     // Format the amounts
     // TODO: Allow to use BN, string or BigNumber or all three in the format. Review in dex-js
-    fillAmountBuy = formatAmountFull(new BN(priceDenominator.toString()), sellToken.decimals) as string
+    fillAmountBuy = formatAmountFull(new BN(priceDenominator.toFixed()), sellToken.decimals) as string
     fillAmountSell = formatAmountFull(
-      new BN(priceNumerator.multipliedBy(FACTOR_TO_FILL_ORDER).toString()),
+      new BN(priceNumerator.multipliedBy(FACTOR_TO_FILL_ORDER).toFixed()),
       buyToken.decimals,
     ) as string
   }
