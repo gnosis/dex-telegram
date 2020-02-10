@@ -2,13 +2,7 @@ import BN from 'bn.js'
 import BigNumber from 'bignumber.js'
 import moment from 'moment-timezone'
 
-import {
-  FEE_DENOMINATOR,
-  formatAmountFull,
-  formatAmount,
-  isOrderUnlimited,
-  isNeverExpiresOrder,
-} from '@gnosis.pm/dex-js'
+import { FEE_DENOMINATOR, formatAmountFull, isOrderUnlimited, isNeverExpiresOrder } from '@gnosis.pm/dex-js'
 import { TokenDto, OrderDto } from 'services'
 
 // To fill an order, no solver will match the trades if there's not 2*FEE spread between the trades
@@ -27,7 +21,7 @@ function _getTokenFmt(amount: BigNumber, token: TokenDto) {
     tokenParam = token.address
   }
 
-  const amountFmt = formatAmount(new BN(amount.toFixed()), token.decimals) as string
+  const amountFmt = formatAmountFull(new BN(amount.toFixed()), token.decimals) as string
 
   return { tokenLabel, tokenParam, amountFmt }
 }
