@@ -18,6 +18,11 @@ export interface Params {
   web3: Web3
 }
 
+function _formatTokenForLog(tokenId: string, token: TokenDto): string {
+  const optionalSymbol = token.symbol ? ` (${token.symbol})` : ''
+  return tokenId + optionalSymbol + ' - ' + token.address
+}
+
 export interface OrderPlacement {
   owner: string
   index: string
@@ -172,10 +177,10 @@ export class DfusionRepoImpl implements DfusionService {
           this._batchIdToDate(validUntilBatchId),
         ])
 
-        log.info(`New order in tx ${event.blockHash}:
+        log.info(`New order in tx ${event.transactionHash}:
     - Owner: ${owner}
-    - Sell token: ${sellToken}
-    - Buy token: ${buyToken}
+    - Sell token: ${_formatTokenForLog(sellTokenId, sellToken)}
+    - Buy token: ${_formatTokenForLog(buyTokenId, buyToken)}
     - Price: ${priceNumerator}/${priceDenominator} = ${priceNumerator.dividedBy(priceDenominator).toNumber()}
     - Valid from: ${validFromBatchId}
     - Valid until: ${validUntilBatchId}
