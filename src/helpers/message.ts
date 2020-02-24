@@ -43,34 +43,33 @@ export function buildExpirationMsg(order: OrderDto): string {
   const { validUntilBatchId, validUntil } = order
 
   if (isNeverExpiresOrder(validUntilBatchId.toNumber())) {
-    return '\n  - *Expires*: Valid until cancelled'
+    return 'Valid until cancelled'
   } else {
-    return `\n  - *Expires*: \`${moment(validUntil).calendar()} GMT\`, \`${moment(validUntil).fromNow()}\``
+    return `\`${moment(validUntil).calendar()} GMT\`, \`${moment(validUntil).fromNow()}\``
   }
 }
 
-export function buildUnknownTokenMsg(order: OrderDto): string {
+export function buildUnknownTokenMsg(order: OrderDto): string | null {
   const { buyToken, sellToken } = order
 
   if (!sellToken.known || !buyToken.known) {
     return (
-      '\n  - "Maybe" means one or more tokens claim to be called as shown, ' +
+      '"Maybe" means one or more tokens claim to be called as shown, ' +
       "but it's not currently part of the list of [known tokens](https://github.com/gnosis/dex-js/blob/master/src/tokenList.json). " +
       'Make sure you verify the address yourself before trading against it.'
     )
   } else {
-    return ''
+    return null
   }
 }
 
-export function buildNotYetActiveOrderMsg(validFrom: Date): string {
-  const now = new Date()
-
-  if (validFrom > now) {
+export function buildNotYetActiveOrderMsg(validFrom: Date): string | null {
+  const now = Date.now()
+  if (validFrom.getTime() > now) {
     // The order is not active yet
-    return `\n  - *Tradable*: \`${moment(validFrom).calendar()} GMT\`, \`${moment(validFrom).fromNow()}\``
+    return `\`${moment(validFrom).calendar()} GMT\`, \`${moment(validFrom).fromNow()}\``
   } else {
-    return ''
+    return null
   }
 }
 
@@ -83,9 +82,9 @@ export function buildSellMsg(
 ): string {
   if (isUnlimited) {
     // doesn't make sense to display amounts when the order is unlimited
-    return `Sell \`${sellTokenLabel}\` for \`${buyTokenLabel}\`\n`
+    return `Sell \`${sellTokenLabel}\` for \`${buyTokenLabel}\``
   } else {
-    return `Sell *${sellAmount}* \`${sellTokenLabel}\` for *${buyAmount}* \`${buyTokenLabel}\`\n`
+    return `Sell *${sellAmount}* \`${sellTokenLabel}\` for *${buyAmount}* \`${buyTokenLabel}\``
   }
 }
 
@@ -112,34 +111,31 @@ export function calculateUnlimitedBuyTokenFillAmount(price: BigNumber, sellToken
   )
 }
 
-export function buildFillOrderMsg(
+export function buildFillOrderUrl(
   isUnlimited: boolean,
   order: OrderDto,
-  price: BigNumber,
+  priceFormatted: string,
   baseUrl: string,
   buyTokenParam: string,
   sellTokenParam: string,
 ): string {
-  const { buyToken, priceDenominator, sellToken, priceNumerator } = order
+  const { buyToken, priceNumerator } = order
 
-  let fillAmountBuy: string
   let fillAmountSell: string
   if (isUnlimited) {
-    // This is tricky. how much should we offer to fill for a unlimited order?
-    // Going for 10 units
-    fillAmountBuy = calculateUnlimitedBuyTokenFillAmount(price, sellToken)
-    fillAmountSell = '10'
+    fillAmountSell = '0'
   } else {
-    // Format the amounts
-    // TODO: Allow to use BN, string or BigNumber or all three in the format. Review in dex-js
-    fillAmountBuy = formatAmountFull(new BN(priceDenominator.toFixed()), sellToken.decimals) as string
     fillAmountSell = formatAmountFull(
       new BN(priceNumerator.multipliedBy(FACTOR_TO_FILL_ORDER).toFixed()),
       buyToken.decimals,
     ) as string
   }
 
-  return `\n\nFill the order here: ${baseUrl}/trade/${buyTokenParam}-${sellTokenParam}?sell=${fillAmountSell}&buy=${fillAmountBuy}`
+  return `${baseUrl}/trade/${buyTokenParam}-${sellTokenParam}?sell=${fillAmountSell}&price=${priceFormatted}`
+}
+
+export function buildPriceMsg(sellTokenLabel: string, buyTokenLabel: string, priceFormatted: string): string {
+  return `1 \`${sellTokenLabel}\` = ${priceFormatted} \`${buyTokenLabel}\``
 }
 
 export function newOrderMessage(order: OrderDto, baseUrl: string): string {
@@ -157,25 +153,42 @@ export function newOrderMessage(order: OrderDto, baseUrl: string): string {
   )
 
   // unlimited?
-  const isUnlimited = isOrderUnlimited(priceNumerator, priceDenominator)
 
   // TODO: Should we publish even if the user doesn't have balance. Should we include the balance of the user? he can change it...
   //  https://github.com/gnosis/dex-telegram/issues/45
 
-  const sellMsg = buildSellMsg(isUnlimited, buyTokenLabel, sellTokenLabel, buyAmountFmt, sellAmountFmt)
-  // Calculate the price
+  // Partial message: Order description
+  //    i.e Sell 3.535 WETH for 1,000 SNX
+  const isUnlimited = isOrderUnlimited(priceNumerator, priceDenominator)
+  const sellMsg = buildSellMsg(isUnlimited, buyTokenLabel, sellTokenLabel, buyAmountFmt, sellAmountFmt) + '\n'
+
+  // Partial message: Price of the order
+  //    i.e Price:  1 WETH = 282.8854314002828854314 SNX
   const price = calculatePrice(order)
-  const priceMsg = `\n  - *Price*:  1 \`${sellTokenLabel}\` = ${price} \`${buyTokenLabel}\``
-  // Only display the valid from if the period hasn't started
-  const notYetActiveOrderMsg = buildNotYetActiveOrderMsg(validFrom)
-  // Does it expire?
-  const expirationMsg = buildExpirationMsg(order)
-  // In case one of the tokens is not in our list
-  const unknownTokenMsg = buildUnknownTokenMsg(order)
-  // Create link for filling this order
-  const fillOrderMsg = buildFillOrderMsg(isUnlimited, order, price, baseUrl, buyTokenParam, sellTokenParam)
+  const maxDecimals = Math.max(sellToken.decimals, buyToken.decimals)
+  const priceFormatted = price.toFixed(maxDecimals)
+  const priceMsg = '\n  - *Price*:  ' + buildPriceMsg(sellTokenLabel, buyTokenLabel, priceFormatted)
 
-  const message = `${sellMsg}${priceMsg}${notYetActiveOrderMsg}${expirationMsg}${unknownTokenMsg}${fillOrderMsg}`
+  // Partial message: Only display the valid from if the period hasn't started
+  //    i.e. Tradable: Today at 4:55 PM GMT, in 4 minutes
+  const tradebleMessage = buildNotYetActiveOrderMsg(validFrom)
+  const notYetActiveOrderMsg = tradebleMessage ? '\n  - *Tradable*: ' + tradebleMessage : ''
 
-  return message
+  // Partial message: Does it expire?
+  //    i.e. Expires: Today at 9:00 PM GMT, in 4 hours
+  const expirationMsg = '\n  - *Expires*: ' + buildExpirationMsg(order)
+
+  // Partial message: Any tokens not whitelisted?
+  //    i.e. "Maybe" means one or more tokens claim to be....
+  const unknownTokensMsgAux = buildUnknownTokenMsg(order)
+  const unknownTokenMsg = unknownTokensMsgAux ? '\n  - ' + unknownTokensMsgAux : ''
+
+  // Partial message: Create link for filling this order
+  //    i.e. Fill the order here: https://app?sell=0.0001002&price=10
+  const fillOrderMsg =
+    '\n\nFill the order here: ' +
+    buildFillOrderUrl(isUnlimited, order, priceFormatted, baseUrl, buyTokenParam, sellTokenParam)
+
+  // Compose the final message
+  return `${sellMsg}${priceMsg}${notYetActiveOrderMsg}${expirationMsg}${unknownTokenMsg}${fillOrderMsg}`
 }
