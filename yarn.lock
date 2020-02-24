@@ -152,12 +152,13 @@
   dependencies:
     bn.js "^5.1.1"
 
-"@gnosis.pm/dex-js@0.1.8":
-  version "0.1.8"
-  resolved "https://registry.yarnpkg.com/@gnosis.pm/dex-js/-/dex-js-0.1.8.tgz#ac47c14d9f1cf6e11c3dc7d0adeed2feedc81482"
-  integrity sha512-rSXCa9Qmr3c9Swr9NuhvQX/XEngWzGOaRLfDNYvb8PSC4zx9p4iFN1xg1Mq7pQZEnpUrPai98+tNIJwkPJUJPA==
+"@gnosis.pm/dex-js@0.1.12":
+  version "0.1.12"
+  resolved "https://registry.yarnpkg.com/@gnosis.pm/dex-js/-/dex-js-0.1.12.tgz#a8ab65966c7f20c98bc6bff12d16c8937bd2ed4b"
+  integrity sha512-A1WFUntxsSL47+UWanu1/gwm9Y1KB5ghSs17jXgFqviDOgg+yOgQP+GK2GFhSNkMTXsa1zqqoSEmKKT9fULLyw==
   dependencies:
     "@gnosis.pm/dex-contracts" "^0.2.0"
+    bignumber.js "^9.0.0"
 
 "@jest/console@^24.7.1", "@jest/console@^24.9.0":
   version "24.9.0"
