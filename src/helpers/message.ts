@@ -36,7 +36,7 @@ export function calculatePrice(
   const sellTokenDecimals = sellToken.decimals
 
   let price
-  if (buyTokenDecimals >= sellToken.decimals) {
+  if (buyTokenDecimals >= sellTokenDecimals) {
     const precisionFactor = 10 ** (buyTokenDecimals - sellTokenDecimals)
     price = priceNumerator.dividedBy(priceDenominator.multipliedBy(precisionFactor))
   } else {
