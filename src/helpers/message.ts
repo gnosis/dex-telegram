@@ -34,7 +34,6 @@ export function calculatePrice(
   const { buyToken, sellToken, priceNumerator, priceDenominator } = order
   const buyTokenDecimals = buyToken.decimals
   const sellTokenDecimals = sellToken.decimals
-  const maxDecimals = Math.max(buyTokenDecimals, sellTokenDecimals)
 
   let price
   if (buyTokenDecimals >= sellToken.decimals) {
@@ -45,7 +44,7 @@ export function calculatePrice(
     price = priceNumerator.multipliedBy(precisionFactor).dividedBy(priceDenominator)
   }
 
-  return price.decimalPlaces(maxDecimals, BigNumber.ROUND_FLOOR)
+  return price.decimalPlaces(buyTokenDecimals, BigNumber.ROUND_FLOOR)
 }
 
 export function buildExpirationMsg(order: OrderDto): string {
@@ -130,7 +129,6 @@ export function buildFillOrderUrl(params: {
 }): string {
   const { isUnlimited, order, baseUrl, buyTokenParam, sellTokenParam, price } = params
   const { sellToken, buyToken, priceNumerator, priceDenominator } = order
-  const maxDecimals = Math.max(sellToken.decimals, buyToken.decimals)
 
   // Calculate the sell amount and price
   let fillAmountSell: BN
@@ -141,7 +139,7 @@ export function buildFillOrderUrl(params: {
 
     // Calculate the inverse price taking the fee into account
     //  (1 - 2*fee) / price
-    priceInverse = FILL_INVERSE_TRADE_PRICE_BASE.div(price).decimalPlaces(maxDecimals, BigNumber.ROUND_CEIL)
+    priceInverse = FILL_INVERSE_TRADE_PRICE_BASE.div(price).decimalPlaces(sellToken.decimals, BigNumber.ROUND_FLOOR)
   } else {
     // The taker needs to sell slightly more "buy tokens" than what the maker is expecting and at a slightly better price
     fillAmountSell = new BN(priceNumerator.multipliedBy(FACTOR_TO_FILL_ORDER).toFixed())
@@ -157,7 +155,7 @@ export function buildFillOrderUrl(params: {
 
   // Format the sell amount and price
   const fillAmountSellFormatted = formatAmountFull(fillAmountSell, buyToken.decimals, false)
-  const priceInverseFormatted = priceInverse.toFixed(maxDecimals)
+  const priceInverseFormatted = priceInverse.toFixed(sellToken.decimals)
 
   // Calculate the fill price
 
