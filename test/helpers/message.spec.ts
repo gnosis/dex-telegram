@@ -31,8 +31,8 @@ const baseOrder: OrderDto = {
   owner: USER_1,
   buyToken: baseBuyToken,
   sellToken: baseSellToken,
-  priceNumerator: new BigNumber(10),
-  priceDenominator: new BigNumber(10),
+  priceNumerator: new BigNumber(10000000000000000000),
+  priceDenominator: new BigNumber(11000000000),
   validFrom: new Date('2020-02-24T00:00:00.000'),
   validUntil: new Date('2020-02-25T00:00:00.000'),
   validFromBatchId: new BigNumber(0),
@@ -42,26 +42,54 @@ const baseOrder: OrderDto = {
 
 describe('calculatePrice', () => {
   test('buy token with same or higher precision', () => {
+    // GIVEN: an order exchanging 20 token1 for 30 token2 (same precision)
     const order = {
       ...baseOrder,
       sellToken: { ...baseSellToken, decimals: 18 },
+      buyToken: { ...baseBuyToken, decimals: 18 },
+      priceNumerator: new BigNumber(20000000000000000000),
+      priceDenominator: new BigNumber(30000000000000000000),
     }
 
+    // WHEN: Calculating the price
     const actual = calculatePrice(order)
 
-    expect(actual.toString(10)).toBe('1')
+    // THEN Price is
+    expect(actual.toString(10)).toBe('0.666666666666666666')
   })
 
   test('sell token with higher precision', () => {
+    // GIVEN: an order exchanging 20 token1 for 30 token2 (different precision)
     const order = {
       ...baseOrder,
-      buyToken: { ...baseBuyToken, decimals: 17 },
       sellToken: { ...baseSellToken, decimals: 18 },
+      buyToken: { ...baseBuyToken, decimals: 17 },
+      priceNumerator: new BigNumber(2000000000000000000),
+      priceDenominator: new BigNumber(30000000000000000000),
     }
 
+    // WHEN: Calculating the price
     const actual = calculatePrice(order)
 
-    expect(actual.toString(10)).toBe('10')
+    // THEN Price is
+    expect(actual.toString(10)).toBe('0.66666666666666666')
+  })
+
+  test('sell token with smaller precision', () => {
+    // GIVEN: an order exchanging 10 token1 for 11 token2 (different precision)
+    const order = {
+      ...baseOrder,
+      sellToken: { ...baseSellToken, decimals: 17 },
+      buyToken: { ...baseBuyToken, decimals: 18 },
+      priceNumerator: new BigNumber(20000000000000000000),
+      priceDenominator: new BigNumber(3000000000000000000),
+    }
+
+    // WHEN: Calculating the price
+    const actual = calculatePrice(order)
+
+    // THEN Price is
+    expect(actual.toString(10)).toBe('0.666666666666666666')
   })
 })
 
@@ -178,7 +206,7 @@ describe('calculateUnlimitedBuyTokenFillAmount', () => {
 })
 
 describe('buildFillOrderMsg', () => {
-  const price = '1.1000000000000000000'
+  const price = new BigNumber('1.1')
   const baseUrl = 'http://dex.gnosis.io/'
   const buyTokenParam = 'SCM'
   const sellTokenParam = 'PMD'
@@ -188,10 +216,17 @@ describe('buildFillOrderMsg', () => {
     const isUnlimited = true
 
     // WHEN: Build fill order url
-    const actual = buildFillOrderUrl(isUnlimited, baseOrder, price, baseUrl, buyTokenParam, sellTokenParam)
+    const actual = buildFillOrderUrl({
+      isUnlimited,
+      order: baseOrder,
+      price,
+      baseUrl,
+      buyTokenParam,
+      sellTokenParam,
+    })
 
     // THEN: The url has the correct price and a sell amount of 0
-    expect(actual).toEqual(`${baseUrl}/trade/${buyTokenParam}-${sellTokenParam}?sell=0&price=${price}`)
+    expect(actual).toEqual(`${baseUrl}/trade/${buyTokenParam}-${sellTokenParam}?sell=0&price=0.907272727`)
   })
 
   test('limited order', () => {
@@ -199,12 +234,17 @@ describe('buildFillOrderMsg', () => {
     const isUnlimited = false
 
     // WHEN: Build fill order url
-    const actual = buildFillOrderUrl(isUnlimited, baseOrder, price, baseUrl, buyTokenParam, sellTokenParam)
+    const actual = buildFillOrderUrl({
+      isUnlimited,
+      order: baseOrder,
+      price,
+      baseUrl,
+      buyTokenParam,
+      sellTokenParam,
+    })
 
     // THEN: The url has the correct price and a sell amount of 0
-    expect(actual).toEqual(
-      `${baseUrl}/trade/${buyTokenParam}-${sellTokenParam}?sell=0.000000000000009802&price=${price}`,
-    )
+    expect(actual).toEqual(`${baseUrl}/trade/${buyTokenParam}-${sellTokenParam}?sell=10.02&price=1.097804391`)
   })
 })
 
@@ -231,6 +271,6 @@ describe('newOrderMessage', () => {
   - *Price*:  1 \`${TOKEN_2}\` = 3.333333333333333333 \`${BUY_TOKEN_SYMBOL}\`
   - *Expires*: \`Tomorrow at 12:00 AM GMT\`, \`in a day\`
 
-Fill the order here: http://dex.gnosis.io//trade/COOL-${TOKEN_2}?sell=10.02&price=3.333333333333333333`)
+Fill the order here: http://dex.gnosis.io//trade/COOL-${TOKEN_2}?sell=10.02&price=0.299401197`)
   })
 })
