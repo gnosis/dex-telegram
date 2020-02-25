@@ -280,3 +280,30 @@ describe('newOrderMessage', () => {
 Fill the order here: http://dex.gnosis.io//trade/COOL-${TOKEN_2}?sell=10.02&price=0.299401197`)
   })
 })
+
+describe('newOrderMessage', () => {
+  const baseUrl = 'http://dex.gnosis.io/'
+
+  test('unlimited order', () => {
+    // GIVEN: An order staring 2min 10 seg ago. With expiring date on next date 12am GMT
+    Date.now = jest.fn().mockReturnValue(new Date('2020-02-24T00:02:10.000'))
+
+    // WHEN: Formatting message for new order
+    const actual = newOrderMessage(
+      {
+        ...baseOrder,
+        priceNumerator: new BigNumber('10000000000000000000'),
+        priceDenominator: new BigNumber('3000000000'),
+      },
+      baseUrl,
+    )
+
+    // THEN: The message is as follows
+    expect(actual).toEqual(`Sell *3* \`${TOKEN_2}\` for *10* \`${BUY_TOKEN_SYMBOL}\`
+
+  - *Price*:  1 \`${TOKEN_2}\` = 3.333333333333333333 \`${BUY_TOKEN_SYMBOL}\`
+  - *Expires*: \`Tomorrow at 12:00 AM GMT\`, \`in a day\`
+
+Fill the order here: http://dex.gnosis.io//trade/COOL-${TOKEN_2}?sell=10.02&price=0.299401197`)
+  })
+})
