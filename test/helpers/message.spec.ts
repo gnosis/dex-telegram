@@ -1,6 +1,8 @@
 import BigNumber from 'bignumber.js'
 
-import { OrderDto } from 'services'
+import { TOKEN_1, TOKEN_2, USER_1 } from '../data'
+
+import { OrderDto, TokenDto } from 'services'
 import {
   calculatePrice,
   buildExpirationMsg,
@@ -9,21 +11,30 @@ import {
   buildSellMsg,
   buildFillOrderMsg,
   calculateUnlimitedBuyTokenFillAmount,
+  newOrderMessage,
 } from 'helpers'
 import { MAX_BATCH_ID } from '@gnosis.pm/dex-js'
 
 const MockEvent = jest.fn()
+const BUY_TOKEN_SYMBOL = 'COOL'
+const BUY_TOKEN_NAME = 'Cool token'
 
-const baseBuyToken = { decimals: 18, address: '0x', known: true }
-const baseSellToken = { decimals: 18, address: '0x', known: true }
+const baseBuyToken: TokenDto = {
+  decimals: 18,
+  address: TOKEN_1,
+  known: true,
+  symbol: BUY_TOKEN_SYMBOL,
+  name: BUY_TOKEN_NAME,
+}
+const baseSellToken: TokenDto = { decimals: 9, address: TOKEN_2, known: true }
 const baseOrder: OrderDto = {
-  owner: '0x',
+  owner: USER_1,
   buyToken: baseBuyToken,
   sellToken: baseSellToken,
   priceNumerator: new BigNumber(10),
   priceDenominator: new BigNumber(10),
-  validFrom: new Date(),
-  validUntil: new Date(),
+  validFrom: new Date('2020-02-24T00:00:00.000'),
+  validUntil: new Date('2020-02-25T00:00:00.000'),
   validFromBatchId: new BigNumber(0),
   validUntilBatchId: new BigNumber(1),
   event: new MockEvent(),
@@ -31,13 +42,22 @@ const baseOrder: OrderDto = {
 
 describe('calculatePrice', () => {
   test('buy token with same or higher precision', () => {
-    const actual = calculatePrice(baseOrder)
+    const order = {
+      ...baseOrder,
+      sellToken: { ...baseSellToken, decimals: 18 },
+    }
+
+    const actual = calculatePrice(order)
 
     expect(actual.toString(10)).toBe('1')
   })
 
   test('sell token with higher precision', () => {
-    const order = { ...baseOrder, buyToken: { ...baseBuyToken, decimals: 17 } }
+    const order = {
+      ...baseOrder,
+      buyToken: { ...baseBuyToken, decimals: 17 },
+      sellToken: { ...baseSellToken, decimals: 18 },
+    }
 
     const actual = calculatePrice(order)
 
@@ -120,7 +140,10 @@ describe('calculateUnlimitedBuyTokenFillAmount', () => {
   const price = new BigNumber('1.001')
 
   test('high precision token', () => {
-    const actual = calculateUnlimitedBuyTokenFillAmount(price, baseSellToken)
+    const actual = calculateUnlimitedBuyTokenFillAmount(price, {
+      ...baseSellToken,
+      decimals: 18,
+    })
 
     expect(actual).toBe('9.970029970029970029')
   })
@@ -151,7 +174,7 @@ describe('buildFillOrderMsg', () => {
 
     expect(actual).toMatch(
       new RegExp(
-        `Fill the order here: ${baseUrl}/trade/${buyTokenParam}-${sellTokenParam}\\?sell=10\\&buy=9.0727272727272727`,
+        `Fill the order here: ${baseUrl}/trade/${buyTokenParam}-${sellTokenParam}\\?sell=10\\&buy=9.072727272`,
       ),
     )
   })
@@ -161,8 +184,35 @@ describe('buildFillOrderMsg', () => {
 
     expect(actual).toMatch(
       new RegExp(
-        `Fill the order here: ${baseUrl}/trade/${buyTokenParam}-${sellTokenParam}\\?sell=0\\.000000000000009802\\&buy=0\\.00000000000000001`,
+        `Fill the order here: ${baseUrl}/trade/${buyTokenParam}-${sellTokenParam}\\?sell=0\\.000000000000009802\\&buy=0\\.00000001`,
       ),
     )
+  })
+})
+
+describe('newOrderMessage', () => {
+  const baseUrl = 'http://dex.gnosis.io/'
+
+  test('unlimited order', () => {
+    // GIVEN: An order staring 2min 10 seg ago. With expiring date on next date 12am GMT
+    Date.now = jest.fn().mockReturnValue(new Date('2020-02-24T00:02:10.000'))
+
+    // WHEN: Formatting message for new order
+    const actual = newOrderMessage(
+      {
+        ...baseOrder,
+        priceNumerator: new BigNumber('10000000000000000000'),
+        priceDenominator: new BigNumber('3000000000'),
+      },
+      baseUrl,
+    )
+
+    // THEN: The message is as follows
+    expect(actual).toEqual(`Sell *3* \`${TOKEN_2}\` for *10* \`${BUY_TOKEN_SYMBOL}\`
+
+  - *Price*:  1 \`${TOKEN_2}\` = 3.33333333333333333333 \`${BUY_TOKEN_SYMBOL}\`
+  - *Expires*: \`Tomorrow at 12:00 AM GMT\`, \`in a day\`
+
+Fill the order here: http://dex.gnosis.io//trade/COOL-${TOKEN_2}?sell=10.02&buy=3`)
   })
 })
