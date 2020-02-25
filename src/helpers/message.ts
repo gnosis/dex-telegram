@@ -81,13 +81,14 @@ export function buildNotYetActiveOrderMsg(validFrom: Date): string | null {
   }
 }
 
-export function buildSellMsg(
-  isUnlimited: boolean,
-  buyTokenLabel: string,
-  sellTokenLabel: string,
-  buyAmount: string,
-  sellAmount: string,
-): string {
+export function buildSellMsg(params: {
+  isUnlimited: boolean
+  buyTokenLabel: string
+  sellTokenLabel: string
+  buyAmount: string
+  sellAmount: string
+}): string {
+  const { isUnlimited, buyTokenLabel, sellTokenLabel, buyAmount, sellAmount } = params
   if (isUnlimited) {
     // doesn't make sense to display amounts when the order is unlimited
     return `Sell \`${sellTokenLabel}\` for \`${buyTokenLabel}\``
@@ -198,7 +199,14 @@ export function newOrderMessage(order: OrderDto, baseUrl: string): string {
   // Partial message: Order description
   //    i.e Sell 3.535 WETH for 1,000 SNX
   const isUnlimited = isOrderUnlimited(priceNumerator, priceDenominator)
-  const sellMsg = buildSellMsg(isUnlimited, buyTokenLabel, sellTokenLabel, buyAmountFmt, sellAmountFmt) + '\n'
+  const sellMsg =
+    buildSellMsg({
+      isUnlimited,
+      buyTokenLabel,
+      sellTokenLabel,
+      buyAmount: buyAmountFmt,
+      sellAmount: sellAmountFmt,
+    }) + '\n'
 
   // Partial message: Price of the order
   //    i.e Price:  1 WETH = 282.8854314002828854314 SNX

@@ -158,7 +158,13 @@ describe('buildSellMsg', () => {
     const isUnlimited = true
 
     // WHEN: Build the sell message
-    const actual = buildSellMsg(isUnlimited, buyTokenLabel, sellTokenLabel, '', '')
+    const actual = buildSellMsg({
+      isUnlimited,
+      buyTokenLabel,
+      sellTokenLabel,
+      buyAmount: '',
+      sellAmount: '',
+    })
 
     // THEN: It reads as follows
     expect(actual).toEqual(`Sell \`${sellTokenLabel}\` for \`${buyTokenLabel}\``)
@@ -171,7 +177,7 @@ describe('buildSellMsg', () => {
     const sellAmount = '2'
 
     // WHEN: Build the sell message
-    const actual = buildSellMsg(isUnlimited, buyTokenLabel, sellTokenLabel, buyAmount, sellAmount)
+    const actual = buildSellMsg({ isUnlimited, buyTokenLabel, sellTokenLabel, buyAmount, sellAmount })
 
     // THEN: It reads as follows
     expect(actual).toEqual(`Sell *${sellAmount}* \`${sellTokenLabel}\` for *${buyAmount}* \`${buyTokenLabel}\``)
