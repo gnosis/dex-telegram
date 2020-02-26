@@ -2,14 +2,10 @@ import BN from 'bn.js'
 import BigNumber from 'bignumber.js'
 import moment from 'moment-timezone'
 
-import {
-  FEE_DENOMINATOR,
-  formatAmountFull,
-  isOrderUnlimited,
-  isNeverExpiresOrder,
-  DEFAULT_PRECISION,
-} from '@gnosis.pm/dex-js'
+import { FEE_DENOMINATOR, formatAmountFull, isOrderUnlimited, isNeverExpiresOrder } from '@gnosis.pm/dex-js'
 import { TokenDto, OrderDto } from 'services'
+
+const PRICE_PRECISION = 19
 
 // To fill an order, no solver will match the trades if there's not 2*FEE spread between the trades
 const FACTOR_TO_FILL_ORDER = 1 + 2 / FEE_DENOMINATOR
@@ -50,7 +46,7 @@ export function calculatePrice(
     price = priceNumerator.multipliedBy(precisionFactor).dividedBy(priceDenominator)
   }
 
-  return price.decimalPlaces(DEFAULT_PRECISION, BigNumber.ROUND_FLOOR)
+  return price.decimalPlaces(PRICE_PRECISION, BigNumber.ROUND_FLOOR)
 }
 
 export function buildExpirationMsg(order: OrderDto): string {
@@ -139,8 +135,6 @@ export function buildFillOrderUrl(params: {
 
   // Calculate the maker theoretic price (theoretic because it needs adjustments because of precision errors)
   const takerTheoreticalPrice = FILL_INVERSE_TRADE_PRICE_BASE.div(price)
-  console.log('takerTheoreticalPrice', takerTheoreticalPrice.toString(10))
-  console.log('takerTheoreticalPrice (fixed)', takerTheoreticalPrice.toFixed(DEFAULT_PRECISION))
 
   // Calculate the sell amount and price
   let takerSellAmount: string
@@ -151,30 +145,19 @@ export function buildFillOrderUrl(params: {
 
     // Calculate the inverse price taking the fee into account
     //  (1 - 2*fee) / price
-    takerPrice = takerTheoreticalPrice.decimalPlaces(DEFAULT_PRECISION, BigNumber.ROUND_FLOOR).toString(10)
+    takerPrice = takerTheoreticalPrice.decimalPlaces(PRICE_PRECISION, BigNumber.ROUND_FLOOR).toString(10)
   } else {
     // The taker needs to sell slightly more "buy tokens" than what the maker is expecting and at a slightly better price
     //    * The taker expects at least "priceNumerator buyTokens"
     //    * We need take the fees into account (the taker needs to sell more tokens than the ones the maker receives)
     const takerSellAmountWeis = priceNumerator.multipliedBy(FACTOR_TO_FILL_ORDER).decimalPlaces(0, BigNumber.ROUND_CEIL)
     takerSellAmount = formatAmountFull(new BN(takerSellAmountWeis.toFixed()), buyToken.decimals, false)
-    console.log('takerSellAmount', takerSellAmount)
 
     // Calculate the taker buy tokens
     const takerBuyAmountWeis = takerSellAmountWeis
       .multipliedBy(takerTheoreticalPrice)
       .dividedBy(10 ** (buyToken.decimals - sellToken.decimals))
       .decimalPlaces(0, BigNumber.ROUND_FLOOR)
-
-    console.log(
-      'takerBuyTokens (decimals)',
-      takerSellAmountWeis
-        .multipliedBy(takerTheoreticalPrice)
-        .dividedBy(10 ** buyToken.decimals)
-        .toString(10),
-    )
-
-    console.log('takerBuyTokens', takerBuyAmountWeis.toString(10))
 
     // Calculate the price
     takerPrice = calculatePrice({
@@ -183,8 +166,6 @@ export function buildFillOrderUrl(params: {
       priceNumerator: takerBuyAmountWeis,
       priceDenominator: takerSellAmountWeis,
     }).toString(10)
-    // takerSellAmountWeis.dividedBy(takerBuyTokensWeis).toFixed(DEFAULT_PRECISION, BigNumber.ROUND_FLOOR)
-    console.log('takerPrice', takerPrice)
   }
 
   // Calculate the fill price
@@ -199,7 +180,7 @@ export function buildPriceMsg(params: {
   price: BigNumber
 }): string {
   const { sellTokenLabel, buyTokenLabel, price } = params
-  const priceFormatted = price.toFixed(DEFAULT_PRECISION)
+  const priceFormatted = price.toFixed(PRICE_PRECISION)
 
   return `1 \`${sellTokenLabel}\` = ${priceFormatted} \`${buyTokenLabel}\``
 }
