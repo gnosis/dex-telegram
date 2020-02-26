@@ -2,7 +2,13 @@ import BN from 'bn.js'
 import BigNumber from 'bignumber.js'
 import moment from 'moment-timezone'
 
-import { FEE_DENOMINATOR, formatAmountFull, isOrderUnlimited, isNeverExpiresOrder, ZERO } from '@gnosis.pm/dex-js'
+import {
+  FEE_DENOMINATOR,
+  formatAmountFull,
+  isOrderUnlimited,
+  isNeverExpiresOrder,
+  DEFAULT_PRECISION,
+} from '@gnosis.pm/dex-js'
 import { TokenDto, OrderDto } from 'services'
 
 // To fill an order, no solver will match the trades if there's not 2*FEE spread between the trades
@@ -44,7 +50,7 @@ export function calculatePrice(
     price = priceNumerator.multipliedBy(precisionFactor).dividedBy(priceDenominator)
   }
 
-  return price.decimalPlaces(buyTokenDecimals, BigNumber.ROUND_FLOOR)
+  return price.decimalPlaces(DEFAULT_PRECISION, BigNumber.ROUND_FLOOR)
 }
 
 export function buildExpirationMsg(order: OrderDto): string {
@@ -129,38 +135,60 @@ export function buildFillOrderUrl(params: {
   price: BigNumber
 }): string {
   const { isUnlimited, order, baseUrl, buyTokenParam, sellTokenParam, price } = params
-  const { sellToken, buyToken, priceNumerator, priceDenominator } = order
+  const { sellToken, buyToken, priceNumerator } = order
+
+  // Calculate the maker theoretic price (theoretic because it needs adjustments because of precision errors)
+  const takerTheoreticalPrice = FILL_INVERSE_TRADE_PRICE_BASE.div(price)
+  console.log('takerTheoreticalPrice', takerTheoreticalPrice.toString(10))
+  console.log('takerTheoreticalPrice (fixed)', takerTheoreticalPrice.toFixed(DEFAULT_PRECISION))
 
   // Calculate the sell amount and price
-  let fillAmountSell: BN
-  let priceInverse: BigNumber
+  let takerSellAmount: string
+  let takerPrice: string
   if (isUnlimited) {
     // For unlimited orders, the user can enter any amount he wants
-    fillAmountSell = ZERO
+    takerSellAmount = '0'
 
     // Calculate the inverse price taking the fee into account
     //  (1 - 2*fee) / price
-    priceInverse = FILL_INVERSE_TRADE_PRICE_BASE.div(price).decimalPlaces(sellToken.decimals, BigNumber.ROUND_FLOOR)
+    takerPrice = takerTheoreticalPrice.decimalPlaces(DEFAULT_PRECISION, BigNumber.ROUND_FLOOR).toString(10)
   } else {
     // The taker needs to sell slightly more "buy tokens" than what the maker is expecting and at a slightly better price
-    fillAmountSell = new BN(priceNumerator.multipliedBy(FACTOR_TO_FILL_ORDER).toFixed())
+    //    * The taker expects at least "priceNumerator buyTokens"
+    //    * We need take the fees into account (the taker needs to sell more tokens than the ones the maker receives)
+    const takerSellAmountWeis = priceNumerator.multipliedBy(FACTOR_TO_FILL_ORDER).decimalPlaces(0, BigNumber.ROUND_CEIL)
+    takerSellAmount = formatAmountFull(new BN(takerSellAmountWeis.toFixed()), buyToken.decimals, false)
+    console.log('takerSellAmount', takerSellAmount)
 
-    // Calculate the price inverse that makes the taker receive the expected tokens taking the fee into account
-    priceInverse = calculatePrice({
-      sellToken: buyToken,
+    // Calculate the taker buy tokens
+    const takerBuyAmountWeis = takerSellAmountWeis
+      .multipliedBy(takerTheoreticalPrice)
+      .dividedBy(10 ** (buyToken.decimals - sellToken.decimals))
+      .decimalPlaces(0, BigNumber.ROUND_FLOOR)
+
+    console.log(
+      'takerBuyTokens (decimals)',
+      takerSellAmountWeis
+        .multipliedBy(takerTheoreticalPrice)
+        .dividedBy(10 ** buyToken.decimals)
+        .toString(10),
+    )
+
+    console.log('takerBuyTokens', takerBuyAmountWeis.toString(10))
+
+    // Calculate the price
+    takerPrice = calculatePrice({
       buyToken: sellToken,
-      priceNumerator: priceDenominator,
-      priceDenominator: new BigNumber(fillAmountSell.toString(10)),
-    })
+      sellToken: buyToken,
+      priceNumerator: takerBuyAmountWeis,
+      priceDenominator: takerSellAmountWeis,
+    }).toString(10)
+    // takerSellAmountWeis.dividedBy(takerBuyTokensWeis).toFixed(DEFAULT_PRECISION, BigNumber.ROUND_FLOOR)
+    console.log('takerPrice', takerPrice)
   }
 
-  // Format the sell amount and price
-  const fillAmountSellFormatted = formatAmountFull(fillAmountSell, buyToken.decimals, false)
-  const priceInverseFormatted = priceInverse.toFixed(sellToken.decimals)
-
   // Calculate the fill price
-
-  return `${baseUrl}/trade/${buyTokenParam}-${sellTokenParam}?sell=${fillAmountSellFormatted}&price=${priceInverseFormatted}`
+  return `${baseUrl}/trade/${buyTokenParam}-${sellTokenParam}?sell=${takerSellAmount}&price=${takerPrice}`
 }
 
 export function buildPriceMsg(params: {
@@ -170,9 +198,8 @@ export function buildPriceMsg(params: {
   buyTokenDecimals: number
   price: BigNumber
 }): string {
-  const { sellTokenDecimals, buyTokenDecimals, sellTokenLabel, buyTokenLabel, price } = params
-  const maxDecimals = Math.max(sellTokenDecimals, buyTokenDecimals)
-  const priceFormatted = price.toFixed(maxDecimals)
+  const { sellTokenLabel, buyTokenLabel, price } = params
+  const priceFormatted = price.toFixed(DEFAULT_PRECISION)
 
   return `1 \`${sellTokenLabel}\` = ${priceFormatted} \`${buyTokenLabel}\``
 }
