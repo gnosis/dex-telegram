@@ -298,9 +298,9 @@ describe('newOrderMessage', () => {
     // Some intermediate steps to explain previous numbers:
     //    * Calculate the maker price:
     //        * Since he sells 1.23 token2 for 12.1 token1
-    //        => Price: 1.23 / 12.1 = 9.837398373983739837...
+    //        => Price: 12.1 / 1.23  = 9.8373983739837398374
     //    * Get taker theoretic price
-    //        * We need to apply to the price the 2 fees:   0.998 * 1 / 9.837398373983739837 = 0.101449586776859504...
+    //        * We need to apply to the price the 2 fees:   0.998 * 1 / 9.837398373983739837 = 0.1014495867768595041...
     //    * Calculate sell amount for taker:
     //        * The maker wants 12.1 token1 and the taker needs to include the two fees in the trade
     //        * Then the taker needs to sell:   12.1 / 0.998 = 12.124248497 token1
@@ -310,7 +310,7 @@ describe('newOrderMessage', () => {
     //        * Using the "theoretic taker price":  12.2 * 0.101449586776859504 = 1.2376849586776859488 token2
     //        * token2 have 2 decimal, we adjust precision flooring the value --->  1.23 token2
     //    * Calculate final price for taker:
-    //        * 1.23 / 12.2 = 0.100819672131147540
+    //        * 1.23 / 12.2 = 0.1008196721311475409
     expect(actual).toEqual(`Sell *1.23* \`${TOKEN_2}\` for *12.1* \`${BUY_TOKEN_SYMBOL}\`
 
   - *Price*:  1 \`${TOKEN_2}\` = 9.8373983739837398374 \`${BUY_TOKEN_SYMBOL}\`
