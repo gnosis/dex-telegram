@@ -41,6 +41,23 @@ const baseOrder: OrderDto = {
 }
 
 describe('calculatePrice', () => {
+  test('sell token with higher precision', () => {
+    // GIVEN: an order exchanging 20 token1 for 30 token2 (different precision)
+    const order = {
+      ...baseOrder,
+      sellToken: { ...baseSellToken, decimals: 18 },
+      buyToken: { ...baseBuyToken, decimals: 17 },
+      priceNumerator: new BigNumber(2000000000000000000),
+      priceDenominator: new BigNumber(30000000000000000000),
+    }
+
+    // WHEN: Calculating the price
+    const actual = calculatePrice(order)
+
+    // THEN Price is
+    expect(actual.toString(10)).toBe('0.6666666666666666666')
+  })
+
   test('buy token with same or higher precision', () => {
     // GIVEN: an order exchanging 20 token1 for 30 token2 (same precision)
     const order = {
@@ -55,7 +72,7 @@ describe('calculatePrice', () => {
     const actual = calculatePrice(order)
 
     // THEN Price is
-    expect(actual.toString(10)).toBe('0.666666666666666666')
+    expect(actual.toString(10)).toBe('0.6666666666666666666')
   })
 
   test('sell token with higher precision', () => {
@@ -72,7 +89,7 @@ describe('calculatePrice', () => {
     const actual = calculatePrice(order)
 
     // THEN Price is
-    expect(actual.toString(10)).toBe('0.66666666666666666')
+    expect(actual.toString(10)).toBe('0.6666666666666666666')
   })
 
   test('sell token with smaller precision', () => {
@@ -89,7 +106,7 @@ describe('calculatePrice', () => {
     const actual = calculatePrice(order)
 
     // THEN Price is
-    expect(actual.toString(10)).toBe('0.666666666666666666')
+    expect(actual.toString(10)).toBe('0.6666666666666666666')
   })
 })
 
@@ -211,7 +228,7 @@ describe('calculateUnlimitedBuyTokenFillAmount', () => {
   })
 })
 
-describe('buildFillOrderMsg', () => {
+describe('buildFillOrderUrl', () => {
   const price = new BigNumber('1.1')
   const baseUrl = 'http://dex.gnosis.io/'
   const buyTokenParam = 'SCM'
@@ -232,7 +249,7 @@ describe('buildFillOrderMsg', () => {
     })
 
     // THEN: The url has the correct price and a sell amount of 0
-    expect(actual).toEqual(`${baseUrl}/trade/${buyTokenParam}-${sellTokenParam}?sell=0&price=0.907272727`)
+    expect(actual).toEqual(`${baseUrl}/trade/${buyTokenParam}-${sellTokenParam}?sell=0&price=0.9072727272727272727`)
   })
 
   test('limited order', () => {
@@ -250,7 +267,79 @@ describe('buildFillOrderMsg', () => {
     })
 
     // THEN: The url has the correct price and a sell amount of 0
-    expect(actual).toEqual(`${baseUrl}/trade/${buyTokenParam}-${sellTokenParam}?sell=10.02&price=1.097804391`)
+    expect(actual).toEqual(`${baseUrl}/trade/${buyTokenParam}-${sellTokenParam}?sell=10.02&price=0.907272727245508982`)
+  })
+})
+
+describe('newOrderMessage', () => {
+  const baseUrl = 'http://dex.gnosis.io/'
+
+  test('basic example', () => {
+    // GIVEN: A maker that sells 1.23 token2 for 12.1 token1
+    // GIVEN: token1 has 2 decimals and token2 has 1 decimal
+    // GIVEN: Price of the maker is 0.1016528925619834...
+    const order = {
+      ...baseOrder,
+      sellToken: { ...baseSellToken, decimals: 2 }, // token2
+      buyToken: { ...baseBuyToken, decimals: 1 }, // token1
+      priceNumerator: new BigNumber(121), // 12.1 token1 (buy)
+      priceDenominator: new BigNumber(123), // 1.23 token2 (sell)
+    }
+    Date.now = jest.fn().mockReturnValue(new Date('2020-02-24T00:02:10.000'))
+
+    // WHEN: Build fill order url
+    const actual = newOrderMessage(order, baseUrl)
+    console.log(actual)
+
+    // THEN: The price in the URL (price for the taker) allows the maker trade to execute fully
+    // THEN: Price for maker is 9.837398373983739837
+    // THEN: Sell amount is 12.2 token1
+    // THEN: Price for taker is 0.100819672131147540
+    // Some intermediate steps to explain previous numbers:
+    //    * Calculate the maker price:
+    //        * Since he sells 1.23 token2 for 12.1 token1
+    //        => Price: 1.23 / 12.1 = 9.837398373983739837...
+    //    * Get taker theoretic price
+    //        * We need to apply to the price the 2 fees:   0.998 * 1 / 9.837398373983739837 = 0.101449586776859504...
+    //    * Calculate sell amount for taker:
+    //        * The maker wants 12.1 token1 and the taker needs to include the two fees in the trade
+    //        * Then the taker needs to sell:   12.1 / 0.998 = 12.124248497 token1
+    //        * Since token1 has 1 decimal. The taker will round and ceil this value
+    //        => He will sell 12.2 token1
+    //    * Calculate the buy tokens for the taker
+    //        * Using the "theoretic taker price":  12.2 * 0.101449586776859504 = 1.2376849586776859488 token2
+    //        * token2 have 2 decimal, we adjust precision flooring the value --->  1.23 token2
+    //    * Calculate final price for taker:
+    //        * 1.23 / 12.2 = 0.100819672131147540
+    expect(actual).toEqual(`Sell *1.23* \`${TOKEN_2}\` for *12.1* \`${BUY_TOKEN_SYMBOL}\`
+
+  - *Price*:  1 \`${TOKEN_2}\` = 9.8373983739837398374 \`${BUY_TOKEN_SYMBOL}\`
+  - *Expires*: \`Tomorrow at 12:00 AM GMT\`, \`in a day\`
+
+Fill the order here: http://dex.gnosis.io//trade/COOL-${TOKEN_2}?sell=12.2&price=0.1008196721311475409`)
+  })
+
+  test('unlimited order', () => {
+    // GIVEN: An order staring 2min 10 seg ago. With expiring date on next date 12am GMT
+    Date.now = jest.fn().mockReturnValue(new Date('2020-02-24T00:02:10.000'))
+
+    // WHEN: Formatting message for new order
+    const actual = newOrderMessage(
+      {
+        ...baseOrder,
+        priceNumerator: new BigNumber('10000000000000000000'),
+        priceDenominator: new BigNumber('3000000000'),
+      },
+      baseUrl,
+    )
+
+    // THEN: The message is as follows
+    expect(actual).toEqual(`Sell *3* \`${TOKEN_2}\` for *10* \`${BUY_TOKEN_SYMBOL}\`
+
+  - *Price*:  1 \`${TOKEN_2}\` = 3.3333333333333333333 \`${BUY_TOKEN_SYMBOL}\`
+  - *Expires*: \`Tomorrow at 12:00 AM GMT\`, \`in a day\`
+
+Fill the order here: http://dex.gnosis.io//trade/COOL-${TOKEN_2}?sell=10.02&price=0.2994`)
   })
 })
 
@@ -274,36 +363,9 @@ describe('newOrderMessage', () => {
     // THEN: The message is as follows
     expect(actual).toEqual(`Sell *3* \`${TOKEN_2}\` for *10* \`${BUY_TOKEN_SYMBOL}\`
 
-  - *Price*:  1 \`${TOKEN_2}\` = 3.333333333333333333 \`${BUY_TOKEN_SYMBOL}\`
+  - *Price*:  1 \`${TOKEN_2}\` = 3.3333333333333333333 \`${BUY_TOKEN_SYMBOL}\`
   - *Expires*: \`Tomorrow at 12:00 AM GMT\`, \`in a day\`
 
-Fill the order here: http://dex.gnosis.io//trade/COOL-${TOKEN_2}?sell=10.02&price=0.299401197`)
-  })
-})
-
-describe('newOrderMessage', () => {
-  const baseUrl = 'http://dex.gnosis.io/'
-
-  test('unlimited order', () => {
-    // GIVEN: An order staring 2min 10 seg ago. With expiring date on next date 12am GMT
-    Date.now = jest.fn().mockReturnValue(new Date('2020-02-24T00:02:10.000'))
-
-    // WHEN: Formatting message for new order
-    const actual = newOrderMessage(
-      {
-        ...baseOrder,
-        priceNumerator: new BigNumber('10000000000000000000'),
-        priceDenominator: new BigNumber('3000000000'),
-      },
-      baseUrl,
-    )
-
-    // THEN: The message is as follows
-    expect(actual).toEqual(`Sell *3* \`${TOKEN_2}\` for *10* \`${BUY_TOKEN_SYMBOL}\`
-
-  - *Price*:  1 \`${TOKEN_2}\` = 3.333333333333333333 \`${BUY_TOKEN_SYMBOL}\`
-  - *Expires*: \`Tomorrow at 12:00 AM GMT\`, \`in a day\`
-
-Fill the order here: http://dex.gnosis.io//trade/COOL-${TOKEN_2}?sell=10.02&price=0.299401197`)
+Fill the order here: http://dex.gnosis.io//trade/COOL-${TOKEN_2}?sell=10.02&price=0.2994`)
   })
 })
