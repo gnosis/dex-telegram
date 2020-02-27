@@ -1,6 +1,6 @@
 {
   "name": "@gnosis.pm/dex-telegram",
-  "version": "0.5.3",
+  "version": "0.6.0",
   "description": "",
   "license": "MIT",
   "scripts": {
