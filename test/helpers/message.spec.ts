@@ -289,7 +289,6 @@ describe('newOrderMessage', () => {
 
     // WHEN: Build fill order url
     const actual = newOrderMessage(order, baseUrl)
-    console.log(actual)
 
     // THEN: The price in the URL (price for the taker) allows the maker trade to execute fully
     // THEN: Price for maker is 9.837398373983739837
@@ -314,6 +313,7 @@ describe('newOrderMessage', () => {
     expect(actual).toEqual(`Sell *1.23* \`${TOKEN_2}\` for *12.1* \`${BUY_TOKEN_SYMBOL}\`
 
   - *Price*:  1 \`${TOKEN_2}\` = 9.8373983739837398374 \`${BUY_TOKEN_SYMBOL}\`
+  - *Price*:  1 \`${BUY_TOKEN_SYMBOL}\` = 0.1016528925619834710 \`${TOKEN_2}\`
   - *Expires*: \`Tomorrow at 12:00 AM GMT\`, \`in a day\`
 
 Fill the order here: http://dex.gnosis.io//trade/COOL-${TOKEN_2}?sell=12.2&price=0.1008196721311475409`)
@@ -337,6 +337,7 @@ Fill the order here: http://dex.gnosis.io//trade/COOL-${TOKEN_2}?sell=12.2&price
     expect(actual).toEqual(`Sell *3* \`${TOKEN_2}\` for *10* \`${BUY_TOKEN_SYMBOL}\`
 
   - *Price*:  1 \`${TOKEN_2}\` = 3.3333333333333333333 \`${BUY_TOKEN_SYMBOL}\`
+  - *Price*:  1 \`${BUY_TOKEN_SYMBOL}\` = 0.3000000000000000000 \`${TOKEN_2}\`
   - *Expires*: \`Tomorrow at 12:00 AM GMT\`, \`in a day\`
 
 Fill the order here: http://dex.gnosis.io//trade/COOL-${TOKEN_2}?sell=10.02&price=0.2994`)
@@ -364,6 +365,7 @@ describe('newOrderMessage', () => {
     expect(actual).toEqual(`Sell *3* \`${TOKEN_2}\` for *10* \`${BUY_TOKEN_SYMBOL}\`
 
   - *Price*:  1 \`${TOKEN_2}\` = 3.3333333333333333333 \`${BUY_TOKEN_SYMBOL}\`
+  - *Price*:  1 \`${BUY_TOKEN_SYMBOL}\` = 0.3000000000000000000 \`${TOKEN_2}\`
   - *Expires*: \`Tomorrow at 12:00 AM GMT\`, \`in a day\`
 
 Fill the order here: http://dex.gnosis.io//trade/COOL-${TOKEN_2}?sell=10.02&price=0.2994`)
