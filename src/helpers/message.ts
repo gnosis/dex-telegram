@@ -228,6 +228,23 @@ export function newOrderMessage(order: OrderDto, baseUrl: string): string {
       buyTokenDecimals: buyToken.decimals,
       price,
     })
+  // Partial message: Price of the order
+  //    i.e Price:  1 WETH = 282.8854314002828854314 SNX
+  const priceInverse = calculatePrice({
+    buyToken: order.sellToken,
+    sellToken: order.buyToken,
+    priceNumerator: priceDenominator,
+    priceDenominator: priceNumerator,
+  })
+  const pricepriceInverseMsg =
+    '\n  - *Price*:  ' +
+    buildPriceMsg({
+      sellTokenLabel: buyTokenLabel,
+      buyTokenLabel: sellTokenLabel,
+      sellTokenDecimals: buyToken.decimals,
+      buyTokenDecimals: sellToken.decimals,
+      price: priceInverse,
+    })
 
   // Partial message: Only display the valid from if the period hasn't started
   //    i.e. Tradable: Today at 4:55 PM GMT, in 4 minutes
@@ -257,5 +274,5 @@ export function newOrderMessage(order: OrderDto, baseUrl: string): string {
     })
 
   // Compose the final message
-  return `${sellMsg}${priceMsg}${notYetActiveOrderMsg}${expirationMsg}${unknownTokenMsg}${fillOrderMsg}`
+  return `${sellMsg}${priceMsg}${pricepriceInverseMsg}${notYetActiveOrderMsg}${expirationMsg}${unknownTokenMsg}${fillOrderMsg}`
 }
