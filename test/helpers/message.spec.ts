@@ -55,7 +55,7 @@ describe('calculatePrice', () => {
     const actual = calculatePrice(order)
 
     // THEN Price is
-    expect(actual.toString(10)).toBe('0.6666666666666666666')
+    expect(actual.toString(10)).toBe('0.6666666666666666666666666')
   })
 
   test('buy token with same or higher precision', () => {
@@ -72,7 +72,7 @@ describe('calculatePrice', () => {
     const actual = calculatePrice(order)
 
     // THEN Price is
-    expect(actual.toString(10)).toBe('0.6666666666666666666')
+    expect(actual.toString(10)).toBe('0.6666666666666666666666666')
   })
 
   test('sell token with higher precision', () => {
@@ -89,7 +89,7 @@ describe('calculatePrice', () => {
     const actual = calculatePrice(order)
 
     // THEN Price is
-    expect(actual.toString(10)).toBe('0.6666666666666666666')
+    expect(actual.toString(10)).toBe('0.6666666666666666666666666')
   })
 
   test('sell token with smaller precision', () => {
@@ -106,7 +106,7 @@ describe('calculatePrice', () => {
     const actual = calculatePrice(order)
 
     // THEN Price is
-    expect(actual.toString(10)).toBe('0.6666666666666666666')
+    expect(actual.toString(10)).toBe('0.6666666666666666666666666')
   })
 })
 
@@ -249,7 +249,9 @@ describe('buildFillOrderUrl', () => {
     })
 
     // THEN: The url has the correct price and a sell amount of 0
-    expect(actual).toEqual(`${baseUrl}/trade/${buyTokenParam}-${sellTokenParam}?sell=0&price=0.9072727272727272727`)
+    expect(actual).toEqual(
+      `${baseUrl}/trade/${buyTokenParam}-${sellTokenParam}?sell=0&price=0.9072727272727272727272727`,
+    )
   })
 
   test('limited order', () => {
@@ -267,7 +269,9 @@ describe('buildFillOrderUrl', () => {
     })
 
     // THEN: The url has the correct price and a sell amount of 0
-    expect(actual).toEqual(`${baseUrl}/trade/${buyTokenParam}-${sellTokenParam}?sell=10.02&price=0.907272727245508982`)
+    expect(actual).toEqual(
+      `${baseUrl}/trade/${buyTokenParam}-${sellTokenParam}?sell=10.02&price=0.9072727272455089820359281`,
+    )
   })
 })
 
@@ -310,13 +314,13 @@ describe('newOrderMessage', () => {
     //        * Using the "theoretic taker price":  12.2 * 0.101449586776859504 = 1.2376849586776859488 token2
     //        * token2 have 2 decimal, we adjust precision flooring the value --->  1.23 token2
     //    * Calculate final price for taker:
-    //        * 1.23 / 12.2 = 0.1008196721311475409
+    //        * 1.23 / 12.2 = 0.1008196721311475409836065
     expect(actual).toEqual(`Sell *1.23* \`${TOKEN_2}\` for *12.1* \`${BUY_TOKEN_SYMBOL}\`
 
-  - *Price*:  1 \`${TOKEN_2}\` = 9.8373983739837398374 \`${BUY_TOKEN_SYMBOL}\`
+  - *Price*:  1 \`${TOKEN_2}\` = 9.8373983739837398373983739 \`${BUY_TOKEN_SYMBOL}\`
   - *Expires*: \`Tomorrow at 12:00 AM GMT\`, \`in a day\`
 
-Fill the order here: http://dex.gnosis.io//trade/COOL-${TOKEN_2}?sell=12.2&price=0.1008196721311475409`)
+Fill the order here: http://dex.gnosis.io//trade/COOL-${TOKEN_2}?sell=12.2&price=0.1008196721311475409836065`)
   })
 
   test('unlimited order', () => {
@@ -336,7 +340,7 @@ Fill the order here: http://dex.gnosis.io//trade/COOL-${TOKEN_2}?sell=12.2&price
     // THEN: The message is as follows
     expect(actual).toEqual(`Sell *3* \`${TOKEN_2}\` for *10* \`${BUY_TOKEN_SYMBOL}\`
 
-  - *Price*:  1 \`${TOKEN_2}\` = 3.3333333333333333333 \`${BUY_TOKEN_SYMBOL}\`
+  - *Price*:  1 \`${TOKEN_2}\` = 3.3333333333333333333333333 \`${BUY_TOKEN_SYMBOL}\`
   - *Expires*: \`Tomorrow at 12:00 AM GMT\`, \`in a day\`
 
 Fill the order here: http://dex.gnosis.io//trade/COOL-${TOKEN_2}?sell=10.02&price=0.2994`)
@@ -363,7 +367,7 @@ describe('newOrderMessage', () => {
     // THEN: The message is as follows
     expect(actual).toEqual(`Sell *3* \`${TOKEN_2}\` for *10* \`${BUY_TOKEN_SYMBOL}\`
 
-  - *Price*:  1 \`${TOKEN_2}\` = 3.3333333333333333333 \`${BUY_TOKEN_SYMBOL}\`
+  - *Price*:  1 \`${TOKEN_2}\` = 3.3333333333333333333333333 \`${BUY_TOKEN_SYMBOL}\`
   - *Expires*: \`Tomorrow at 12:00 AM GMT\`, \`in a day\`
 
 Fill the order here: http://dex.gnosis.io//trade/COOL-${TOKEN_2}?sell=10.02&price=0.2994`)

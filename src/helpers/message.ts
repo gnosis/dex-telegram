@@ -5,7 +5,9 @@ import moment from 'moment-timezone'
 import { FEE_DENOMINATOR, formatAmountFull, isOrderUnlimited, isNeverExpiresOrder } from '@gnosis.pm/dex-js'
 import { TokenDto, OrderDto } from 'services'
 
-const PRICE_PRECISION = 19
+// Setup bignumber to use 25 decimals
+const PRICE_PRECISION = 25
+BigNumber.config({ DECIMAL_PLACES: PRICE_PRECISION + 1 })
 
 // To fill an order, no solver will match the trades if there's not 2*FEE spread between the trades
 const FACTOR_TO_FILL_ORDER = 1 + 2 / FEE_DENOMINATOR
