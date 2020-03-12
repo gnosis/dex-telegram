@@ -125,8 +125,7 @@ export function buildFillOrderUrl(params: {
 
     // Calculate the inverse price taking the fee into account
     //  (1 - 2*fee) / price
-    const price = takerTheoreticalPrice.decimalPlaces(PRICE_PRECISION, BigNumber.ROUND_FLOOR)
-    takerPrice = formatPrice({ price, decimals: PRICE_PRECISION, zeroPadding: false })
+    takerPrice = formatPrice({ price: takerTheoreticalPrice, decimals: PRICE_PRECISION, zeroPadding: false })
   } else {
     // The taker needs to sell slightly more "buy tokens" than what the maker is expecting and at a slightly better price
     //    * The taker expects at least "priceNumerator buyTokens"
