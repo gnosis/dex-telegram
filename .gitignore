@@ -6,3 +6,5 @@ package-lock.json
 build
 coverage
 .vscode
+.yalc
+yalc.lock
