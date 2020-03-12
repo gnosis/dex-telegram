@@ -2,7 +2,7 @@ import BN from 'bn.js'
 import BigNumber from 'bignumber.js'
 import moment from 'moment-timezone'
 
-import { FEE_DENOMINATOR, formatAmountFull, isOrderUnlimited, isNeverExpiresOrder } from '@gnosis.pm/dex-js'
+import { FEE_DENOMINATOR, formatAmountFull, isOrderUnlimited, isNeverExpiresOrder, calculatePrice, formatPrice, invertPrice } from '@gnosis.pm/dex-js'
 import { TokenDto, OrderDto } from 'services'
 
 const PRICE_PRECISION = 19
@@ -27,26 +27,6 @@ function _getTokenFmt(amount: BigNumber, token: TokenDto) {
   const amountFmt = formatAmountFull(new BN(amount.toFixed()), token.decimals) as string
 
   return { tokenLabel, tokenParam, amountFmt }
-}
-
-// TODO: probably there is (or there should be) a function shared on dex-js for this
-export function calculatePrice(
-  order: Pick<OrderDto, 'buyToken' | 'sellToken' | 'priceNumerator' | 'priceDenominator'>,
-): BigNumber {
-  const { buyToken, sellToken, priceNumerator, priceDenominator } = order
-  const buyTokenDecimals = buyToken.decimals
-  const sellTokenDecimals = sellToken.decimals
-
-  let price
-  if (buyTokenDecimals >= sellTokenDecimals) {
-    const precisionFactor = 10 ** (buyTokenDecimals - sellTokenDecimals)
-    price = priceNumerator.dividedBy(priceDenominator.multipliedBy(precisionFactor))
-  } else {
-    const precisionFactor = 10 ** (sellTokenDecimals - buyTokenDecimals)
-    price = priceNumerator.multipliedBy(precisionFactor).dividedBy(priceDenominator)
-  }
-
-  return price.decimalPlaces(PRICE_PRECISION, BigNumber.ROUND_FLOOR)
 }
 
 export function buildExpirationMsg(order: OrderDto): string {
@@ -145,7 +125,8 @@ export function buildFillOrderUrl(params: {
 
     // Calculate the inverse price taking the fee into account
     //  (1 - 2*fee) / price
-    takerPrice = takerTheoreticalPrice.decimalPlaces(PRICE_PRECISION, BigNumber.ROUND_FLOOR).toString(10)
+    const price = takerTheoreticalPrice.decimalPlaces(PRICE_PRECISION, BigNumber.ROUND_FLOOR)
+    takerPrice = formatPrice({ price, decimals: PRICE_PRECISION, zeroPadding: false })
   } else {
     // The taker needs to sell slightly more "buy tokens" than what the maker is expecting and at a slightly better price
     //    * The taker expects at least "priceNumerator buyTokens"
@@ -160,12 +141,11 @@ export function buildFillOrderUrl(params: {
       .decimalPlaces(0, BigNumber.ROUND_FLOOR)
 
     // Calculate the price
-    takerPrice = calculatePrice({
-      buyToken: sellToken,
-      sellToken: buyToken,
-      priceNumerator: takerBuyAmountWeis,
-      priceDenominator: takerSellAmountWeis,
-    }).toString(10)
+    const price = calculatePrice({
+      numerator: { amount: takerBuyAmountWeis, decimals: sellToken.decimals },
+      denominator: { amount: takerSellAmountWeis, decimals: buyToken.decimals },
+    })
+    takerPrice = formatPrice({ price, decimals: PRICE_PRECISION, zeroPadding: false })
   }
 
   // Calculate the fill price
@@ -180,7 +160,7 @@ export function buildPriceMsg(params: {
   price: BigNumber
 }): string {
   const { sellTokenLabel, buyTokenLabel, price } = params
-  const priceFormatted = price.toFixed(PRICE_PRECISION)
+  const priceFormatted = formatPrice({ price, decimals: PRICE_PRECISION, zeroPadding: false })
 
   return `1 \`${sellTokenLabel}\` = ${priceFormatted} \`${buyTokenLabel}\``
 }
@@ -218,7 +198,10 @@ export function newOrderMessage(order: OrderDto, baseUrl: string): string {
 
   // Partial message: Price of the order
   //    i.e Price:  1 WETH = 282.8854314002828854314 SNX
-  const price = calculatePrice(order)
+  const price = calculatePrice({
+    numerator: { amount: order.priceNumerator, decimals: buyToken.decimals },
+    denominator: { amount: order.priceDenominator, decimals: sellToken.decimals },
+  })
   const priceMsg =
     '\n  - *Price*:  ' +
     buildPriceMsg({
@@ -230,13 +213,8 @@ export function newOrderMessage(order: OrderDto, baseUrl: string): string {
     })
   // Partial message: Price of the order
   //    i.e Price:  1 WETH = 282.8854314002828854314 SNX
-  const priceInverse = calculatePrice({
-    buyToken: order.sellToken,
-    sellToken: order.buyToken,
-    priceNumerator: priceDenominator,
-    priceDenominator: priceNumerator,
-  })
-  const pricepriceInverseMsg =
+  const priceInverse = invertPrice(price)
+  const priceInverseMsg =
     '\n  - *Price*:  ' +
     buildPriceMsg({
       sellTokenLabel: buyTokenLabel,
@@ -274,5 +252,5 @@ export function newOrderMessage(order: OrderDto, baseUrl: string): string {
     })
 
   // Compose the final message
-  return `${sellMsg}${priceMsg}${pricepriceInverseMsg}${notYetActiveOrderMsg}${expirationMsg}${unknownTokenMsg}${fillOrderMsg}`
+  return `${sellMsg}${priceMsg}${priceInverseMsg}${notYetActiveOrderMsg}${expirationMsg}${unknownTokenMsg}${fillOrderMsg}`
 }
