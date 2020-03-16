@@ -24,7 +24,7 @@ function _getTokenFmt(amount: BigNumber, token: TokenDto) {
     tokenParam = token.address
   }
 
-  const amountFmt = formatAmountFull(new BN(amount.toFixed()), token.decimals) as string
+  const amountFmt = formatAmountFull({ amount: new BN(amount.toFixed()), precision: token.decimals }) as string
 
   return { tokenLabel, tokenParam, amountFmt }
 }
@@ -131,7 +131,11 @@ export function buildFillOrderUrl(params: {
     //    * The taker expects at least "priceNumerator buyTokens"
     //    * We need take the fees into account (the taker needs to sell more tokens than the ones the maker receives)
     const takerSellAmountWeis = priceNumerator.multipliedBy(FACTOR_TO_FILL_ORDER).decimalPlaces(0, BigNumber.ROUND_CEIL)
-    takerSellAmount = formatAmountFull(new BN(takerSellAmountWeis.toFixed()), buyToken.decimals, false)
+    takerSellAmount = formatAmountFull({
+      amount: new BN(takerSellAmountWeis.toFixed()),
+      precision: buyToken.decimals,
+      thousandSeparator: false,
+    })
 
     // Calculate the taker buy tokens
     const takerBuyAmountWeis = takerSellAmountWeis
