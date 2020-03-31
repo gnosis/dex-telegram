@@ -4,7 +4,6 @@ import { TOKEN_1, TOKEN_2, USER_1 } from '../data'
 
 import { OrderDto, TokenDto } from 'services'
 import {
-  calculatePrice,
   buildExpirationMsg,
   buildUnknownTokenMsg,
   buildNotYetActiveOrderMsg,
@@ -39,76 +38,6 @@ const baseOrder: OrderDto = {
   validUntilBatchId: new BigNumber(1),
   event: new MockEvent(),
 }
-
-describe('calculatePrice', () => {
-  test('sell token with higher precision', () => {
-    // GIVEN: an order exchanging 20 token1 for 30 token2 (different precision)
-    const order = {
-      ...baseOrder,
-      sellToken: { ...baseSellToken, decimals: 18 },
-      buyToken: { ...baseBuyToken, decimals: 17 },
-      priceNumerator: new BigNumber(2000000000000000000),
-      priceDenominator: new BigNumber(30000000000000000000),
-    }
-
-    // WHEN: Calculating the price
-    const actual = calculatePrice(order)
-
-    // THEN Price is
-    expect(actual.toString(10)).toBe('0.6666666666666666666')
-  })
-
-  test('buy token with same or higher precision', () => {
-    // GIVEN: an order exchanging 20 token1 for 30 token2 (same precision)
-    const order = {
-      ...baseOrder,
-      sellToken: { ...baseSellToken, decimals: 18 },
-      buyToken: { ...baseBuyToken, decimals: 18 },
-      priceNumerator: new BigNumber(20000000000000000000),
-      priceDenominator: new BigNumber(30000000000000000000),
-    }
-
-    // WHEN: Calculating the price
-    const actual = calculatePrice(order)
-
-    // THEN Price is
-    expect(actual.toString(10)).toBe('0.6666666666666666666')
-  })
-
-  test('sell token with higher precision', () => {
-    // GIVEN: an order exchanging 20 token1 for 30 token2 (different precision)
-    const order = {
-      ...baseOrder,
-      sellToken: { ...baseSellToken, decimals: 18 },
-      buyToken: { ...baseBuyToken, decimals: 17 },
-      priceNumerator: new BigNumber(2000000000000000000),
-      priceDenominator: new BigNumber(30000000000000000000),
-    }
-
-    // WHEN: Calculating the price
-    const actual = calculatePrice(order)
-
-    // THEN Price is
-    expect(actual.toString(10)).toBe('0.6666666666666666666')
-  })
-
-  test('sell token with smaller precision', () => {
-    // GIVEN: an order exchanging 10 token1 for 11 token2 (different precision)
-    const order = {
-      ...baseOrder,
-      sellToken: { ...baseSellToken, decimals: 17 },
-      buyToken: { ...baseBuyToken, decimals: 18 },
-      priceNumerator: new BigNumber(20000000000000000000),
-      priceDenominator: new BigNumber(3000000000000000000),
-    }
-
-    // WHEN: Calculating the price
-    const actual = calculatePrice(order)
-
-    // THEN Price is
-    expect(actual.toString(10)).toBe('0.6666666666666666666')
-  })
-})
 
 describe('buildExpirationMsg', () => {
   test('With expiration', () => {
@@ -309,14 +238,14 @@ describe('newOrderMessage', () => {
     //        * Using the "theoretic taker price":  12.2 * 0.101449586776859504 = 1.2376849586776859488 token2
     //        * token2 have 2 decimal, we adjust precision flooring the value --->  1.23 token2
     //    * Calculate final price for taker:
-    //        * 1.23 / 12.2 = 0.1008196721311475409
+    //        * 1.23 / 12.2 = 0.1008196721311475409836065574
     expect(actual).toEqual(`Sell *1.23* \`${TOKEN_2}\` for *12.1* \`${BUY_TOKEN_SYMBOL}\`
 
   - *Price*:  1 \`${TOKEN_2}\` = 9.8373983739837398374 \`${BUY_TOKEN_SYMBOL}\`
-  - *Price*:  1 \`${BUY_TOKEN_SYMBOL}\` = 0.1016528925619834710 \`${TOKEN_2}\`
+  - *Price*:  1 \`${BUY_TOKEN_SYMBOL}\` = 0.1016528925619834711 \`${TOKEN_2}\`
   - *Expires*: \`Tomorrow at 12:00 AM GMT\`, \`in a day\`
 
-Fill the order here: http://dex.gnosis.io//trade/COOL-${TOKEN_2}?sell=12.2&price=0.1008196721311475409`)
+Fill the order here: http://dex.gnosis.io//trade/COOL-${TOKEN_2}?sell=12.2&price=0.100819672131147541`)
   })
 
   test('unlimited order', () => {
@@ -337,7 +266,7 @@ Fill the order here: http://dex.gnosis.io//trade/COOL-${TOKEN_2}?sell=12.2&price
     expect(actual).toEqual(`Sell *3* \`${TOKEN_2}\` for *10* \`${BUY_TOKEN_SYMBOL}\`
 
   - *Price*:  1 \`${TOKEN_2}\` = 3.3333333333333333333 \`${BUY_TOKEN_SYMBOL}\`
-  - *Price*:  1 \`${BUY_TOKEN_SYMBOL}\` = 0.3000000000000000000 \`${TOKEN_2}\`
+  - *Price*:  1 \`${BUY_TOKEN_SYMBOL}\` = 0.3 \`${TOKEN_2}\`
   - *Expires*: \`Tomorrow at 12:00 AM GMT\`, \`in a day\`
 
 Fill the order here: http://dex.gnosis.io//trade/COOL-${TOKEN_2}?sell=10.02&price=0.2994`)
@@ -365,7 +294,7 @@ describe('newOrderMessage', () => {
     expect(actual).toEqual(`Sell *3* \`${TOKEN_2}\` for *10* \`${BUY_TOKEN_SYMBOL}\`
 
   - *Price*:  1 \`${TOKEN_2}\` = 3.3333333333333333333 \`${BUY_TOKEN_SYMBOL}\`
-  - *Price*:  1 \`${BUY_TOKEN_SYMBOL}\` = 0.3000000000000000000 \`${TOKEN_2}\`
+  - *Price*:  1 \`${BUY_TOKEN_SYMBOL}\` = 0.3 \`${TOKEN_2}\`
   - *Expires*: \`Tomorrow at 12:00 AM GMT\`, \`in a day\`
 
 Fill the order here: http://dex.gnosis.io//trade/COOL-${TOKEN_2}?sell=10.02&price=0.2994`)
