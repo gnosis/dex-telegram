@@ -35,7 +35,8 @@ export function buildExpirationMsg(order: OrderDto): string {
   if (isNeverExpiresOrder(validUntilBatchId.toNumber())) {
     return 'Valid until cancelled'
   } else {
-    return `\`${moment(validUntil).calendar()} GMT\`, \`${moment(validUntil).fromNow()}\``
+    const expiryDate = moment(validUntil).add(5, 'm').toDate()
+    return `\`${moment(expiryDate).calendar()} GMT\`, \`${moment(expiryDate).fromNow()}\``
   }
 }
 
