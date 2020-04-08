@@ -33,7 +33,7 @@ const baseOrder: OrderDto = {
   priceNumerator: new BigNumber(10000000000000000000),
   priceDenominator: new BigNumber(11000000000),
   validFrom: new Date('2020-02-24T00:00:00.000'),
-  validUntil: new Date('2020-02-24T11:55:00.000'),
+  validUntil: new Date('2020-02-25T00:00:00.000'),
   validFromBatchId: new BigNumber(0),
   validUntilBatchId: new BigNumber(1),
   event: new MockEvent(),
