@@ -174,7 +174,7 @@ export class DfusionRepoImpl implements DfusionService {
           this._getToken(sellTokenAddress),
           this._getToken(buyTokenAddress),
           this._batchIdToDate(validFromBatchId),
-          this._batchIdToDate(validUntilBatchId),
+          this._batchIdToDate(validUntilBatchId + 1),
         ])
 
         log.info(`New order in tx ${event.transactionHash}:
