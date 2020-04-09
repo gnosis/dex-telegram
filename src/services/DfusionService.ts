@@ -174,7 +174,7 @@ export class DfusionRepoImpl implements DfusionService {
           this._getToken(sellTokenAddress),
           this._getToken(buyTokenAddress),
           this._batchIdToDate(validFromBatchId),
-          this._batchIdToDate(validUntilBatchId),
+          this._batchIdToDate(validUntilBatchId.plus(1)), // adding 1 since validUntillBatchId is inclusive. https://github.com/gnosis/dex-telegram/issues/183
         ])
 
         log.info(`New order in tx ${event.transactionHash}:
