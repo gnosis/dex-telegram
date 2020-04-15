@@ -10,10 +10,10 @@ Develop:
 &nbsp;
 [![Coverage Status](https://coveralls.io/repos/github/gnosis/dex-telegram/badge.svg?branch=develop)](https://coveralls.io/github/gnosis/dex-telegram?branch=develop)
 
-# dFusion Telegram Bots
+# Gnosis Protocol Telegram Bots
 <img align="right" width="350" src="./docs/screenshot.png">
 
-Telegram bot watching the smart contracts of [dFusion protocol](https://github.com/gnosis/dex-contracts)
+Telegram bot watching the smart contracts of [Gnosis Protocol](https://github.com/gnosis/dex-contracts)
 
 The bots will watch the contracts. They could potentially:
 * Report on a public channel about new orders
