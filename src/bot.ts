@@ -68,10 +68,10 @@ async function _helpCommand(msg: Message) {
     msg.chat.id,
     `${fromUser ? 'Hi ' + fromUser.first_name : 'Hi there'}!
     
-I don't talk much for now. I just notify every new order in dFusion channel.
-Please, go to ${channelHandle} to get notified on every new order.
+I don't talk much for now. I just notify every new order in the Gnosis Protocol channel.
+Please, head to ${channelHandle} to get notified on every new order.
 
-Also, you can ask about me by using the command: /about`,
+Also, you can find out more about me by using the command: /about`,
   )
 }
 
@@ -88,11 +88,11 @@ async function _aboutCommand(msg: Message) {
 
   return bot.sendMessage(
     msg.chat.id,
-    `I'm just a bot watching dFusion smart contract.
+    `I'm just a bot watching the Gnosis Protocol smart contract.
 
-If you want to know more about me, checkout my code in https://github.com/gnosis/dex-telegram
+If you want to know more about me, check out my code in https://github.com/gnosis/dex-telegram
 
-In that github you'll be able to fork me, open issues, or even better, give me some additional functionality (Pull Requests are really welcomed 😀).
+In that repo you'll be able to fork me, open issues, or even better, give me additional functionality (Pull Requests are extremely welcomed 😀).
 
 Some interesting facts are:
 - Contract Address: ${batchExchangeAddress}
@@ -103,10 +103,10 @@ Some interesting facts are:
 - Contract version: ${contractsVersion}
 - dex-js version: ${dexJsVersion}
 
-Also, here are some links you might find useful:
-- https://github.com/gnosis/dex-contracts: dFusion Smart Contracts
-- https://github.com/gnosis/dex-research: dFusion Research
-- https://github.com/gnosis/dex-services: dFusion services`,
+Also, here are some links you may find useful:
+- https://github.com/gnosis/dex-contracts: Gnosis Protocol Smart Contracts
+- https://github.com/gnosis/dex-research: Gnosis Protocol Research
+- https://github.com/gnosis/dex-services: Gnosis Protocol services`,
   )
 }
 
@@ -130,7 +130,7 @@ dfusionService
   .getAbout()
   .then(({ batchExchangeAddress, nodeInfo, networkId, blockNumber }) => {
     log.info(
-      `'Using contract ${batchExchangeAddress} in network ${networkId} (${nodeInfo}). Last block: ${blockNumber}'`,
+      `'Using contract ${batchExchangeAddress} on network ${networkId} (${nodeInfo}). Last block: ${blockNumber}'`,
     )
   })
   .catch(log.errorHandler)
