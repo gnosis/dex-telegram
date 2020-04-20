@@ -47,7 +47,7 @@ class BufferedBot extends TelegramBot {
       mergeMap(messageIputArray => {
         return from(messageIputArray).pipe(
           // concatenate messages in pieces no longer than 4096 characters
-          scan((accum, message, index) => {
+          scan<SendMessageInput, { message: SendMessageInput, pass: SendMessageInput | null }>((accum, message, index) => {
             const concatText = accum.message.text + (index > 0 ? MESSAGE_DELIMITER : '') + message.text
             if (concatText.length < 4096) { // avoids Error: Message is too long
               accum.message.text = concatText
@@ -61,7 +61,7 @@ class BufferedBot extends TelegramBot {
               accum.pass = accum.message
             }
             return accum
-          }, { message: { ...messageIputArray[0], text: '' }, pass: null } as { message: SendMessageInput, pass: SendMessageInput | null }),
+          }, { message: { ...messageIputArray[0], text: '' }, pass: null }),
           pluck('pass'),
           filter(Boolean),
         )
