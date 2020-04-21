@@ -3,6 +3,9 @@ import { Subject, timer } from 'rxjs'
 import { bufferTime, filter, groupBy, mergeMap, concatMap, ignoreElements, startWith } from 'rxjs/operators'
 
 import { SendMessageInput, concatMessages } from 'helpers'
+import { Logger } from '@gnosis.pm/dex-js'
+
+const log = new Logger('bot:buffered')
 
 const BUFFER_TIME = 3000 // consecutive messages over this time get buffered
 const SPACE_TIME = 1000 // min time between sending messages
@@ -36,10 +39,9 @@ export class BufferedBot extends TelegramBot {
         startWith(compoundMessage),
       )),
     ).subscribe(compoundMessage => {
-      console.log('compoundMessage', compoundMessage)
+      log.debug('Sending compound message %o', compoundMessage)
 
       const { chatId, text, options } = compoundMessage
-      console.log('text', text.length)
 
       super.sendMessage(chatId, text, options)
     })
