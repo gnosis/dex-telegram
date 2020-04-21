@@ -1,13 +1,12 @@
 import moment from 'moment-timezone'
-import TelegramBot, { Message, User } from 'node-telegram-bot-api'
-import { Subject, timer } from 'rxjs'
-import { bufferTime, filter, groupBy, mergeMap, concatMap, ignoreElements, startWith } from 'rxjs/operators'
+import { Message, User } from 'node-telegram-bot-api'
 
 import Server from 'Server'
 import { Logger, logUnhandledErrors, onShutdown, assert } from '@gnosis.pm/dex-js'
 
 import { dfusionService } from 'services'
-import { newOrderMessage, SendMessageInput, concatMessages } from 'helpers'
+import { newOrderMessage } from 'helpers'
+import { BufferedBot } from 'bufferedBot'
 
 const WEB_BASE_URL = process.env.WEB_BASE_URL || ''
 assert(WEB_BASE_URL, 'WEB_BASE_URL is required')
@@ -27,53 +26,6 @@ assert(channelId, 'TELEGRAM_CHANNEL_ID env var is required')
 // Private channels are identified by numbers
 const isPublicChannel = isNaN(channelId as any)
 const channelHandle = isPublicChannel ? channelId : '**private chat**'
-
-class BufferedBot extends TelegramBot {
-  private messagesSubject$ = new Subject<SendMessageInput>()
-
-  constructor(token: string, options?: TelegramBot.ConstructorOptions) {
-    super(token, options)
-
-    this.messagesSubject$.asObservable().pipe(
-      // group messages by chatId
-      // in case we have more channels
-      groupBy(messageInput => messageInput.chatId),
-      mergeMap(group$ => group$.pipe(
-        // buffer messages for 6sec
-        bufferTime(6000),
-        // pass forth only non-empty arrays
-        filter(array => array.length > 0),
-      )),
-      // here all messages in the array belong to the same chatId
-      mergeMap(messageIputArray => {
-        // concat many messages into one
-        return concatMessages(messageIputArray)
-      }),
-      // if multiple compound messages coming through
-      // space them out by 1sec
-      concatMap(compoundMessage => timer(1000).pipe(
-        ignoreElements(),
-        startWith(compoundMessage),
-      )),
-    ).subscribe(compoundMessage => {
-      console.log('compoundMessage', compoundMessage)
-
-      const { chatId, text, options } = compoundMessage
-      console.log('text', text.length)
-
-      super.sendMessage(chatId, text, options)
-    })
-  }
-
-  // have to return any to respect TelegramBot.sendMessage type
-  sendMessage(chatId: number | string, text: string, options?: TelegramBot.SendMessageOptions): any {
-    this.messagesSubject$.next({
-      chatId,
-      text,
-      options,
-    })
-  }
-}
 
 const bot = new BufferedBot(token, {
   polling: true,
