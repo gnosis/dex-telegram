@@ -2,7 +2,16 @@ import BN from 'bn.js'
 import BigNumber from 'bignumber.js'
 import moment from 'moment-timezone'
 
-import { FEE_DENOMINATOR, formatAmountFull, isOrderUnlimited, isNeverExpiresOrder, calculatePrice, formatPrice, invertPrice } from '@gnosis.pm/dex-js'
+import {
+  FEE_DENOMINATOR,
+  formatAmountFull,
+  isOrderUnlimited,
+  isNeverExpiresOrder,
+  calculatePrice,
+  formatPrice,
+  invertPrice,
+  encodeTokenSymbol,
+} from '@gnosis.pm/dex-js'
 import { TokenDto, OrderDto } from 'services'
 
 const PRICE_PRECISION = 19
@@ -12,17 +21,16 @@ const FACTOR_TO_FILL_ORDER = 1 + 2 / FEE_DENOMINATOR
 const FILL_INVERSE_TRADE_PRICE_BASE = new BigNumber(1 - 2 / FEE_DENOMINATOR)
 
 function _getTokenFmt(amount: BigNumber, token: TokenDto) {
-  let tokenLabel, tokenParam
+  let tokenLabel
   if (token.known) {
     tokenLabel = token.symbol || token.name || token.address
-    tokenParam = token.symbol || token.address
   } else {
     // The token is unknown, so it can't be trusted.
     // We use it's address and we add the "Maybe " prefix ot it's symbol/name
     const tokenLabelAux = token.symbol || token.name
     tokenLabel = tokenLabelAux ? 'Maybe ' + tokenLabelAux : token.address
-    tokenParam = token.address
   }
+  const tokenParam = encodeTokenSymbol(token)
 
   const amountFmt = formatAmountFull({ amount: new BN(amount.toFixed()), precision: token.decimals }) as string
 
