@@ -21,16 +21,19 @@ const FACTOR_TO_FILL_ORDER = 1 + 2 / FEE_DENOMINATOR
 const FILL_INVERSE_TRADE_PRICE_BASE = new BigNumber(1 - 2 / FEE_DENOMINATOR)
 
 function _getTokenFmt(amount: BigNumber, token: TokenDto) {
-  let tokenLabel
+  let tokenLabel, tokenParam
+
   if (token.known) {
     tokenLabel = token.symbol || token.name || token.address
+    tokenParam = encodeTokenSymbol(token)
   } else {
     // The token is unknown, so it can't be trusted.
     // We use it's address and we add the "Maybe " prefix ot it's symbol/name
     const tokenLabelAux = token.symbol || token.name
     tokenLabel = tokenLabelAux ? 'Maybe ' + tokenLabelAux : token.address
+    // always use the address and on the interface you'll be able to your browser
+    tokenParam = token.address
   }
-  const tokenParam = encodeTokenSymbol(token)
 
   const amountFmt = formatAmountFull({ amount: new BN(amount.toFixed()), precision: token.decimals }) as string
 
