@@ -1,13 +1,13 @@
 import moment from 'moment-timezone'
 import TelegramBot, { Message, User } from 'node-telegram-bot-api'
-import { Subject, timer, from } from 'rxjs'
-import { bufferTime, filter, groupBy, mergeMap, concatMap, ignoreElements, startWith, pluck, scan } from 'rxjs/operators'
+import { Subject, timer } from 'rxjs'
+import { bufferTime, filter, groupBy, mergeMap, concatMap, ignoreElements, startWith } from 'rxjs/operators'
 
 import Server from 'Server'
 import { Logger, logUnhandledErrors, onShutdown, assert } from '@gnosis.pm/dex-js'
 
 import { dfusionService } from 'services'
-import { newOrderMessage, SendMessageInput, MESSAGE_DELIMITER } from 'helpers'
+import { newOrderMessage, SendMessageInput, concatMessages } from 'helpers'
 
 const WEB_BASE_URL = process.env.WEB_BASE_URL || ''
 assert(WEB_BASE_URL, 'WEB_BASE_URL is required')
@@ -36,35 +36,18 @@ class BufferedBot extends TelegramBot {
 
     this.messagesSubject$.asObservable().pipe(
       // group messages by chatId
+      // in case we have more channels
       groupBy(messageInput => messageInput.chatId),
       mergeMap(group$ => group$.pipe(
-        // buffer messages for 3sec
+        // buffer messages for 6sec
         bufferTime(6000),
         // pass forth only non-empty arrays
         filter(array => array.length > 0),
       )),
-      // here all messages belong to the same chatId
+      // here all messages in the array belong to the same chatId
       mergeMap(messageIputArray => {
-        return from(messageIputArray).pipe(
-          // concatenate messages in pieces no longer than 4096 characters
-          scan<SendMessageInput, { message: SendMessageInput, pass: SendMessageInput | null }>((accum, message, index) => {
-            const concatText = accum.message.text + (index > 0 ? MESSAGE_DELIMITER : '') + message.text
-            if (concatText.length < 4096) { // avoids Error: Message is too long
-              accum.message.text = concatText
-              accum.pass = null
-            } else {
-              accum.pass = accum.message
-              accum.message = message
-            }
-
-            if (index === messageIputArray.length - 1) {
-              accum.pass = accum.message
-            }
-            return accum
-          }, { message: { ...messageIputArray[0], text: '' }, pass: null }),
-          pluck('pass'),
-          filter(Boolean),
-        )
+        // concat many messages into one
+        return concatMessages(messageIputArray)
       }),
       // if multiple compound messages coming through
       // space them out by 1sec
@@ -179,7 +162,6 @@ Also, here are some links you might find useful:
 dfusionService.watchOrderPlacement({
   onNewOrder(order) {
     const message = newOrderMessage(order, WEB_BASE_URL)
-    // console.log('message', message)
     // Send message
     bot.sendMessage(channelId, message, { parse_mode: 'Markdown' })
   },
