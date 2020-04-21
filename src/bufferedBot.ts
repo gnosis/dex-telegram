@@ -4,6 +4,9 @@ import { bufferTime, filter, groupBy, mergeMap, concatMap, ignoreElements, start
 
 import { SendMessageInput, concatMessages } from 'helpers'
 
+const BUFFER_TIME = 3000 // consecutive messages over this time get buffered
+const SPACE_TIME = 1000 // min time between sending messages
+
 // sendMessage buffers messages and sends them in batches
 export class BufferedBot extends TelegramBot {
   private messagesSubject$ = new Subject<SendMessageInput>()
@@ -16,8 +19,8 @@ export class BufferedBot extends TelegramBot {
       // in case we have more channels
       groupBy(messageInput => messageInput.chatId),
       mergeMap(group$ => group$.pipe(
-        // buffer messages for 6sec
-        bufferTime(6000),
+        // buffer messages for N seconds
+        bufferTime(BUFFER_TIME),
         // pass forth only non-empty arrays
         filter(array => array.length > 0),
       )),
@@ -27,8 +30,8 @@ export class BufferedBot extends TelegramBot {
         return concatMessages(messageIputArray)
       }),
       // if multiple compound messages coming through
-      // space them out by 1sec
-      concatMap(compoundMessage => timer(1000).pipe(
+      // space them out by M seconds
+      concatMap(compoundMessage => timer(SPACE_TIME).pipe(
         ignoreElements(),
         startWith(compoundMessage),
       )),
