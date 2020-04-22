@@ -265,7 +265,7 @@ export interface SendMessageInput {
   options?: TelegramBot.SendMessageOptions
 }
 
-export const MESSAGE_DELIMITER = '\n\n====================================================\n\n'
+export const MESSAGE_DELIMITER = '\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n'
 const MAX_MESSAGE_LENGTH = 4096 // avoids Error: Message is too long
 
 export function concatMessages(
