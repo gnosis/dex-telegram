@@ -31,7 +31,7 @@ function _getTokenFmt(amount: BigNumber, token: TokenDto) {
     // We use it's address and we add the "Maybe " prefix ot it's symbol/name
     const tokenLabelAux = token.symbol || token.name
     tokenLabel = tokenLabelAux ? 'Maybe ' + tokenLabelAux : token.address
-    // always use the address and on the interface you'll be able to your browser
+    // always use the address and on the interface you'll be able to your token list
     tokenParam = token.address
   }
 
