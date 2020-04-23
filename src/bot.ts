@@ -8,7 +8,7 @@ import { dfusionService } from 'services'
 import { newOrderMessage } from 'helpers'
 import { BufferedBot } from 'bufferedBot'
 
-const WEB_BASE_URL = process.env.WEB_BASE_URL || ''
+const WEB_BASE_URL = process.env.WEB_BASE_URL
 assert(WEB_BASE_URL, 'WEB_BASE_URL is required')
 const port = parseInt(process.env.API_PORT || '3000')
 
