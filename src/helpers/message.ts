@@ -13,6 +13,7 @@ import {
   encodeTokenSymbol,
 } from '@gnosis.pm/dex-js'
 import { TokenDto, OrderDto } from 'services'
+import TelegramBot from 'node-telegram-bot-api'
 
 const PRICE_PRECISION = 19
 
@@ -267,4 +268,38 @@ export function newOrderMessage(order: OrderDto, baseUrl: string): string {
 
   // Compose the final message
   return `${sellMsg}${priceMsg}${priceInverseMsg}${notYetActiveOrderMsg}${expirationMsg}${unknownTokenMsg}${fillOrderMsg}`
+}
+
+export interface SendMessageInput {
+  chatId: number | string
+  text: string
+  options?: TelegramBot.SendMessageOptions
+}
+
+export const MESSAGE_DELIMITER = '\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n'
+const MAX_MESSAGE_LENGTH = 4096 // avoids Error: Message is too long
+
+export function concatMessages(
+  messageInputs: SendMessageInput[],
+  { maxLength = MAX_MESSAGE_LENGTH, delimeter = MESSAGE_DELIMITER } = {},
+): SendMessageInput[] {
+  if (messageInputs.length <= 1) return messageInputs
+
+  const defaultMessage = {
+    ...messageInputs[0],
+    text: '',
+  }
+
+  return messageInputs.reduce((accum, message) => {
+    const lastMessage = accum[accum.length - 1]
+    const concatText = (lastMessage.text ? lastMessage.text + delimeter : '') + message.text
+    if (concatText.length > maxLength) {
+      const nextMessage = { ...defaultMessage, text: message.text }
+      accum.push(nextMessage)
+    } else {
+      lastMessage.text = concatText
+    }
+
+    return accum
+  }, [defaultMessage])
 }

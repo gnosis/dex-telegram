@@ -7,7 +7,7 @@
     "start": "DEBUG=ERROR-*,WARN-*,INFO-* NTBA_FIX_319=yes node build/src/bot",
     "start:env": "DEBUG=ERROR-*,WARN-*,INFO-* NTBA_FIX_319=yes node -r dotenv/config build/src/bot",
     "dev": "DEBUG=ERROR-*,WARN-*,INFO-*,DEBUG-*,-DEBUG-helper*,-DEBUG-util* NTBA_FIX_319=yes nodemon -r dotenv/config  -r tsconfig-paths/register src/bot.ts",
-    "dev:debug": "DEBUG=ERROR-*,WARN-*,INFO-*,DEBUG-* -r dotenv/config -r tsconfig-paths/register src/bot.ts",
+    "dev:debug": "DEBUG=ERROR-*,WARN-*,INFO-*,DEBUG-* nodemon -r dotenv/config -r tsconfig-paths/register src/bot.ts",
     "dev:info": "DEBUG=ERROR-*,WARN-*,INFO-* nodemon -r tsconfig-paths/register -r dotenv/config src/bot.ts",
     "sandbox": "DEBUG=ERROR-*,WARN-*,INFO-*,DEBUG-*,-DEBUG-helper*,-DEBUG-util* nodemon -r dotenv/config -r tsconfig-paths/register",
     "test": "jest",
@@ -32,8 +32,9 @@
     "moment": "^2.24.0",
     "moment-timezone": "^0.5.27",
     "node-telegram-bot-api": "^0.40.0",
-    "web3": "^1.2.4",
-    "web3-core": "^1.2.2"
+    "rxjs": "7.0.0-beta.0",
+    "web3": "^1.2.7-rc.0",
+    "web3-core": "^1.2.7-rc.0"
   },
   "devDependencies": {
     "@types/debug": "^4.1.5",
@@ -43,7 +44,6 @@
     "@types/moment-timezone": "^0.5.12",
     "@types/node": "^13.1.1",
     "@types/node-telegram-bot-api": "^0.40.0",
-    "@types/web3": "^1.2.2",
     "@typescript-eslint/eslint-plugin": "^2.6.1",
     "@typescript-eslint/parser": "^2.6.1",
     "coveralls": "^3.0.7",
