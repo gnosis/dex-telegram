@@ -146,7 +146,7 @@ export class DfusionRepoImpl implements DfusionService {
 
   public watchOrderPlacement(params: WatchOrderPlacementParams) {
     this._contract.events
-      .OrderPlacement({ fromBlock: 6360000 }) // allows to get a bunch of past orders at once
+      .OrderPlacement()
       .on('connected', subscriptionId => {
         log.debug('Starting to listen for new orders. SubscriptionId: %s', subscriptionId)
       })
