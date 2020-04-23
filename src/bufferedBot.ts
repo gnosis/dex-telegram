@@ -96,7 +96,7 @@ export class BufferedBot extends TelegramBot {
             }),
             // delay between retries
             delayWhen(delaySec => timer(delaySec * 1000)),
-            tap(() => log.error('Retrying now'), e => console.log('ErrorError', !!e), () => console.log('COMPLETE complete')),
+            tap(() => log.error('Retrying now')),
             // catch rethrown error
             // and close pipe for this message
             // after giving some delay before next compoundMessage
