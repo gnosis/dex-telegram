@@ -1,11 +1,12 @@
 import moment from 'moment-timezone'
-import TelegramBot, { Message, User } from 'node-telegram-bot-api'
+import { Message, User } from 'node-telegram-bot-api'
 
 import Server from 'Server'
 import { Logger, logUnhandledErrors, onShutdown, assert } from '@gnosis.pm/dex-js'
 
 import { dfusionService } from 'services'
 import { newOrderMessage } from 'helpers'
+import { BufferedBot } from 'bufferedBot'
 
 const WEB_BASE_URL = process.env.WEB_BASE_URL
 assert(WEB_BASE_URL, 'WEB_BASE_URL is required')
@@ -26,7 +27,7 @@ assert(channelId, 'TELEGRAM_CHANNEL_ID env var is required')
 const isPublicChannel = isNaN(channelId as any)
 const channelHandle = isPublicChannel ? channelId : '**private chat**'
 
-const bot = new TelegramBot(token, {
+const bot = new BufferedBot(token, {
   polling: true,
 })
 

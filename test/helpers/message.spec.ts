@@ -11,6 +11,8 @@ import {
   buildFillOrderUrl,
   calculateUnlimitedBuyTokenFillAmount,
   newOrderMessage,
+  concatMessages,
+  SendMessageInput,
 } from 'helpers'
 import { MAX_BATCH_ID } from '@gnosis.pm/dex-js'
 
@@ -298,5 +300,58 @@ describe('newOrderMessage', () => {
   - *Expires*: \`Tomorrow at 12:00 AM GMT\`, \`in a day\`
 
 Fill the order here: http://dex.gnosis.io//trade/COOL-${TOKEN_2}?sell=10.02&price=0.2994`)
+  })
+})
+
+describe('concatMessages', () => {
+  const defaultMessage: SendMessageInput = {
+    chatId: 1,
+    options: { parse_mode: 'Markdown' },
+    text: '',
+  }
+
+  const delimeter = '---DELIMETER---'
+
+  const message1 = {
+    ...defaultMessage,
+    text: 'ABC',
+  }
+  const message2 = {
+    ...defaultMessage,
+    text: 'DEF',
+  }
+  const message3 = {
+    ...defaultMessage,
+    text: 'GHI',
+  }
+
+  test('concatenates message text', () => {
+    const compoundMessage = concatMessages([message1, message2, message3], { delimeter })
+
+    expect(compoundMessage).toEqual([{
+      ...defaultMessage,
+      text: 'ABC' + delimeter + 'DEF' + delimeter + 'GHI',
+    }])
+  })
+  test('concatenates message text up to maxLength', () => {
+    // slightly more than two messages + delimeter
+    // so that third message doesn't fit
+    const maxLength = 3 + 2 * delimeter.length + 1
+    const compoundMessage = concatMessages([message1, message2, message3], { delimeter, maxLength })
+
+    expect(compoundMessage).toEqual([{
+      ...defaultMessage,
+      text: 'ABC' + delimeter + 'DEF',
+    }, message3])
+  })
+  test('does not change single message', () => {
+    const compoundMessage = concatMessages([message1])
+
+    expect(compoundMessage).toEqual([message1])
+  })
+  test('does not change empty array', () => {
+    const compoundMessage = concatMessages([])
+
+    expect(compoundMessage).toEqual([])
   })
 })

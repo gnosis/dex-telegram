@@ -2,8 +2,18 @@ import BN from 'bn.js'
 import BigNumber from 'bignumber.js'
 import moment from 'moment-timezone'
 
-import { FEE_DENOMINATOR, formatAmountFull, isOrderUnlimited, isNeverExpiresOrder, calculatePrice, formatPrice, invertPrice } from '@gnosis.pm/dex-js'
+import {
+  FEE_DENOMINATOR,
+  formatAmountFull,
+  isOrderUnlimited,
+  isNeverExpiresOrder,
+  calculatePrice,
+  formatPrice,
+  invertPrice,
+  encodeTokenSymbol,
+} from '@gnosis.pm/dex-js'
 import { TokenDto, OrderDto } from 'services'
+import TelegramBot from 'node-telegram-bot-api'
 
 const PRICE_PRECISION = 19
 
@@ -13,14 +23,16 @@ const FILL_INVERSE_TRADE_PRICE_BASE = new BigNumber(1 - 2 / FEE_DENOMINATOR)
 
 function _getTokenFmt(amount: BigNumber, token: TokenDto) {
   let tokenLabel, tokenParam
+
   if (token.known) {
     tokenLabel = token.symbol || token.name || token.address
-    tokenParam = token.symbol || token.address
+    tokenParam = encodeTokenSymbol(token)
   } else {
     // The token is unknown, so it can't be trusted.
     // We use it's address and we add the "Maybe " prefix ot it's symbol/name
     const tokenLabelAux = token.symbol || token.name
     tokenLabel = tokenLabelAux ? 'Maybe ' + tokenLabelAux : token.address
+    // always use the address and on the interface you'll be able to your token list
     tokenParam = token.address
   }
 
@@ -256,4 +268,38 @@ export function newOrderMessage(order: OrderDto, baseUrl: string): string {
 
   // Compose the final message
   return `${sellMsg}${priceMsg}${priceInverseMsg}${notYetActiveOrderMsg}${expirationMsg}${unknownTokenMsg}${fillOrderMsg}`
+}
+
+export interface SendMessageInput {
+  chatId: number | string
+  text: string
+  options?: TelegramBot.SendMessageOptions
+}
+
+export const MESSAGE_DELIMITER = '\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n'
+const MAX_MESSAGE_LENGTH = 4096 // avoids Error: Message is too long
+
+export function concatMessages(
+  messageInputs: SendMessageInput[],
+  { maxLength = MAX_MESSAGE_LENGTH, delimeter = MESSAGE_DELIMITER } = {},
+): SendMessageInput[] {
+  if (messageInputs.length <= 1) return messageInputs
+
+  const defaultMessage = {
+    ...messageInputs[0],
+    text: '',
+  }
+
+  return messageInputs.reduce((accum, message) => {
+    const lastMessage = accum[accum.length - 1]
+    const concatText = (lastMessage.text ? lastMessage.text + delimeter : '') + message.text
+    if (concatText.length > maxLength) {
+      const nextMessage = { ...defaultMessage, text: message.text }
+      accum.push(nextMessage)
+    } else {
+      lastMessage.text = concatText
+    }
+
+    return accum
+  }, [defaultMessage])
 }
