@@ -161,6 +161,7 @@ export class DfusionRepoImpl implements DfusionService {
           validFrom: validFromBatchIdString,
           validUntil: validUntilBatchIdString,
         } = event.returnValues
+
         const priceNumerator = new BigNumber(priceNumeratorString)
         const priceDenominator = new BigNumber(priceDenominatorString)
         const validFromBatchId = new BigNumber(validFromBatchIdString)
