@@ -33,8 +33,8 @@
     "moment-timezone": "^0.5.27",
     "node-telegram-bot-api": "^0.40.0",
     "rxjs": "7.0.0-beta.0",
-    "web3": "^1.2.7-rc.0",
-    "web3-core": "^1.2.7-rc.0"
+    "web3": "^1.2.7",
+    "web3-core": "^1.2.7"
   },
   "devDependencies": {
     "@types/debug": "^4.1.5",
