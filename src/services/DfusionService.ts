@@ -1,11 +1,13 @@
 import Web3 from 'web3'
 
 import { Logger, ContractEventLog, tokenList, Erc20Contract, BatchExchangeContract } from '@gnosis.pm/dex-js'
+import { TcrContract } from '@gnosis.pm/dex-js/build-esm/contracts/TcrContract'
 
 import packageJson from '../../package.json'
 import { BigNumber } from 'bignumber.js'
 import { version as dexJsVersion } from '@gnosis.pm/dex-js/package.json'
 import { version as contractsVersion } from '@gnosis.pm/dex-contracts/package.json'
+import { TCR_LIST_ID, TCR_CACHE_TIME } from 'config'
 
 const PEER_COUNT_WARN_THRESHOLD = 3 // Warning if the node has less than X peers
 const BLOCK_TIME_ERR_THRESHOLD_MINUTES = 2 // Error if there's no a new block in X min
@@ -15,6 +17,7 @@ const log = new Logger('service:dfusion')
 export interface Params {
   batchExchangeContract: BatchExchangeContract
   erc20Contract: Erc20Contract
+  tcrContract: TcrContract
   web3: Web3
 }
 
@@ -65,6 +68,8 @@ export interface AboutDto {
   contractsVersion: string
   dexJsVersion: string
   batchExchangeAddress: string
+  tcrContractAddress: string
+  tcrListId: number
 }
 
 export interface OrderDto {
@@ -84,16 +89,19 @@ export class DfusionRepoImpl implements DfusionService {
   private _web3: Web3
   private _contract: BatchExchangeContract
   private _erc20Contract: Erc20Contract
+  private _tcrContract: TcrContract
   private _networkId: number
   private _batchTime: BigNumber
   private _tokenCache: { [tokenAddress: string]: TokenDto } = {}
+  private _tcrCache: { lastUpdate: number; addresses: Set<string> } = { lastUpdate: 0, addresses: new Set<string>() }
 
   constructor(params: Params) {
-    const { web3, batchExchangeContract, erc20Contract } = params
+    const { web3, batchExchangeContract, erc20Contract, tcrContract } = params
     log.debug('Setup dfusionRepo with contract address %s', batchExchangeContract.options.address)
 
     this._contract = batchExchangeContract
     this._erc20Contract = erc20Contract
+    this._tcrContract = tcrContract
     this._web3 = web3
   }
 
@@ -223,6 +231,8 @@ export class DfusionRepoImpl implements DfusionService {
       dexJsVersion,
       version: packageJson.version,
       batchExchangeAddress: this._contract.options.address,
+      tcrContractAddress: this._tcrContract.options.address,
+      tcrListId: TCR_LIST_ID,
     }
   }
 
@@ -246,13 +256,16 @@ export class DfusionRepoImpl implements DfusionService {
     let token = this._tokenCache[tokenAddress]
 
     if (!token) {
-      const networkId = await this._getNetworkId()
-
       const tokenContract = this._erc20Contract.clone()
       tokenContract.options.address = tokenAddress
 
-      // Get basic data from the contract
-      const { symbol, decimals, name } = await _getDataFromErc20(tokenContract)
+      const [networkId, { symbol, decimals, name }, tcr] = await Promise.all([
+        this._getNetworkId(),
+        // Get basic data from the contract
+        _getDataFromErc20(tokenContract),
+        // Get addresses from TCR
+        this._getTcr(),
+      ])
 
       const tokenJson = tokenList.find(token => token.addressByNetwork[networkId] === tokenAddress)
       token = {
@@ -261,7 +274,7 @@ export class DfusionRepoImpl implements DfusionService {
         ...tokenJson,
         decimals: decimals as number,
         address: tokenAddress,
-        known: !!tokenJson,
+        known: !!tokenJson || (tcr.size > 0 && tcr.has(tokenAddress)),
       }
 
       // Cache token if it's found, or null if is not
@@ -288,6 +301,24 @@ export class DfusionRepoImpl implements DfusionService {
         .multipliedBy(new BigNumber(1000))
         .toNumber(),
     )
+  }
+
+  private async _getTcr(): Promise<Set<string>> {
+    const { lastUpdate, addresses } = this._tcrCache
+
+    // Primitive caching - update once every 5min
+    if (!lastUpdate || lastUpdate < Date.now() - TCR_CACHE_TIME) {
+      const tcrList = await this._tcrContract.methods
+        .getTokens(TCR_LIST_ID)
+        .call()
+        .catch(() => [])
+
+      tcrList.forEach(address => addresses.add(address))
+
+      this._tcrCache.lastUpdate = Date.now()
+    }
+
+    return addresses
   }
 }
 
