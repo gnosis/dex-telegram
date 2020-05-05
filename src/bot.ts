@@ -85,6 +85,8 @@ async function _aboutCommand(msg: Message) {
     dexJsVersion,
     contractsVersion,
     batchExchangeAddress,
+    tcrContractAddress,
+    tcrListId,
   } = await dfusionService.getAbout()
 
   return bot.sendMessage(
@@ -103,6 +105,8 @@ Some interesting facts are:
 - Bot version: ${version}
 - Contract version: ${contractsVersion}
 - dex-js version: ${dexJsVersion}
+- TCR Contract Address: ${tcrContractAddress}
+- TCR list id: ${tcrListId}
 
 Also, here are some links you may find useful:
 - https://github.com/gnosis/dex-contracts: Gnosis Protocol Smart Contracts
