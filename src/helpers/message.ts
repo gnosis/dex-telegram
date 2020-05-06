@@ -57,10 +57,9 @@ export function buildUnknownTokenMsg(order: OrderDto): string | null {
 
   if (!sellToken.known || !buyToken.known) {
     return (
-      '"Maybe" means one or more tokens claim to be called as shown, but it\'s not currently part of the list of ' +
-      '[known tokens TCR (getTokens with listId = ' +
+      '"Maybe" means one or more tokens claim to be called as shown, but it\'s not part of list ' +
       TCR_LIST_ID +
-      ')]' +
+      ' in the [Tokens-Curated Registry]' +
       `(https://etherscan.io/address/${TCR_CONTRACT_ADDRESS}#readContract). ` +
       'Make sure you verify the address yourself before trading against it.'
     )
