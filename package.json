@@ -31,6 +31,7 @@
     "express": "^4.17.1",
     "moment": "^2.24.0",
     "moment-timezone": "^0.5.27",
+    "node-cache": "^5.1.0",
     "node-telegram-bot-api": "^0.40.0",
     "rxjs": "7.0.0-beta.0",
     "web3": "^1.2.7",
