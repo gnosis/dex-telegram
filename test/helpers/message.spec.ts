@@ -39,6 +39,7 @@ const baseOrder: OrderDto = {
   validFromBatchId: new BigNumber(0),
   validUntilBatchId: new BigNumber(1),
   event: new MockEvent(),
+  networkId: 1,
 }
 
 describe('buildExpirationMsg', () => {
