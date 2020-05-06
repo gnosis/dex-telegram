@@ -1,4 +1,5 @@
 import Web3 from 'web3'
+import NodeCache from 'node-cache'
 
 import { Logger, ContractEventLog, tokenList, Erc20Contract, BatchExchangeContract } from '@gnosis.pm/dex-js'
 import { TcrContract } from '@gnosis.pm/dex-js/build-esm/contracts/TcrContract'
@@ -93,8 +94,7 @@ export class DfusionRepoImpl implements DfusionService {
   private _tcrContract: TcrContract
   private _networkId: number
   private _batchTime: BigNumber
-  private _tokenCache: { [tokenAddress: string]: TokenDto } = {}
-  private _tcrCache: { lastUpdate: number; addresses: Set<string> } = { lastUpdate: 0, addresses: new Set<string>() }
+  private _cache: NodeCache
 
   constructor(params: Params) {
     const { web3, batchExchangeContract, erc20Contract, tcrContract } = params
@@ -104,6 +104,8 @@ export class DfusionRepoImpl implements DfusionService {
     this._erc20Contract = erc20Contract
     this._tcrContract = tcrContract
     this._web3 = web3
+
+    this._cache = new NodeCache({ useClones: false })
   }
 
   public async isHealthy(): Promise<boolean> {
@@ -255,7 +257,7 @@ export class DfusionRepoImpl implements DfusionService {
   }
 
   private async _getToken(tokenAddress: string): Promise<TokenDto> {
-    let token = this._tokenCache[tokenAddress]
+    let token = this._cache.get<TokenDto>(tokenAddress)
 
     if (!token) {
       const tokenContract = this._erc20Contract.clone()
@@ -280,7 +282,7 @@ export class DfusionRepoImpl implements DfusionService {
       }
 
       // Cache token if it's found, or null if is not
-      this._tokenCache[tokenAddress] = token
+      this._cache.set(tokenAddress, token)
     }
 
     return token
@@ -306,19 +308,21 @@ export class DfusionRepoImpl implements DfusionService {
   }
 
   private async _getTcr(): Promise<Set<string>> {
-    const { lastUpdate, addresses } = this._tcrCache
+    const tcrCacheKey = 'tcr'
+    const cachedAddresses = this._cache.get<Set<string>>(tcrCacheKey)
 
-    // Primitive caching - update once every 5min
-    if (!lastUpdate || lastUpdate < Date.now() - TCR_CACHE_TIME) {
-      const tcrList = await this._tcrContract.methods
-        .getTokens(TCR_LIST_ID)
-        .call()
-        .catch(() => [])
-
-      tcrList.forEach(address => addresses.add(address))
-
-      this._tcrCache.lastUpdate = Date.now()
+    if (cachedAddresses) {
+      return cachedAddresses
     }
+
+    const tcrList = await this._tcrContract.methods
+      .getTokens(TCR_LIST_ID)
+      .call()
+      .catch(() => [])
+
+    const addresses = new Set<string>(tcrList)
+
+    this._cache.set(tcrCacheKey, addresses, TCR_CACHE_TIME)
 
     return addresses
   }
