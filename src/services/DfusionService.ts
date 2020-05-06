@@ -83,6 +83,7 @@ export interface OrderDto {
   priceNumerator: BigNumber
   priceDenominator: BigNumber
   event: ContractEventLog<OrderPlacement>
+  networkId: number
 }
 
 export class DfusionRepoImpl implements DfusionService {
@@ -206,6 +207,7 @@ export class DfusionRepoImpl implements DfusionService {
           validFrom: validFrom as Date,
           validUntil: validUntil as Date,
           event,
+          networkId: await this._getNetworkId(),
         })
       })
       .on('changed', data => {
