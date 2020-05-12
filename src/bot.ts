@@ -12,6 +12,8 @@ const WEB_BASE_URL = process.env.WEB_BASE_URL
 assert(WEB_BASE_URL, 'WEB_BASE_URL is required')
 const port = parseInt(process.env.API_PORT || '3000')
 
+assert(process.env.TCR_CONTRACT_ADDRESS, 'TCR_CONTRACT_ADDRESS env var is required')
+
 moment.tz.setDefault('Etc/GMT')
 
 logUnhandledErrors()
@@ -85,6 +87,8 @@ async function _aboutCommand(msg: Message) {
     dexJsVersion,
     contractsVersion,
     batchExchangeAddress,
+    tcrContractAddress,
+    tcrListId,
   } = await dfusionService.getAbout()
 
   return bot.sendMessage(
@@ -103,6 +107,8 @@ Some interesting facts are:
 - Bot version: ${version}
 - Contract version: ${contractsVersion}
 - dex-js version: ${dexJsVersion}
+- TCR Contract Address: ${tcrContractAddress}
+- TCR list id: ${tcrListId}
 
 Also, here are some links you may find useful:
 - https://github.com/gnosis/dex-contracts: Gnosis Protocol Smart Contracts

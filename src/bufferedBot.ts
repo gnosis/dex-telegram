@@ -28,8 +28,9 @@ import { Logger } from '@gnosis.pm/dex-js'
 
 const log = new Logger('bot:buffered')
 
-const BUFFER_TIME = 3000 // consecutive messages over this time get buffered
-const SPACE_TIME = 1000 // min time between sending messages
+const BUFFER_TIME = 3000 // consecutive messages over this time get buffered, ms
+const SPACE_TIME = 1000 // min time between sending messages, ms
+const DEFAULT_RETRY_DELAY = 5 // retry delay when error message doesn't suggest it, sec
 const MAX_RETRIES = 5 // give up on a message after so many retries
 
 const RETRY_IN_REGEXP = /\bretry after (\d+)/ // to extract recommended delay from
@@ -87,15 +88,15 @@ export class BufferedBot extends TelegramBot {
             map(error => {
               // if error is 'Too Many Requests: retry in N'
               const errorMatch = error.message.match(RETRY_IN_REGEXP)
-              const delaySec = errorMatch ? parseInt(errorMatch[1], 10) : SPACE_TIME
-              // or in SPACE_TIME seconds
+              const delaySec = errorMatch ? parseInt(errorMatch[1], 10) : DEFAULT_RETRY_DELAY
+              // or in DEFAULT_RETRY_DELAY seconds
 
               log.error('Retrying in', delaySec, 'seconds')
 
-              return delaySec
+              return delaySec * 1000
             }),
             // delay between retries
-            delayWhen(delaySec => timer(delaySec * 1000)),
+            delayWhen(delayMs => timer(delayMs)),
             tap(() => log.error('Retrying now')),
             // catch rethrown error
             // and close pipe for this message

@@ -286,10 +286,10 @@
   dependencies:
     bn.js "^5.1.1"
 
-"@gnosis.pm/dex-js@0.2.3-RC.2":
-  version "0.2.3-RC.2"
-  resolved "https://registry.yarnpkg.com/@gnosis.pm/dex-js/-/dex-js-0.2.3-RC.2.tgz#8fbbf81330f99e1b33bfd9f229b3e63a776785e1"
-  integrity sha512-WbJh3utuS3GpNj0aHUmjWa1f4jIaCmCh5cJ+3UVbp4vqoXMhHlypD0kS1YdMMEmit94habDcfTcMBTMPWyt9Zw==
+"@gnosis.pm/dex-js@0.3.0":
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/@gnosis.pm/dex-js/-/dex-js-0.3.0.tgz#7e52af18c73f190418af9b4a5f60b5d44578a09e"
+  integrity sha512-6kClU2SvOH77Df27k3YVg6Gqro5k2MJQWD0iyaNLlC/nf/igJeLTd3ICEEFukZpnPHDewNkd9xXiX/3amM41hg==
   dependencies:
     "@gnosis.pm/dex-contracts" "^0.2.0"
     bignumber.js "^9.0.0"
@@ -1530,6 +1530,11 @@ clone-response@^1.0.2:
   integrity sha1-0dyXOSAxTfZ/vrlCI7TuNQI56Ws=
   dependencies:
     mimic-response "^1.0.0"
+
+clone@2.x:
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/clone/-/clone-2.1.2.tgz#1b7f4b9f591f1e8f83670401600345a02887435f"
+  integrity sha1-G39Ln1kfHo+DZwQBYANFoCiHQ18=
 
 co@^4.6.0:
   version "4.6.0"
@@ -4623,6 +4628,13 @@ nice-try@^1.0.4:
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/nice-try/-/nice-try-1.0.5.tgz#a3378a7696ce7d223e88fc9b764bd7ef1089e366"
   integrity sha512-1nh45deeb5olNY7eX82BkPO7SSxR5SSYJiPTrTdFUVYwAl8CKMA5N9PjTYkHiRjisVcxcQ1HXdLhx2qxxJzLNQ==
+
+node-cache@^5.1.0:
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/node-cache/-/node-cache-5.1.0.tgz#266786c28dcec0fd34385ee29c383e6d6f1aa5de"
+  integrity sha512-gFQwYdoOztBuPlwg6DKQEf50G+gkK69aqLnw4djkmlHCzeVrLJfwvg9xl4RCAGviTIMUVoqcyoZ/V/wPEu/VVg==
+  dependencies:
+    clone "2.x"
 
 node-int64@^0.4.0:
   version "0.4.0"

@@ -11,9 +11,11 @@ import {
   formatPrice,
   invertPrice,
   encodeTokenSymbol,
+  getNetworkFromId,
 } from '@gnosis.pm/dex-js'
 import { TokenDto, OrderDto } from 'services'
 import TelegramBot from 'node-telegram-bot-api'
+import { TCR_CONTRACT_ADDRESS, TCR_LIST_ID } from 'config'
 
 const PRICE_PRECISION = 19
 
@@ -51,14 +53,22 @@ export function buildExpirationMsg(order: OrderDto): string {
   }
 }
 
+function buildEtherscanLink(networkId: number): string {
+  return `https://${
+    networkId === 1 ? '' : `${getNetworkFromId(networkId).toLowerCase()}.`
+  }etherscan.io/address/${TCR_CONTRACT_ADDRESS}#readContract`
+}
+
 export function buildUnknownTokenMsg(order: OrderDto): string | null {
-  const { buyToken, sellToken } = order
+  const { buyToken, sellToken, networkId } = order
 
   if (!sellToken.known || !buyToken.known) {
     return (
-      '"Maybe" means one or more tokens claim to be called as shown, ' +
-      "but it's not currently part of the list of [known tokens](https://github.com/gnosis/dex-js/blob/master/src/tokenList.json). " +
-      'Make sure you verify the address yourself before trading against it.'
+      '"Maybe" means one or more tokens claim to be called as shown, but it\'s not part of list ' +
+      TCR_LIST_ID +
+      ' in the [Tokens-Curated Registry](' +
+      buildEtherscanLink(networkId) +
+      '). Make sure you verify the address yourself before trading against it.'
     )
   } else {
     return null
@@ -290,16 +300,19 @@ export function concatMessages(
     text: '',
   }
 
-  return messageInputs.reduce((accum, message) => {
-    const lastMessage = accum[accum.length - 1]
-    const concatText = (lastMessage.text ? lastMessage.text + delimeter : '') + message.text
-    if (concatText.length > maxLength) {
-      const nextMessage = { ...defaultMessage, text: message.text }
-      accum.push(nextMessage)
-    } else {
-      lastMessage.text = concatText
-    }
+  return messageInputs.reduce(
+    (accum, message) => {
+      const lastMessage = accum[accum.length - 1]
+      const concatText = (lastMessage.text ? lastMessage.text + delimeter : '') + message.text
+      if (concatText.length > maxLength) {
+        const nextMessage = { ...defaultMessage, text: message.text }
+        accum.push(nextMessage)
+      } else {
+        lastMessage.text = concatText
+      }
 
-    return accum
-  }, [defaultMessage])
+      return accum
+    },
+    [defaultMessage],
+  )
 }
