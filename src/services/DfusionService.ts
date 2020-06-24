@@ -1,7 +1,14 @@
 import Web3 from 'web3'
 import NodeCache from 'node-cache'
 
-import { Logger, ContractEventLog, tokenList, Erc20Contract, BatchExchangeContract } from '@gnosis.pm/dex-js'
+import {
+  Logger,
+  ContractEventLog,
+  tokenList,
+  Erc20Contract,
+  BatchExchangeContract,
+  ContractEventEmitter,
+} from '@gnosis.pm/dex-js'
 import { TcrContract } from '@gnosis.pm/dex-js/build-esm/contracts/TcrContract'
 
 import packageJson from '../../package.json'
@@ -19,6 +26,7 @@ export interface Params {
   batchExchangeContract: BatchExchangeContract
   erc20Contract: Erc20Contract
   tcrContract: TcrContract
+  tokenIdsFilter?: string[]
   web3: Web3
 }
 
@@ -91,18 +99,21 @@ export class DfusionRepoImpl implements DfusionService {
   private _web3: Web3
   private _contract: BatchExchangeContract
   private _erc20Contract: Erc20Contract
+  private _tokenIdsFilter?: string[]
+
   private _tcrContract: TcrContract
   private _networkId: number
   private _batchTime: BigNumber
   private _cache: NodeCache
 
   constructor(params: Params) {
-    const { web3, batchExchangeContract, erc20Contract, tcrContract } = params
+    const { web3, batchExchangeContract, erc20Contract, tcrContract, tokenIdsFilter } = params
     log.debug('Setup dfusionRepo with contract address %s', batchExchangeContract.options.address)
 
     this._contract = batchExchangeContract
     this._erc20Contract = erc20Contract
     this._tcrContract = tcrContract
+    this._tokenIdsFilter = tokenIdsFilter
     this._web3 = web3
 
     this._cache = new NodeCache({ useClones: false })
@@ -156,10 +167,40 @@ export class DfusionRepoImpl implements DfusionService {
   }
 
   public watchOrderPlacement(params: WatchOrderPlacementParams) {
-    this._contract.events
-      .OrderPlacement()
+    const OrderPlacement = this._contract.events.OrderPlacement
+    const subscriptions: Map<string, ContractEventEmitter<OrderPlacement>> = new Map()
+    if (this._tokenIdsFilter) {
+      const tokenListDescription = this._tokenIdsFilter.join(', ')
+      subscriptions.set(
+        'Orders whose Buy Token is ' + tokenListDescription,
+        OrderPlacement({
+          filter: { buyToken: this._tokenIdsFilter },
+        }),
+      )
+
+      subscriptions.set(
+        'Orders whose Sell Token is ' + tokenListDescription,
+        OrderPlacement({
+          filter: { sellToken: this._tokenIdsFilter },
+        }),
+      )
+    } else {
+      subscriptions.set('Any Order', OrderPlacement())
+    }
+
+    for (const [subscriptionName, subscription] of subscriptions) {
+      this.subscribeOrderPlacement(subscriptionName, subscription, params)
+    }
+  }
+
+  private subscribeOrderPlacement(
+    subscriptionName: string,
+    subscription: ContractEventEmitter<OrderPlacement>,
+    params: WatchOrderPlacementParams,
+  ) {
+    subscription
       .on('connected', subscriptionId => {
-        log.debug('Starting to listen for new orders. SubscriptionId: %s', subscriptionId)
+        log.debug('Subscribe to %s. SubscriptionId: %s', subscriptionName, subscriptionId)
       })
       .on('data', async event => {
         log.debug('New order: %o', event)
@@ -190,13 +231,13 @@ export class DfusionRepoImpl implements DfusionService {
         ])
 
         log.info(`New order in tx ${event.transactionHash}:
-    - Owner: ${owner}
-    - Sell token: ${_formatTokenForLog(sellTokenId, sellToken)}
-    - Buy token: ${_formatTokenForLog(buyTokenId, buyToken)}
-    - Price: ${priceNumerator}/${priceDenominator} = ${priceNumerator.dividedBy(priceDenominator).toNumber()}
-    - Valid from: ${validFromBatchId}
-    - Valid until: ${validUntilBatchId}
-    - Block number: ${event.blockNumber}`)
+  - Owner: ${owner}
+  - Sell token: ${_formatTokenForLog(sellTokenId, sellToken)}
+  - Buy token: ${_formatTokenForLog(buyTokenId, buyToken)}
+  - Price: ${priceNumerator}/${priceDenominator} = ${priceNumerator.dividedBy(priceDenominator).toNumber()}
+  - Valid from: ${validFromBatchId}
+  - Valid until: ${validUntilBatchId}
+  - Block number: ${event.blockNumber}`)
 
         params.onNewOrder({
           owner,
