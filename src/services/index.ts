@@ -4,7 +4,7 @@ import { web3 } from 'helpers/web3'
 import DfusionServiceImpl, { DfusionService } from 'services/DfusionService'
 
 function createDfusionService(): DfusionService {
-  const tokenIdsFilter = process.env.TOKEN_IDS_FILTER?.split(',')
+  const tokenIdsFilter = process.env.TOKEN_IDS_FILTER?.split(',').map(ids => ids.trim())
   return new DfusionServiceImpl({
     batchExchangeContract,
     erc20Contract,
