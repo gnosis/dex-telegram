@@ -14,9 +14,9 @@ Develop:
 
 <img align="right" width="350" src="./docs/screenshot.png">
 
-Telegram bot watching the smart contracts of [Gnosis Protocol](https://github.com/gnosis/dex-contracts)
+Telegram bot watching the smart contracts of [Gnosis Protocol](https://docs.gnosis.io/protocol)
 
-Right now the bots notify every time someone sends an order to the protocol. You can watch all markets, or you can set a list of market your channel is interest in.
+Right now the bots notify every time someone sends an order to the protocol. You can watch all markets, or you can set a list of markets your channel is interested in.
 
 Although it's not implemented right now, this project can easily be forked or accept PR, so the bots could potentially:
 
