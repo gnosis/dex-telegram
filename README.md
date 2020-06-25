@@ -11,15 +11,18 @@ Develop:
 [![Coverage Status](https://coveralls.io/repos/github/gnosis/dex-telegram/badge.svg?branch=develop)](https://coveralls.io/github/gnosis/dex-telegram?branch=develop)
 
 # Gnosis Protocol Telegram Bots
+
 <img align="right" width="350" src="./docs/screenshot.png">
 
-Telegram bot watching the smart contracts of [Gnosis Protocol](https://github.com/gnosis/dex-contracts)
+Telegram bot watching the smart contracts of [Gnosis Protocol](https://docs.gnosis.io/protocol)
 
-The bots will watch the contracts. They could potentially:
-* Report on a public channel about new orders
-* Report when a solution for a batch was submitted
-* Allow an user to register any address, so it's notified every time one of the orders is executed partially or totally
-* In general, any information about the protocol
+Right now the bots notify every time someone sends an order to the protocol. You can watch all markets, or you can set a list of markets your channel is interested in.
+
+Although it's not implemented right now, this project can easily be forked or accept PR, so the bots could potentially:
+
+- Report trades, prices, solutions
+- Allow an user to register any address, so it's notified every time one of the orders is executed partially or totally
+- Even a full client of Gnosis Protocol (prices, submit orders, history) could be implemented maybe with the help of https://thegraph.com/explorer/subgraph/gnosis/protocol
 
 ---
 
@@ -28,6 +31,8 @@ The bots will watch the contracts. They could potentially:
 Create a `.env` file using [.env.example](.env.example) as a template.
 
 You'll need to setup the Telegram token and the channel in the `.env` file or as environment variables when you run the process.
+
+Every environment variable in the [.env.example](.env.example) has some hints of what does it do, and how you can set it up for your use case.
 
 ## Run in develop
 
