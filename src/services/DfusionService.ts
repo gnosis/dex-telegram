@@ -70,6 +70,10 @@ export interface TokenDto {
   forceAddressDisplay?: boolean
 }
 
+interface LocalOverride extends Pick<TokenDto, 'name' | 'symbol' | 'forceAddressDisplay'> {
+  decimals?: number
+}
+
 export interface AboutDto {
   blockNumber: number
   networkId: number
@@ -313,20 +317,22 @@ export class DfusionRepoImpl implements DfusionService {
         this._getTcr(),
       ])
 
-      const localOverride = TOKEN_OVERRIDES[networkId][tokenAddress.toLowerCase()]
+      let localOverride: LocalOverride = TOKEN_OVERRIDES[networkId][tokenAddress.toLowerCase()]
       if (localOverride) {
         log.info(`Local override found for token address ${tokenAddress} on network ${networkId}:`, localOverride)
+      } else {
+        localOverride = {}
       }
 
       const tokenJson = tokenList.find(token => token.addressByNetwork[networkId] === tokenAddress)
       token = {
+        symbol,
+        name,
+        decimals: decimals as number,
         ...tokenJson,
-        symbol: localOverride?.symbol || symbol,
-        name: localOverride?.name || name,
-        decimals: localOverride?.decimals || (decimals as number),
+        ...localOverride,
         address: tokenAddress,
         known: !!tokenJson || (tcr.size > 0 && tcr.has(tokenAddress)),
-        forceAddressDisplay: localOverride?.forceAddressDisplay,
       }
 
       // Cache token if it's found, or null if is not
