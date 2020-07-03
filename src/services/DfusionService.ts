@@ -15,7 +15,7 @@ import packageJson from '../../package.json'
 import { BigNumber } from 'bignumber.js'
 import { version as dexJsVersion } from '@gnosis.pm/dex-js/package.json'
 import { version as contractsVersion } from '@gnosis.pm/dex-contracts/package.json'
-import { TCR_LIST_ID, TCR_CACHE_TIME } from 'config'
+import { TCR_LIST_ID, TCR_CACHE_TIME, TOKEN_OVERRIDES } from 'config'
 
 const PEER_COUNT_WARN_THRESHOLD = 3 // Warning if the node has less than X peers
 const BLOCK_TIME_ERR_THRESHOLD_MINUTES = 2 // Error if there's no a new block in X min
@@ -67,6 +67,11 @@ export interface TokenDto {
   decimals: number
   address: string
   known: boolean
+  forceAddressDisplay?: boolean
+}
+
+interface LocalOverride extends Pick<TokenDto, 'name' | 'symbol' | 'forceAddressDisplay'> {
+  decimals?: number
 }
 
 export interface AboutDto {
@@ -312,12 +317,20 @@ export class DfusionRepoImpl implements DfusionService {
         this._getTcr(),
       ])
 
+      let localOverride: LocalOverride = TOKEN_OVERRIDES[networkId][tokenAddress.toLowerCase()]
+      if (localOverride) {
+        log.info(`Local override found for token address ${tokenAddress} on network ${networkId}:`, localOverride)
+      } else {
+        localOverride = {}
+      }
+
       const tokenJson = tokenList.find(token => token.addressByNetwork[networkId] === tokenAddress)
       token = {
         symbol,
         name,
-        ...tokenJson,
         decimals: decimals as number,
+        ...tokenJson,
+        ...localOverride,
         address: tokenAddress,
         known: !!tokenJson || (tcr.size > 0 && tcr.has(tokenAddress)),
       }
