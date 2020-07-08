@@ -26,7 +26,10 @@ const FILL_INVERSE_TRADE_PRICE_BASE = new BigNumber(1 - 2 / FEE_DENOMINATOR)
 function _getTokenFmt(amount: BigNumber, token: TokenDto) {
   let tokenLabel, tokenParam
 
-  if (token.known) {
+  if (token.forceAddressDisplay) {
+    tokenParam = token.address
+    tokenLabel = token.address
+  } else if (token.known) {
     tokenLabel = token.symbol || token.name || token.address
     tokenParam = encodeTokenSymbol(token)
   } else {

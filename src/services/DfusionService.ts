@@ -1,14 +1,21 @@
 import Web3 from 'web3'
 import NodeCache from 'node-cache'
 
-import { Logger, ContractEventLog, tokenList, Erc20Contract, BatchExchangeContract } from '@gnosis.pm/dex-js'
+import {
+  Logger,
+  ContractEventLog,
+  tokenList,
+  Erc20Contract,
+  BatchExchangeContract,
+  ContractEventEmitter,
+} from '@gnosis.pm/dex-js'
 import { TcrContract } from '@gnosis.pm/dex-js/build-esm/contracts/TcrContract'
 
 import packageJson from '../../package.json'
 import { BigNumber } from 'bignumber.js'
 import { version as dexJsVersion } from '@gnosis.pm/dex-js/package.json'
 import { version as contractsVersion } from '@gnosis.pm/dex-contracts/package.json'
-import { TCR_LIST_ID, TCR_CACHE_TIME } from 'config'
+import { TCR_LIST_ID, TCR_CACHE_TIME, TOKEN_OVERRIDES } from 'config'
 
 const PEER_COUNT_WARN_THRESHOLD = 3 // Warning if the node has less than X peers
 const BLOCK_TIME_ERR_THRESHOLD_MINUTES = 2 // Error if there's no a new block in X min
@@ -19,6 +26,7 @@ export interface Params {
   batchExchangeContract: BatchExchangeContract
   erc20Contract: Erc20Contract
   tcrContract: TcrContract
+  tokenIdsFilter?: string[]
   web3: Web3
 }
 
@@ -59,6 +67,11 @@ export interface TokenDto {
   decimals: number
   address: string
   known: boolean
+  forceAddressDisplay?: boolean
+}
+
+interface LocalOverride extends Pick<TokenDto, 'name' | 'symbol' | 'forceAddressDisplay'> {
+  decimals?: number
 }
 
 export interface AboutDto {
@@ -91,18 +104,21 @@ export class DfusionRepoImpl implements DfusionService {
   private _web3: Web3
   private _contract: BatchExchangeContract
   private _erc20Contract: Erc20Contract
+  private _tokenIdsFilter?: string[]
+
   private _tcrContract: TcrContract
   private _networkId: number
   private _batchTime: BigNumber
   private _cache: NodeCache
 
   constructor(params: Params) {
-    const { web3, batchExchangeContract, erc20Contract, tcrContract } = params
+    const { web3, batchExchangeContract, erc20Contract, tcrContract, tokenIdsFilter } = params
     log.debug('Setup dfusionRepo with contract address %s', batchExchangeContract.options.address)
 
     this._contract = batchExchangeContract
     this._erc20Contract = erc20Contract
     this._tcrContract = tcrContract
+    this._tokenIdsFilter = tokenIdsFilter
     this._web3 = web3
 
     this._cache = new NodeCache({ useClones: false })
@@ -156,10 +172,40 @@ export class DfusionRepoImpl implements DfusionService {
   }
 
   public watchOrderPlacement(params: WatchOrderPlacementParams) {
-    this._contract.events
-      .OrderPlacement()
+    const OrderPlacement = this._contract.events.OrderPlacement
+    const subscriptions: Map<string, ContractEventEmitter<OrderPlacement>> = new Map()
+    if (this._tokenIdsFilter) {
+      const tokenListDescription = this._tokenIdsFilter.join(', ')
+      subscriptions.set(
+        'Orders whose Buy Token is ' + tokenListDescription,
+        OrderPlacement({
+          filter: { buyToken: this._tokenIdsFilter },
+        }),
+      )
+
+      subscriptions.set(
+        'Orders whose Sell Token is ' + tokenListDescription,
+        OrderPlacement({
+          filter: { sellToken: this._tokenIdsFilter },
+        }),
+      )
+    } else {
+      subscriptions.set('Any Order', OrderPlacement())
+    }
+
+    for (const [subscriptionName, subscription] of subscriptions) {
+      this.subscribeOrderPlacement(subscriptionName, subscription, params)
+    }
+  }
+
+  private subscribeOrderPlacement(
+    subscriptionName: string,
+    subscription: ContractEventEmitter<OrderPlacement>,
+    params: WatchOrderPlacementParams,
+  ) {
+    subscription
       .on('connected', subscriptionId => {
-        log.debug('Starting to listen for new orders. SubscriptionId: %s', subscriptionId)
+        log.debug('Subscribe to %s. SubscriptionId: %s', subscriptionName, subscriptionId)
       })
       .on('data', async event => {
         log.debug('New order: %o', event)
@@ -190,13 +236,13 @@ export class DfusionRepoImpl implements DfusionService {
         ])
 
         log.info(`New order in tx ${event.transactionHash}:
-    - Owner: ${owner}
-    - Sell token: ${_formatTokenForLog(sellTokenId, sellToken)}
-    - Buy token: ${_formatTokenForLog(buyTokenId, buyToken)}
-    - Price: ${priceNumerator}/${priceDenominator} = ${priceNumerator.dividedBy(priceDenominator).toNumber()}
-    - Valid from: ${validFromBatchId}
-    - Valid until: ${validUntilBatchId}
-    - Block number: ${event.blockNumber}`)
+  - Owner: ${owner}
+  - Sell token: ${_formatTokenForLog(sellTokenId, sellToken)}
+  - Buy token: ${_formatTokenForLog(buyTokenId, buyToken)}
+  - Price: ${priceNumerator}/${priceDenominator} = ${priceNumerator.dividedBy(priceDenominator).toNumber()}
+  - Valid from: ${validFromBatchId}
+  - Valid until: ${validUntilBatchId}
+  - Block number: ${event.blockNumber}`)
 
         params.onNewOrder({
           owner,
@@ -271,12 +317,20 @@ export class DfusionRepoImpl implements DfusionService {
         this._getTcr(),
       ])
 
+      let localOverride: LocalOverride = TOKEN_OVERRIDES[networkId][tokenAddress.toLowerCase()]
+      if (localOverride) {
+        log.info(`Local override found for token address ${tokenAddress} on network ${networkId}:`, localOverride)
+      } else {
+        localOverride = {}
+      }
+
       const tokenJson = tokenList.find(token => token.addressByNetwork[networkId] === tokenAddress)
       token = {
         symbol,
         name,
-        ...tokenJson,
         decimals: decimals as number,
+        ...tokenJson,
+        ...localOverride,
         address: tokenAddress,
         known: !!tokenJson || (tcr.size > 0 && tcr.has(tokenAddress)),
       }
