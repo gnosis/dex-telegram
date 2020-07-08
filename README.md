@@ -18,11 +18,17 @@ Telegram bot watching the smart contracts of [Gnosis Protocol](https://docs.gnos
 
 Right now the bots notify every time someone sends an order to the protocol. You can watch all markets, or you can set a list of markets your channel is interested in.
 
-Although it's not implemented right now, this project can easily be forked or accept PR, so the bots could potentially:
+Although it's not implemented right now, this project can easily be forked or accept PRs, so the bots could potentially:
 
 - Report trades, prices, solutions
-- Allow an user to register any address, so it's notified every time one of the orders is executed partially or totally
-- Even a full client of Gnosis Protocol (prices, submit orders, history) could be implemented maybe with the help of https://thegraph.com/explorer/subgraph/gnosis/protocol
+- Allow users to register any address so they are notified every time one of the orders is executed (partially or totally)
+- Even a full client of Gnosis Protocol (prices, submit orders, history) could potentially be implemented with the help of https://thegraph.com/explorer/subgraph/gnosis/protocol
+
+---
+
+## Tutorial
+
+- [Setup your own bot](https://docs.gnosis.io/protocol/docs/tutorial-telegram-bot/)
 
 ---
 
@@ -32,7 +38,7 @@ Create a `.env` file using [.env.example](.env.example) as a template.
 
 You'll need to setup the Telegram token and the channel in the `.env` file or as environment variables when you run the process.
 
-Every environment variable in the [.env.example](.env.example) has some hints of what does it do, and how you can set it up for your use case.
+Every environment variable in the [.env.example](.env.example) has hints of what it does, and how you can set it up for your use case.
 
 ## Run in develop
 
