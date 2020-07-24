@@ -142,12 +142,14 @@ export class DfusionRepoImpl implements DfusionService {
         // for now triggers `connection not open on send()`
         // but we can aniticipate `on request()`
         if (error.message.includes('connection not open on ') || error.message.includes('connection got closed')) {
-          log.error('Connection failure. Reconnecting...')
           provider.once('connect', () => {
             log.info('Reconnection successfull')
           })
 
-          provider.reconnect()
+          setTimeout(() => {
+            log.error('Connection failure. Reconnecting...')
+            provider.reconnect()
+          }, 5000)
         }
       })
     }
