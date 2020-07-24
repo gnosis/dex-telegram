@@ -17,6 +17,20 @@ import { version as dexJsVersion } from '@gnosis.pm/dex-js/package.json'
 import { version as contractsVersion } from '@gnosis.pm/dex-contracts/package.json'
 import { TCR_LIST_ID, TCR_CACHE_TIME, TOKEN_OVERRIDES } from 'config'
 
+// declaration merging
+// to allow for error callback
+declare module 'web3-core' {
+  interface WebsocketProvider {
+    on(type: string, callback: () => void): void;
+    on(type: 'error', callback: (error: Error) => void): void
+  }
+  interface IpcProvider {
+    on(type: string, callback: () => void): void;
+    on(type: 'error', callback: (error: Error) => void): void
+  }
+
+}
+
 const PEER_COUNT_WARN_THRESHOLD = 3 // Warning if the node has less than X peers
 const BLOCK_TIME_ERR_THRESHOLD_MINUTES = 2 // Error if there's no a new block in X min
 
@@ -120,6 +134,23 @@ export class DfusionRepoImpl implements DfusionService {
     this._tcrContract = tcrContract
     this._tokenIdsFilter = tokenIdsFilter
     this._web3 = web3
+
+    const provider = web3.currentProvider
+    if (provider && typeof provider === 'object' && 'on' in provider) {
+      provider.on('error', (error: Error): void => {
+        log.error('Web3 Provider error: ', error)
+        // for now triggers `connection not open on send()`
+        // but we can aniticipate `on request()`
+        if (error.message.includes('connection not open on ')) {
+          log.error('Connection failure. Reconnecting...')
+          provider.once('connect', () => {
+            log.debug('Reconnection successfull')
+          })
+
+          provider.reconnect()
+        }
+      })
+    }
 
     this._cache = new NodeCache({ useClones: false })
   }
