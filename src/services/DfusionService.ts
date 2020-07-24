@@ -141,10 +141,10 @@ export class DfusionRepoImpl implements DfusionService {
         log.error('Web3 Provider error: ', error)
         // for now triggers `connection not open on send()`
         // but we can aniticipate `on request()`
-        if (error.message.includes('connection not open on ')) {
+        if (error.message.includes('connection not open on ') || error.message.includes('connection got closed')) {
           log.error('Connection failure. Reconnecting...')
           provider.once('connect', () => {
-            log.debug('Reconnection successfull')
+            log.info('Reconnection successfull')
           })
 
           provider.reconnect()
