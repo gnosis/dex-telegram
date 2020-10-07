@@ -401,19 +401,19 @@
     "@ethersproject/rlp" "^5.0.0"
     "@ethersproject/signing-key" "^5.0.0"
 
-"@gnosis.pm/dex-contracts@^0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@gnosis.pm/dex-contracts/-/dex-contracts-0.2.0.tgz#1649e2efdb818158db79569e9375d6bf9405c63f"
-  integrity sha512-9zMT7XaveDJ5L52o0RNRcFL0Vf2nOpX1lGsWimIZCZBnCL1HyvKHvX4W4mfcItkScNVNgvJ9EWSNVXQjS+pK5g==
+"@gnosis.pm/dex-contracts@^0.4.3":
+  version "0.4.3"
+  resolved "https://registry.yarnpkg.com/@gnosis.pm/dex-contracts/-/dex-contracts-0.4.3.tgz#b887eb543cae039d1e9607870232394cab5c3be7"
+  integrity sha512-ObyItfEzWRwfwWSSncPFP8aT54+Vi7VzTvqCbNYTwF+Einn9kdJvasTWkFaw5eiZE1ykD//kFB4T8xv80F2lBw==
   dependencies:
-    bn.js "^5.1.1"
+    bn.js "^5.1.3"
 
-"@gnosis.pm/dex-js@0.3.0":
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/@gnosis.pm/dex-js/-/dex-js-0.3.0.tgz#7e52af18c73f190418af9b4a5f60b5d44578a09e"
-  integrity sha512-6kClU2SvOH77Df27k3YVg6Gqro5k2MJQWD0iyaNLlC/nf/igJeLTd3ICEEFukZpnPHDewNkd9xXiX/3amM41hg==
+"@gnosis.pm/dex-js@^0.8.0":
+  version "0.8.0"
+  resolved "https://registry.yarnpkg.com/@gnosis.pm/dex-js/-/dex-js-0.8.0.tgz#aa96a30d2c17efea121f160f54eca1e82a08dbcd"
+  integrity sha512-/IjDZOrMGaR2cyzkVGaXSvzkr8EADwEfpvkkVIziSlWVG853xpKK6OKB2lO2et9IOGRwTKniSLEjXnjn3a3K/g==
   dependencies:
-    "@gnosis.pm/dex-contracts" "^0.2.0"
+    "@gnosis.pm/dex-contracts" "^0.4.3"
     bignumber.js "^9.0.0"
 
 "@istanbuljs/load-nyc-config@^1.0.0":
@@ -1297,10 +1297,10 @@ bn.js@^4.11.9:
   resolved "https://registry.yarnpkg.com/bn.js/-/bn.js-4.11.9.tgz#26d556829458f9d1e81fc48952493d0ba3507828"
   integrity sha512-E6QoYqCKZfgatHTdHzs1RRKP7ip4vvm+EyRUeE2RF0NblwVvb0p6jSVeNTOFxPn26QXN2o6SMfNxKp6kU8zQaw==
 
-bn.js@^5.1.1:
-  version "5.1.1"
-  resolved "https://registry.yarnpkg.com/bn.js/-/bn.js-5.1.1.tgz#48efc4031a9c4041b9c99c6941d903463ab62eb5"
-  integrity sha512-IUTD/REb78Z2eodka1QZyyEk66pciRcP6Sroka0aI3tG/iwIdYLrBD62RsubR7vqdt3WyX8p4jxeatzmRSphtA==
+bn.js@^5.1.3:
+  version "5.1.3"
+  resolved "https://registry.yarnpkg.com/bn.js/-/bn.js-5.1.3.tgz#beca005408f642ebebea80b042b4d18d2ac0ee6b"
+  integrity sha512-GkTiFpjFtUzU9CbMeJ5iazkCzGL3jrhzerzZIuqLABjbwRaFt33I9tUdSNryIptM+RxDet6OKm2WnLXzW51KsQ==
 
 body-parser@1.19.0, body-parser@^1.16.0:
   version "1.19.0"
