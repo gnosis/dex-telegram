@@ -22,4 +22,5 @@ export const TOKEN_OVERRIDES = {
       forceAddressDisplay: true, // name and symbol are ignored when `forceAddressDisplay` is set
     },
   },
+  100: {},
 }
