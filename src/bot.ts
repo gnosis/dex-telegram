@@ -12,8 +12,6 @@ const WEB_BASE_URL = process.env.WEB_BASE_URL
 assert(WEB_BASE_URL, 'WEB_BASE_URL is required')
 const port = parseInt(process.env.API_PORT || '3000')
 
-assert(process.env.TCR_CONTRACT_ADDRESS, 'TCR_CONTRACT_ADDRESS env var is required')
-
 moment.tz.setDefault('Etc/GMT')
 
 logUnhandledErrors()
