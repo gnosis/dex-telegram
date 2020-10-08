@@ -40,7 +40,7 @@ const log = new Logger('service:dfusion')
 export interface Params {
   batchExchangeContract: BatchExchangeContract
   erc20Contract: Erc20Contract
-  tcrContract: TcrContract | undefined
+  tcrContract?: TcrContract
   tokenIdsFilter?: string[]
   web3: Web3
 }
@@ -97,7 +97,7 @@ export interface AboutDto {
   contractsVersion: string
   dexJsVersion: string
   batchExchangeAddress: string
-  tcrContractAddress: string | undefined
+  tcrContractAddress?: string
   tcrListId: number
 }
 
@@ -121,7 +121,7 @@ export class DfusionRepoImpl implements DfusionService {
   private _erc20Contract: Erc20Contract
   private _tokenIdsFilter?: string[]
 
-  private _tcrContract: TcrContract | undefined
+  private _tcrContract?: TcrContract
   private _networkId: number
   private _batchTime: BigNumber
   private _cache: NodeCache
@@ -208,7 +208,7 @@ export class DfusionRepoImpl implements DfusionService {
 
   public watchOrderPlacement(params: WatchOrderPlacementParams) {
     const OrderPlacement = this._contract.events.OrderPlacement
-    const subscriptions: Map<string, EventEmitter> = new Map()
+    const subscriptions: Map<string, ContractEventEmitter<OrderPlacement>> = new Map()
 
     if (this._tokenIdsFilter) {
       const tokenListDescription = this._tokenIdsFilter.join(', ')
