@@ -39,7 +39,7 @@ const log = new Logger('service:dfusion')
 export interface Params {
   batchExchangeContract: BatchExchangeContract
   erc20Contract: Erc20Contract
-  tcrContract: TcrContract
+  tcrContract?: TcrContract
   tokenIdsFilter?: string[]
   web3: Web3
 }
@@ -96,7 +96,7 @@ export interface AboutDto {
   contractsVersion: string
   dexJsVersion: string
   batchExchangeAddress: string
-  tcrContractAddress: string
+  tcrContractAddress?: string
   tcrListId: number
 }
 
@@ -120,7 +120,7 @@ export class DfusionRepoImpl implements DfusionService {
   private _erc20Contract: Erc20Contract
   private _tokenIdsFilter?: string[]
 
-  private _tcrContract: TcrContract
+  private _tcrContract?: TcrContract
   private _networkId: number
   private _batchTime: BigNumber
   private _cache: NodeCache
@@ -208,6 +208,7 @@ export class DfusionRepoImpl implements DfusionService {
   public watchOrderPlacement(params: WatchOrderPlacementParams) {
     const OrderPlacement = this._contract.events.OrderPlacement
     const subscriptions: Map<string, ContractEventEmitter<OrderPlacement>> = new Map()
+
     if (this._tokenIdsFilter) {
       const tokenListDescription = this._tokenIdsFilter.join(', ')
       subscriptions.set(
@@ -315,7 +316,7 @@ export class DfusionRepoImpl implements DfusionService {
       dexJsVersion,
       version: packageJson.version,
       batchExchangeAddress: this._contract.options.address,
-      tcrContractAddress: this._tcrContract.options.address,
+      tcrContractAddress: this._tcrContract?.options.address,
       tcrListId: TCR_LIST_ID,
     }
   }
@@ -403,7 +404,7 @@ export class DfusionRepoImpl implements DfusionService {
       return cachedAddresses
     }
 
-    const tcrList = await this._tcrContract.methods
+    const tcrList = await this._tcrContract?.methods
       .getTokens(TCR_LIST_ID)
       .call()
       .catch(() => [])

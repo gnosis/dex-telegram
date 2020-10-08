@@ -4,4 +4,4 @@ import { TCR_CONTRACT_ADDRESS } from 'config'
 
 export const batchExchangeContract = createBatchExchangeContract(web3)
 export const erc20Contract = createErc20Contract(web3)
-export const tcrContract = createTcrContract(web3, TCR_CONTRACT_ADDRESS)
+export const tcrContract = TCR_CONTRACT_ADDRESS ? createTcrContract(web3, TCR_CONTRACT_ADDRESS) : undefined
