@@ -16,7 +16,6 @@ import { BigNumber } from 'bignumber.js'
 import { version as dexJsVersion } from '@gnosis.pm/dex-js/package.json'
 import { version as contractsVersion } from '@gnosis.pm/dex-contracts/package.json'
 import { TCR_LIST_ID, TCR_CACHE_TIME, TOKEN_OVERRIDES } from 'config'
-import { EventEmitter } from 'events'
 
 // declaration merging
 // to allow for error callback
