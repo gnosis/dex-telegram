@@ -24,7 +24,7 @@
     }
   },
   "dependencies": {
-    "@gnosis.pm/dex-js": "0.3.0",
+    "@gnosis.pm/dex-js": "^0.8.1-rc.0",
     "bignumber.js": "^9.0.0",
     "debug": "^4.1.1",
     "dotenv": "^8.1.0",
@@ -34,8 +34,8 @@
     "node-cache": "^5.1.0",
     "node-telegram-bot-api": "^0.40.0",
     "rxjs": "7.0.0-beta.0",
-    "web3": "^1.2.11",
-    "web3-core": "^1.2.11"
+    "web3": "^1.3.0",
+    "web3-core": "^1.3.0"
   },
   "devDependencies": {
     "@types/debug": "^4.1.5",
