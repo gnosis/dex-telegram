@@ -7,8 +7,8 @@ import {
   tokenList,
   Erc20Contract,
   BatchExchangeContract,
-  ContractEventEmitter,
 } from '@gnosis.pm/dex-js'
+import { Subscription } from 'web3-core-subscriptions'
 import { TcrContract } from '@gnosis.pm/dex-js/build-esm/contracts/TcrContract'
 
 import packageJson from '../../package.json'
@@ -207,7 +207,7 @@ export class DfusionRepoImpl implements DfusionService {
 
   public watchOrderPlacement(params: WatchOrderPlacementParams) {
     const OrderPlacement = this._contract.events.OrderPlacement
-    const subscriptions: Map<string, ContractEventEmitter<OrderPlacement>> = new Map()
+    const subscriptions: Map<string, Subscription<ContractEventLog<OrderPlacement>>> = new Map()
 
     if (this._tokenIdsFilter) {
       const tokenListDescription = this._tokenIdsFilter.join(', ')
@@ -235,7 +235,7 @@ export class DfusionRepoImpl implements DfusionService {
 
   private subscribeOrderPlacement(
     subscriptionName: string,
-    subscription: ContractEventEmitter<OrderPlacement>,
+    subscription: Subscription<ContractEventLog<OrderPlacement>>,
     params: WatchOrderPlacementParams,
   ) {
     subscription
