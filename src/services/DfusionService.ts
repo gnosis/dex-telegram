@@ -364,6 +364,7 @@ export class DfusionRepoImpl implements DfusionService {
       })
       .on('error', (error: Error) => {
         params.onError(error)
+        this.handleSubscriptionError(error, { subscription, name: subscriptionName })
       })
   }
 
