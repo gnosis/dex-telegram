@@ -168,7 +168,6 @@ export class DfusionRepoImpl implements DfusionService {
     }
 
     this._cache = new NodeCache({ useClones: false })
-    console.log('subs:0', (web3 as any)._requestManager.subscriptions.size)
 
     const subNewHeads = () => {
       const sub = web3.eth.subscribe('newBlockHeaders', function(error, result) {
@@ -190,10 +189,6 @@ export class DfusionRepoImpl implements DfusionService {
     }
 
     subNewHeads()
-    console.log('subs:1', (web3 as any)._requestManager.subscriptions.size)
-    setInterval(() => {
-      console.log('subs:INTERVAL', (web3 as any)._requestManager.subscriptions.size)
-    }, 5000)
   }
 
   public async isHealthy(): Promise<boolean> {
@@ -284,13 +279,11 @@ export class DfusionRepoImpl implements DfusionService {
     }
   }
 
-  private reconnectAndResubscribe<T>(provider: WebsocketProvider, { subscription, name }: {subscription: Subscription<T>, name?: string}) {
+  private reconnectAndResubscribe<T>(provider: WebsocketProvider, { subscription, name }: { subscription: Subscription<T>, name?: string }) {
     // retry subscription when connection is established
     // expect several `eth_subscribe not supported` errors in a row
     provider.once('connect', () => {
-      console.log('CONNECTED_CONNECTED')
       log.info('Retrying subscription to %s', name)
-      // eslint-disable-next-line dot-notation
       subscription.resubscribe()
     })
 
