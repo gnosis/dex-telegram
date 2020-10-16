@@ -124,6 +124,13 @@ export interface OrderDto {
 const TIME_TO_FLUSH_RESPONSES = 1000 // ms
 // time to wait before hard disconnecting an open connection
 
+// codes 4000-4999 are available for us by applications
+// let's use 4000 for eth_subscribe reason
+const ETH_SUBSCRIBE_NOT_SUPPORTED = {
+  code: 4000,
+  reason: 'Method eth_subscribe not supported when it should be',
+}
+
 export class DfusionRepoImpl implements DfusionService {
   private _web3: Web3
   private _contract: BatchExchangeContract
@@ -266,7 +273,7 @@ export class DfusionRepoImpl implements DfusionService {
     }
   }
 
-  private handleSubscriptionError<T>(error: Error, subscriptionParams: {subscription: Subscription<T>, name?: string}) {
+  private handleSubscriptionError<T>(error: Error, subscriptionParams: { subscription: Subscription<T>, name?: string }) {
     const provider = this._web3.currentProvider
     if (
       // error that shouldn't happen with websocket connection
@@ -294,7 +301,8 @@ export class DfusionRepoImpl implements DfusionService {
       this._reconnecting = true
 
       log.info('Dropping current WebSocket connection')
-      provider.disconnect(4256, 'eth_subscribe not supported when it should be')
+      // should not use 1000 (Normal Closure) and 1001 (Going Away) codes to trigger auto reconnect
+      provider.disconnect(ETH_SUBSCRIBE_NOT_SUPPORTED.code, ETH_SUBSCRIBE_NOT_SUPPORTED.reason)
 
       provider.once('connect', () => {
         log.info('Reconnection successfull')
