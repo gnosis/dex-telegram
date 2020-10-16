@@ -174,7 +174,7 @@ export class DfusionRepoImpl implements DfusionService {
       const sub = web3.eth.subscribe('newBlockHeaders', function(error, result) {
         if (!error) {
           console.log('newBlockHeaders::CallbackResult', result)
-  }
+        }
         // console.error('newBlockHeaders::CallbackError', error)
       })
         .on('connected', function(subscriptionId) {
@@ -274,14 +274,19 @@ export class DfusionRepoImpl implements DfusionService {
   private handleSubscriptionError<T>(error: Error, subscriptionParams: {subscription: Subscription<T>, name?: string}) {
     const provider = this._web3.currentProvider
     if (
+      // error that shouldn't happen with websocket connection
+      // if it happens, then consider the connection faulty and try to reconnect
       error.message.includes('Method eth_subscribe is not supported') &&
       provider && typeof provider === 'object' && 'disconnect' in provider && 'on' in provider
     ) {
+      // at this point we know provider is WebsocketProvider
       this.reconnectAndResubscribe(provider, subscriptionParams)
     }
   }
 
   private reconnectAndResubscribe<T>(provider: WebsocketProvider, { subscription, name }: {subscription: Subscription<T>, name?: string}) {
+    // retry subscription when connection is established
+    // expect several `eth_subscribe not supported` errors in a row
     provider.once('connect', () => {
       console.log('CONNECTED_CONNECTED')
       log.info('Retrying subscription to %s', name)
@@ -300,6 +305,7 @@ export class DfusionRepoImpl implements DfusionService {
 
       provider.once('connect', () => {
         log.info('Reconnection successfull')
+        // allow reconnecting again if subscription still errors
         this._reconnecting = false
       })
     }, TIME_TO_FLUSH_RESPONSES)
