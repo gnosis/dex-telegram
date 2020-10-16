@@ -32,6 +32,12 @@ declare module 'web3-core' {
 
 }
 
+declare module 'web3-core-subscriptions' {
+  interface Subscription<T> {
+    resubscribe(): void
+  }
+}
+
 const PEER_COUNT_WARN_THRESHOLD = 3 // Warning if the node has less than X peers
 const BLOCK_TIME_ERR_THRESHOLD_MINUTES = 2 // Error if there's no a new block in X min
 
