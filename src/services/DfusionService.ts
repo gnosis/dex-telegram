@@ -156,6 +156,32 @@ export class DfusionRepoImpl implements DfusionService {
     }
 
     this._cache = new NodeCache({ useClones: false })
+    console.log('subs:0', (web3 as any)._requestManager.subscriptions.size)
+
+    const subNewHeads = () => {
+      const sub = web3.eth.subscribe('newBlockHeaders', function(error, result) {
+        if (!error) {
+          console.log('newBlockHeaders::CallbackResult', result)
+  }
+        // console.error('newBlockHeaders::CallbackError', error)
+      })
+        .on('connected', function(subscriptionId) {
+          console.log('newBlockHeaders::Connected', subscriptionId)
+        })
+        .on('data', function(blockHeader) {
+          console.log('newBlockHeaders::Data', blockHeader)
+        })
+        .on('error', error => {
+          console.error('newBlockHeaders::Error', error)
+          this.handleSubscriptionError(error, { subscription: sub, name: 'newBlockHeaders' })
+        })
+    }
+
+    subNewHeads()
+    console.log('subs:1', (web3 as any)._requestManager.subscriptions.size)
+    setInterval(() => {
+      console.log('subs:INTERVAL', (web3 as any)._requestManager.subscriptions.size)
+    }, 5000)
   }
 
   public async isHealthy(): Promise<boolean> {
