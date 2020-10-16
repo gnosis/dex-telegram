@@ -114,6 +114,9 @@ export interface OrderDto {
   networkId: number
 }
 
+const TIME_TO_FLUSH_RESPONSES = 1000 // ms
+// time to wait before hard disconnecting an open connection
+
 export class DfusionRepoImpl implements DfusionService {
   private _web3: Web3
   private _contract: BatchExchangeContract
