@@ -124,7 +124,7 @@ export interface OrderDto {
 const TIME_TO_FLUSH_RESPONSES = 1000 // ms
 // time to wait before hard disconnecting an open connection
 
-// codes 4000-4999 are available for us by applications
+// codes 4000-4999 are available for use by applications
 // let's use 4000 for eth_subscribe reason
 const ETH_SUBSCRIBE_NOT_SUPPORTED = {
   code: 4000,
