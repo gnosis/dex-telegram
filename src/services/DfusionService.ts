@@ -125,6 +125,8 @@ export class DfusionRepoImpl implements DfusionService {
   private _batchTime: BigNumber
   private _cache: NodeCache
 
+  private _reconnecting = false
+
   constructor(params: Params) {
     const { web3, batchExchangeContract, erc20Contract, tcrContract, tokenIdsFilter } = params
     log.debug('Setup dfusionRepo with contract address %s', batchExchangeContract.options.address)
