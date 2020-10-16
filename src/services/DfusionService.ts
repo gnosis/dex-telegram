@@ -16,6 +16,7 @@ import { BigNumber } from 'bignumber.js'
 import { version as dexJsVersion } from '@gnosis.pm/dex-js/package.json'
 import { version as contractsVersion } from '@gnosis.pm/dex-contracts/package.json'
 import { TCR_LIST_ID, TCR_CACHE_TIME, TOKEN_OVERRIDES } from 'config'
+import { WebsocketProvider } from 'web3-core'
 
 // declaration merging
 // to allow for error callback
@@ -262,6 +263,40 @@ export class DfusionRepoImpl implements DfusionService {
     for (const [subscriptionName, subscription] of subscriptions) {
       this.subscribeOrderPlacement(subscriptionName, subscription, params)
     }
+  }
+
+  private handleSubscriptionError<T>(error: Error, subscriptionParams: {subscription: Subscription<T>, name?: string}) {
+    const provider = this._web3.currentProvider
+    if (
+      error.message.includes('Method eth_subscribe is not supported') &&
+      provider && typeof provider === 'object' && 'disconnect' in provider && 'on' in provider
+    ) {
+      this.reconnectAndResubscribe(provider, subscriptionParams)
+    }
+  }
+
+  private reconnectAndResubscribe<T>(provider: WebsocketProvider, { subscription, name }: {subscription: Subscription<T>, name?: string}) {
+    provider.once('connect', () => {
+      console.log('CONNECTED_CONNECTED')
+      log.info('Retrying subscription to %s', name)
+      // eslint-disable-next-line dot-notation
+      subscription.resubscribe()
+    })
+
+    setTimeout(() => {
+      // don't reconnect while connection is in progress
+      if (this._reconnecting) return
+
+      this._reconnecting = true
+
+      log.info('Dropping current WebSocket connection')
+      provider.disconnect(4256, 'eth_subscribe not supported when it should be')
+
+      provider.once('connect', () => {
+        log.info('Reconnection successfull')
+        this._reconnecting = false
+      })
+    }, TIME_TO_FLUSH_RESPONSES)
   }
 
   private subscribeOrderPlacement(
