@@ -16,6 +16,7 @@ import { BigNumber } from 'bignumber.js'
 import { version as dexJsVersion } from '@gnosis.pm/dex-js/package.json'
 import { version as contractsVersion } from '@gnosis.pm/dex-contracts/package.json'
 import { TCR_LIST_ID, TCR_CACHE_TIME, TOKEN_OVERRIDES } from 'config'
+import { WebsocketProvider } from 'web3-core'
 
 // declaration merging
 // to allow for error callback
@@ -29,6 +30,12 @@ declare module 'web3-core' {
     on(type: 'error', callback: (error: Error) => void): void
   }
 
+}
+
+declare module 'web3-core-subscriptions' {
+  interface Subscription<T> {
+    resubscribe(): void
+  }
 }
 
 const PEER_COUNT_WARN_THRESHOLD = 3 // Warning if the node has less than X peers
@@ -114,6 +121,16 @@ export interface OrderDto {
   networkId: number
 }
 
+const TIME_TO_FLUSH_RESPONSES = 1000 // ms
+// time to wait before hard disconnecting an open connection
+
+// codes 4000-4999 are available for use by applications
+// let's use 4000 for eth_subscribe reason
+const ETH_SUBSCRIBE_NOT_SUPPORTED = {
+  code: 4000,
+  reason: 'Method eth_subscribe not supported when it should be',
+}
+
 export class DfusionRepoImpl implements DfusionService {
   private _web3: Web3
   private _contract: BatchExchangeContract
@@ -124,6 +141,8 @@ export class DfusionRepoImpl implements DfusionService {
   private _networkId: number
   private _batchTime: BigNumber
   private _cache: NodeCache
+
+  private _reconnecting = false
 
   constructor(params: Params) {
     const { web3, batchExchangeContract, erc20Contract, tcrContract, tokenIdsFilter } = params
@@ -233,6 +252,45 @@ export class DfusionRepoImpl implements DfusionService {
     }
   }
 
+  private handleSubscriptionError<T>(error: Error, subscriptionParams: { subscription: Subscription<T>, name?: string }) {
+    const provider = this._web3.currentProvider
+    if (
+      // error that shouldn't happen with websocket connection
+      // if it happens, then consider the connection faulty and try to reconnect
+      error.message.includes('Method eth_subscribe is not supported') &&
+      provider && typeof provider === 'object' && 'disconnect' in provider && 'on' in provider
+    ) {
+      // at this point we know provider is WebsocketProvider
+      this.reconnectAndResubscribe(provider, subscriptionParams)
+    }
+  }
+
+  private reconnectAndResubscribe<T>(provider: WebsocketProvider, { subscription, name }: { subscription: Subscription<T>, name?: string }) {
+    // retry subscription when connection is established
+    // expect several `eth_subscribe not supported` errors in a row
+    provider.once('connect', () => {
+      log.info('Retrying subscription to %s', name)
+      subscription.resubscribe()
+    })
+
+    setTimeout(() => {
+      // don't reconnect while connection is in progress
+      if (this._reconnecting) return
+
+      this._reconnecting = true
+
+      log.info('Dropping current WebSocket connection')
+      // should not use 1000 (Normal Closure) and 1001 (Going Away) codes to trigger auto reconnect
+      provider.disconnect(ETH_SUBSCRIBE_NOT_SUPPORTED.code, ETH_SUBSCRIBE_NOT_SUPPORTED.reason)
+
+      provider.once('connect', () => {
+        log.info('Reconnection successfull')
+        // allow reconnecting again if subscription still errors
+        this._reconnecting = false
+      })
+    }, TIME_TO_FLUSH_RESPONSES)
+  }
+
   private subscribeOrderPlacement(
     subscriptionName: string,
     subscription: Subscription<ContractEventLog<OrderPlacement>>,
@@ -298,6 +356,7 @@ export class DfusionRepoImpl implements DfusionService {
       })
       .on('error', (error: Error) => {
         params.onError(error)
+        this.handleSubscriptionError(error, { subscription, name: subscriptionName })
       })
   }
 
