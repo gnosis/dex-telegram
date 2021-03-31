@@ -1,3 +1,4 @@
+# Do a change to trigger a build2
 sudo: required
 language: node_js
 cache: yarn
@@ -7,9 +8,20 @@ script:
   - yarn test-coverage
 services:
   - docker
+env:
+  global:
+    DOCKER_TAG: dex-telegram
+    DOCKER_IMAGE: gnosispm/dex-telegram
+cache:
+  directories:
+    - docker_images
+before_install:
+  - docker load -i docker_images/images.tar || true
+before_cache:
+  - docker save -o docker_images/images.tar $(docker images -a -q)
 install:
   - yarn install
-  - docker build -t dex-telegram .
+  - docker build --cache-from $CACHE_IMAGE:develop -t $DOCKER_TAG .
 after_success:
   - |
     # Create Docker image if branch master or develop or a tag
@@ -21,16 +33,16 @@ after_success:
 
       if [ "$TRAVIS_BRANCH" == "master" ]; then
         echo "Pushing image staging...";
-        docker tag dex-telegram gnosispm/dex-telegram:staging;
-        docker push gnosispm/dex-telegram:staging;
+        docker tag $DOCKER_TAG $DOCKER_IMAGE:staging;
+        docker push $DOCKER_IMAGE:staging;
       elif [ "$TRAVIS_BRANCH" == "develop" ]; then
         echo "Pushing image develop...";
-        docker tag dex-telegram gnosispm/dex-telegram:develop;
-        docker push gnosispm/dex-telegram:develop;
+        docker tag $DOCKER_TAG $DOCKER_IMAGE:develop;
+        docker push $DOCKER_IMAGE:develop;
       elif [[ $TRAVIS_TAG = $TRAVIS_BRANCH ]]; then
         echo "Pushing image tag $TRAVIS_TAG...";
-        docker tag dex-telegram gnosispm/dex-telegram:$TRAVIS_TAG;
-        docker push gnosispm/dex-telegram:$TRAVIS_TAG;
+        docker tag $DOCKER_TAG $DOCKER_IMAGE:$TRAVIS_TAG;
+        docker push $DOCKER_IMAGE:$TRAVIS_TAG;
       fi
       echo "The image has been pushed";
     else
